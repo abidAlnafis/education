@@ -1,39 +1,52 @@
 body {
   min-height: 75rem;
-  padding-top: 5.5rem;
+  padding-top: 4.8rem;
 }
+
 .active {
   color: #fff !important;
   background: #4babf5;
   border-radius: 10px;
 }
+
 .nav-link {
   text-decoration: none;
   color: black;
 }
+
 .footer-copyright {
   position: absolute;
   left: 0;
   right: 0;
 }
+
 .fonty {
   font-family: "Poppins", sans-serif !important;
 }
+
+.line-height{
+  line-height: 2em;
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+}
+
 .bt1 {
   background-color: red;
 }
+
 .bt1:hover {
   background-color: #4babf5;
 }
 
-.calcu1{
+.calcu1 {
   min-height: 0rem !important;
   padding-top: 0rem !important;
 }
 
-/* style for calcu1 */
 .calcu1 {
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   background-color: #f4f4f4;
   display: flex;
   align-items: center;
