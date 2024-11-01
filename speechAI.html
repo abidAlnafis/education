@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech AI</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="img/speech.png" rel="icon">
+</head>
+
+<body>
+    <div class="container">
+        <div class="language-select-container">
+            <label for="languageSelect">Language:</label>
+            <select id="languageSelect">
+                <option value="en-US">English</option>
+                <option value="bn-BD">Bangla</option>
+                <option value="hi-IN">Hindi</option>
+            </select>
+        </div>
+        <div class="timer-container">
+            <p id="timer">00:00:00</p>
+        </div>
+        <div class="button-container">
+            <button id="startButton" class="fancy-button">Start</button>
+            <button id="pauseButton" class="fancy-button" disabled>Pause</button>
+            <button id="stopButton" class="fancy-button" disabled>Stop</button>
+        </div>
+        <div class="transcription-container">
+            <p id="transcription"></p>
+        </div>
+        <button id="privacyButton" class="privacy-button">Privacy & Security</button>
+
+        <!-- Privacy Modal -->
+        <div id="privacyModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Privacy & Security</h2>
+                <p>Your privacy is important to us. This application uses the <strong>Web Speech API</strong> to enable
+                    real-time speech transcription. Here’s how we manage and protect your information:</p>
+                <ul>
+                    <li><strong>Data Processing and Transmission:</strong> The Web Speech API processes speech data to
+                        convert it into text. When you use this feature, audio data may be sent to third-party servers
+                        (e.g., Google servers for Chrome users) where the transcription is processed. Neither this
+                        application nor its creators store, share, or retain any spoken data.
+                    </li>
+                    <li><strong>No Data Collection or Storage:</strong> We do not collect, record, or store any of the
+                        audio data or transcriptions generated during your use of this application. The transcription
+                        occurs in real-time and is displayed on your screen only, without saving any information on our
+                        servers.
+                    </li>
+                    <li><strong>Third-Party Processing:</strong> Depending on your browser, speech recognition is
+                        handled by third-party services (e.g., Google for Chrome users). Please refer to your browser's
+                        privacy policy for further information on how these providers handle and process audio data.
+                    </li>
+                    <li><strong>User Consent Privacy:</strong> By using the speech recognition feature, you consent to
+                        the
+                        transmission and processing of your audio data by third-party services for the purpose of
+                        transcription. If you do not consent, please avoid using the voice-to-text feature or disable
+                        microphone access for this site in your browser settings.
+                    </li>
+                    <li><strong>Security Measures:</strong> We recommend using the application in a secure environment
+                        and avoiding sensitive information while using the voice transcription feature. This helps
+                        ensure that private information remains confidential.
+                    </li>
+                    <li><strong>Data Access Permissions:</strong> The application requires microphone access solely for
+                        enabling voice-to-text transcription. You may revoke microphone permissions at any time through
+                        your browser or device settings.
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    </div>
+
+
+    <style>
+        /* Background styling */
+        body {
+            background-image: url('https://your-image-url.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+        }
+
+        .container {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            width: 80%;
+            max-width: 500px;
+        }
+
+        .timer-container {
+            font-size: 2rem;
+            font-weight: bold;
+            padding-bottom: 20px;
+        }
+
+        /* Button styling */
+        .fancy-button {
+            padding: 12px 24px;
+            margin: 10px;
+            border: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            color: white;
+            background-image: linear-gradient(45deg, #ff6a00, #ee0979);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .fancy-button:hover {
+            background-image: linear-gradient(45deg, #ee0979, #ff6a00);
+            transform: scale(1.05);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.6);
+        }
+
+        .fancy-button:active {
+            transform: scale(0.98);
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Disabled button styling */
+        .fancy-button:disabled {
+            background-image: linear-gradient(45deg, #666666, #333333);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Transcription text styling */
+        .transcription-container {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            overflow-y: auto;
+            max-height: 150px;
+            font-size: 1.1rem;
+        }
+
+        /* Scrollbar styling for the transcription box */
+        .transcription-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .transcription-container::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.4);
+            border-radius: 5px;
+        }
+
+        .language-toggle-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .language-toggle-container label {
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        .language-toggle-container input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+
+        .language-select-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .language-select-container label {
+            font-size: 1.1rem;
+            margin-right: 10px;
+        }
+
+        .language-select-container select {
+            font-size: 1rem;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ff6a00;
+            background-color: #333;
+            color: white;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .language-select-container select:focus {
+            border-color: #ee0979;
+        }
+
+        /* Privacy Button */
+        .privacy-button {
+            background: linear-gradient(45deg, #ff6a00, #ee0979);
+            color: white;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .privacy-button:hover {
+            background: linear-gradient(45deg, #ee0979, #ff6a00);
+        }
+
+        /* Modal Background */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            padding-top: 60px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        /* Modal Content */
+        .modal-content {
+            background-color: #333;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+            color: white;
+        }
+
+        .modal-content h2 {
+            color: #ff6a00;
+            text-align: center;
+            margin-top: 0;
+        }
+
+        .modal-content p,
+        .modal-content ul {
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .modal-content ul {
+            list-style: disc;
+            padding-left: 20px;
+        }
+
+        .modal-content strong {
+            color: #ff6a00;
+        }
+
+        /* Close Button */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #ff6a00;
+            text-decoration: none;
+        }
+    </style>
+
+    <script>
+        let startTime;
+        let elapsedTime = 0;
+        let timerInterval;
+        let recognition;
+        let isPaused = false;
+        let currentLang = 'en-US';
+        let isRecognizing = false; // Track if recognition is currently active
+
+        document.getElementById("startButton").addEventListener("click", startTranscription);
+        document.getElementById("pauseButton").addEventListener("click", togglePauseTranscription);
+        document.getElementById("stopButton").addEventListener("click", stopTranscription);
+        document.getElementById("languageSelect").addEventListener("change", updateLanguage);
+
+        function updateLanguage() {
+            const selectedLanguage = document.getElementById("languageSelect").value;
+
+            // If language changes, stop and restart recognition if active
+            if (currentLang !== selectedLanguage) {
+                currentLang = selectedLanguage;
+
+                if (isRecognizing) {
+                    recognition.stop();
+                    isRecognizing = false;
+                }
+
+                // Wait a moment before restarting with the new language
+                setTimeout(() => {
+                    if (!isPaused && startTime) {
+                        initSpeechRecognition();
+                        recognition.start();
+                        isRecognizing = true;
+                    }
+                }, 500);
+            }
+        }
+
+        function startTranscription() {
+            if (!startTime) {
+                startTime = Date.now();
+            }
+
+            if (!recognition) {
+                initSpeechRecognition();
+            }
+
+            if (!isPaused) {
+                recognition.start();
+                isRecognizing = true;
+            }
+
+            resumeTimer();
+            isPaused = false;
+            document.getElementById("pauseButton").disabled = false;
+            document.getElementById("stopButton").disabled = false;
+            document.getElementById("startButton").disabled = true;
+            document.getElementById("pauseButton").textContent = "Pause";
+        }
+
+        function togglePauseTranscription() {
+            if (isPaused) {
+                recognition.start();
+                resumeTimer();
+                document.getElementById("pauseButton").textContent = "Pause";
+                isPaused = false;
+                isRecognizing = true;
+            } else {
+                recognition.stop();
+                pauseTimer();
+                document.getElementById("pauseButton").textContent = "Resume";
+                isPaused = true;
+                isRecognizing = false;
+            }
+        }
+
+        function stopTranscription() {
+            clearInterval(timerInterval);
+            document.getElementById("timer").textContent = "00:00:00";
+            document.getElementById("transcription").textContent = "";
+
+            if (recognition) {
+                recognition.stop();
+                recognition = null;
+                isRecognizing = false;
+            }
+
+            startTime = null;
+            elapsedTime = 0;
+            isPaused = false;
+
+            document.getElementById("pauseButton").disabled = true;
+            document.getElementById("stopButton").disabled = true;
+            document.getElementById("startButton").disabled = false;
+            document.getElementById("pauseButton").textContent = "Pause";
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                const timeElapsed = Date.now() - startTime + elapsedTime;
+                document.getElementById("timer").textContent = formatTime(timeElapsed);
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            clearInterval(timerInterval);
+            elapsedTime += Date.now() - startTime;
+        }
+
+        function resumeTimer() {
+            startTime = Date.now();
+            clearInterval(timerInterval);
+            startTimer();
+        }
+
+        function formatTime(ms) {
+            const totalSeconds = Math.floor(ms / 1000);
+            const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+            const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+            const seconds = String(totalSeconds % 60).padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
+        }
+
+        function initSpeechRecognition() {
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = currentLang;
+            recognition.continuous = true;
+            recognition.interimResults = true;
+
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                let finalTranscript = '';
+
+                for (const result of event.results) {
+                    if (result.isFinal) {
+                        finalTranscript += result[0].transcript;
+                    } else {
+                        interimTranscript += result[0].transcript;
+                    }
+                }
+
+                document.getElementById("transcription").textContent = finalTranscript + interimTranscript;
+            };
+
+            recognition.onerror = (event) => {
+                console.error("Speech recognition error:", event.error);
+                if (event.error === 'not-allowed') {
+                    alert('Please allow microphone access to use speech recognition.');
+                }
+                recognition.stop();
+            };
+
+            recognition.onend = () => {
+                if (!isPaused && isRecognizing) {
+                    recognition.start();
+                }
+            };
+        }
+        // Modal Control
+        const privacyModal = document.getElementById("privacyModal");
+        const privacyButton = document.getElementById("privacyButton");
+        const closeButton = document.querySelector(".close");
+
+        privacyButton.onclick = function () {
+            privacyModal.style.display = "block";
+        };
+
+        closeButton.onclick = function () {
+            privacyModal.style.display = "none";
+        };
+
+        // Close modal when clicking outside content
+        window.onclick = function (event) {
+            if (event.target == privacyModal) {
+                privacyModal.style.display = "none";
+            }
+        };
+
+    </script>
+</body>
+
+</html>
