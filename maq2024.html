@@ -277,6 +277,10 @@
 
         // Start the quiz
         function startQuiz() {
+            if (questions.length === 0) {
+                alert("Please add questions first");
+                return; // Exit the function if no questions
+            }
             const quizForm = document.getElementById('quizForm');
             const quizButtonContainer = document.getElementById('quizButtonContainer');
             const manageQuestionsForm = document.getElementById('manageQuestionsForm'); // Get the manage questions form
