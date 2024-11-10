@@ -341,23 +341,21 @@
                     if (userAnswerValue === q.correctAnswer - 1) {
                         questionAnswerDiv.classList.add('correct');
                         questionAnswerDiv.innerHTML += `
-          <p>Your Answer: ${userAnswerText}</p>
-          <p>Correct Answer: ${correctAnswerText}</p>
+          <p><strong>Correct Answer:</strong> ${correctAnswerText}</p>
         `;
                         score++;
                     } else {
                         questionAnswerDiv.classList.add('incorrect');
                         questionAnswerDiv.innerHTML += `
-          <p>Your Answer: ${userAnswerText}</p>
-          <p>Correct Answer: ${correctAnswerText}</p>
+          <p><strong>Correct Answer:</strong> ${correctAnswerText}</p>
         `;
                     }
                 } else {
                     // No answer selected
                     questionAnswerDiv.classList.add('incorrect');
                     questionAnswerDiv.innerHTML += `
-        <p>Your Answer: None</p>
-        <p>Correct Answer: ${q.options[q.correctAnswer - 1]}</p>
+        <p>You didn't answer it</p>
+        <p><strong>Correct Answer:</strong> ${q.options[q.correctAnswer - 1]}</p>
       `;
                 }
 
