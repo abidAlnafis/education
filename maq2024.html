@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link href="img/creative-medical-logo-and-healthcare-concept-vector-46176821.png" rel="icon">
+    <title>MAQ 2024</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            padding: 10px 15px;
+            margin: 10px 0;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .question-container {
+            margin-top: 20px;
+        }
+
+        .question {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .manage-container {
+            margin-top: 20px;
+        }
+
+        .manage-container button {
+            background-color: #2196F3;
+        }
+
+        .manage-container button:hover {
+            background-color: #0b7dda;
+        }
+
+        /* Results Section */
+        #resultForm {
+            margin-top: 20px;
+        }
+
+        .result-header {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .score {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 20px;
+            padding: 10px;
+        }
+
+        .correct {
+            background-color: #d4edda;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .incorrect {
+            background-color: #f8d7da;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .question-answer {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        /* Mobile and tablet responsiveness */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            button {
+                width: 100%;
+                /* Make buttons full width on small screens */
+                padding: 15px;
+            }
+
+            .question {
+                font-size: 14px;
+                padding: 8px;
+            }
+
+            .question-container,
+            .quiz-container {
+                margin-top: 10px;
+            }
+
+            .score {
+                font-size: 1em;
+            }
+        }
+
+        @media (max-width: 480px) {
+
+            .question-container,
+            .quiz-container {
+                margin-top: 5px;
+            }
+
+            .result-header {
+                font-size: 1.2em;
+            }
+        }
+
+        /* Centering the Add/Edit Question Form */
+        #manageQuestionsForm {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #questionForm input {
+            width: 80%;
+            /* Adjust width to make inputs a bit smaller */
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 18px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        #questionForm button {
+            width: 50%;
+            /* Adjust button width */
+            font-size: 18px;
+            padding: 12px 0;
+            margin-top: 20px;
+        }
+
+        #questionList {
+            width: 80%;
+            /* Ensure the question list also aligns with the input fields */
+            margin-top: 30px;
+        }
+
+        #questionList div {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        #questionList button {
+            padding: 8px 12px;
+            margin-right: 10px;
+            background-color: #FF6347;
+        }
+
+        #questionList button:hover {
+            background-color: #e53d33;
+        }
+
+        .image-section {
+            padding-top: 35px;
+            padding-bottom: 35px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Medical Admission Quiz 2024</h2>
+
+        <!-- Start Quiz Button -->
+        <div id="quizButtonContainer">
+            <button onclick="startQuiz()">Start Quiz</button>
+        </div>
+
+        <!-- Manage Questions Button -->
+        <div id="manageButtonContainer" class="manage-container">
+            <button onclick="manageQuestions()">Manage Questions</button>
+        </div>
+        <div id="imageSection" class="image-section" style="padding-top: 35px; padding-bottom: 35px;"><img
+                src="img/maxresdefault.jpg" height="400px" width="342px" alt=""></div>
+
+        <!-- Quiz Form -->
+        <!-- Link Font Awesome in the head section -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+        <div id="quizForm" style="display:none; position:relative;">
+            <!-- Wrapper div for the icon to position it independently -->
+            <div style="position:absolute; top:10px; left:10px;">
+                <i class="fas fa-arrow-left" onclick="goBack()"
+                    style="font-size:20px; color:#000; cursor:pointer; line-height:1;"></i>
+            </div>
+
+            <!-- Padding added to the quiz container, without affecting the icon -->
+            <div id="quizContainer" class="quiz-container" style="padding-top:50px;">
+                <!-- Your quiz questions go here -->
+            </div>
+
+            <button id="submitQuizButton" onclick="submitQuiz()">Submit Answer</button>
+        </div>
+
+
+
+        <!-- Results Form -->
+        <div id="resultForm" style="display:none;">
+            <div class="score" id="scoreContainer"></div>
+            <div id="resultContainer" class="resultContainer"></div>
+        </div>
+
+
+        <!-- Manage Questions Form -->
+        <div id="manageQuestionsForm" style="display:none;">
+            <h3>Manage Questions</h3>
+            <form id="questionForm">
+                <input type="text" id="questionInput" placeholder="Enter question" required><br>
+                <input type="text" id="option1Input" placeholder="Option 1" required><br>
+                <input type="text" id="option2Input" placeholder="Option 2" required><br>
+                <input type="text" id="option3Input" placeholder="Option 3" required><br>
+                <input type="text" id="option4Input" placeholder="Option 4" required><br>
+                <label for="correctAnswerInput">Correct Answer (1-4):</label><br>
+                <input type="number" id="correctAnswerInput" min="1" max="4" required><br><br>
+                <button type="button" onclick="saveQuestion()">Save Question</button>
+            </form>
+            <br>
+            <div id="questionList"></div>
+        </div>
+
+    </div>
+    <div style="padding-top: 30px;" align="center"><br><br>
+        <hr style="margin-bottom:10px ;">
+        <p style="margin-bottom: 10px;">Developed By</p>
+        <h3 style="margin-top: 0px;">Abid All Nafish</h3>
+    </div>
+    <script>
+        // Load questions from localStorage when the page loads
+        let questions = JSON.parse(localStorage.getItem('questions')) || [];
+        let editingIndex = -1; // -1 means no question is being edited
+
+        // Shuffle function for randomizing questions only
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+            }
+        }
+
+        // Start the quiz
+        function startQuiz() {
+            const quizForm = document.getElementById('quizForm');
+            const quizButtonContainer = document.getElementById('quizButtonContainer');
+            const manageQuestionsForm = document.getElementById('manageQuestionsForm'); // Get the manage questions form
+            const manageButtonContainer = document.getElementById('manageButtonContainer'); // Get the manage button container
+
+            quizButtonContainer.style.display = 'none'; // Hide the start quiz button
+            manageButtonContainer.style.display = 'none'; // Hide the manage questions button
+            quizForm.style.display = 'block'; // Show the quiz form
+            manageQuestionsForm.style.display = 'none'; // Hide the manage questions form when quiz starts
+
+            // Shuffle the questions
+            shuffleArray(questions);
+
+            const quizContainer = document.getElementById('quizContainer');
+            quizContainer.innerHTML = ''; // Clear any existing quiz content
+
+            // Loop through each question to display options
+            questions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question';
+                questionDiv.innerHTML = ` 
+            <p><strong>Q${index + 1}:</strong> ${q.question}</p>
+            <label><input type="radio" name="q${index}" value="1"> ${q.options[0]}</label><br>
+            <label><input type="radio" name="q${index}" value="2"> ${q.options[1]}</label><br>
+            <label><input type="radio" name="q${index}" value="3"> ${q.options[2]}</label><br>
+            <label><input type="radio" name="q${index}" value="4"> ${q.options[3]}</label>
+        `;
+                quizContainer.appendChild(questionDiv);
+            });
+            document.getElementById('imageSection').style.display = 'none'; // Hide image section
+        }
+
+
+
+        // Submit the quiz and show results
+        function submitQuiz() {
+            const quizContainer = document.getElementById('quizContainer');
+            const scoreContainer = document.getElementById('scoreContainer');
+            const resultContainer = document.getElementById('resultContainer');
+
+            let score = 0;
+            resultContainer.innerHTML = ''; // Clear any previous results
+
+            questions.forEach((q, index) => {
+                const userAnswer = document.querySelector(`input[name="q${index}"]:checked`);
+                const questionAnswerDiv = document.createElement('div');
+                questionAnswerDiv.classList.add('question-answer');
+
+                // Show the question
+                questionAnswerDiv.innerHTML = `<p><strong>Q${index + 1}:</strong> ${q.question}</p>`;
+
+                if (userAnswer) {
+                    const userAnswerValue = parseInt(userAnswer.value) - 1; // Convert to 0-based index
+                    const userAnswerText = q.options[userAnswerValue];
+                    const correctAnswerText = q.options[q.correctAnswer - 1];
+
+                    // Check if the user's answer is correct or incorrect
+                    if (userAnswerValue === q.correctAnswer - 1) {
+                        questionAnswerDiv.classList.add('correct');
+                        questionAnswerDiv.innerHTML += `
+          <p>Your Answer: ${userAnswerText}</p>
+          <p>Correct Answer: ${correctAnswerText}</p>
+        `;
+                        score++;
+                    } else {
+                        questionAnswerDiv.classList.add('incorrect');
+                        questionAnswerDiv.innerHTML += `
+          <p>Your Answer: ${userAnswerText}</p>
+          <p>Correct Answer: ${correctAnswerText}</p>
+        `;
+                    }
+                } else {
+                    // No answer selected
+                    questionAnswerDiv.classList.add('incorrect');
+                    questionAnswerDiv.innerHTML += `
+        <p>Your Answer: None</p>
+        <p>Correct Answer: ${q.options[q.correctAnswer - 1]}</p>
+      `;
+                }
+
+                resultContainer.appendChild(questionAnswerDiv);
+            });
+
+            scoreContainer.textContent = `Your Score: ${score} / ${questions.length}`;
+            document.getElementById('resultForm').style.display = 'block';
+        }
+
+        // Manage Questions
+        function manageQuestions() {
+            const quizForm = document.getElementById('quizForm');
+            const manageQuestionsForm = document.getElementById('manageQuestionsForm');
+            const manageButtonContainer = document.getElementById('manageButtonContainer');
+
+            quizForm.style.display = 'none';
+            manageQuestionsForm.style.display = 'block';
+            manageButtonContainer.style.display = 'none';
+
+            const questionList = document.getElementById('questionList');
+            questionList.innerHTML = ''; // Clear existing question list
+
+            questions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.innerHTML = ` 
+      <p><strong>Q${index + 1}:</strong> ${q.question} - Correct Answer: ${q.options[q.correctAnswer - 1]}</p>
+      <button onclick="editQuestion(${index})">Edit</button>
+      <button onclick="deleteQuestion(${index})">Delete</button>
+    `;
+                questionList.appendChild(questionDiv);
+            });
+            document.getElementById('imageSection').style.display = 'none'; // Hide image section
+        }
+
+        // Save a new question
+        function saveQuestion() {
+            const questionInput = document.getElementById('questionInput').value;
+            const option1Input = document.getElementById('option1Input').value;
+            const option2Input = document.getElementById('option2Input').value;
+            const option3Input = document.getElementById('option3Input').value;
+            const option4Input = document.getElementById('option4Input').value;
+            const correctAnswerInput = parseInt(document.getElementById('correctAnswerInput').value) || 1;
+
+            if (questionInput && option1Input && option2Input && option3Input && option4Input) {
+                const newQuestion = {
+                    question: questionInput,
+                    options: [option1Input, option2Input, option3Input, option4Input],
+                    correctAnswer: correctAnswerInput
+                };
+
+                if (editingIndex === -1) {
+                    questions.push(newQuestion);
+                } else {
+                    questions[editingIndex] = newQuestion;
+                }
+
+                localStorage.setItem('questions', JSON.stringify(questions));
+                manageQuestions(); // Refresh the list of questions
+                document.getElementById('questionForm').reset(); // Clear the form
+                editingIndex = -1;
+            } else {
+                alert('Please fill all fields correctly!');
+            }
+        }
+
+        // Edit an existing question
+        function editQuestion(index) {
+            const question = questions[index];
+            document.getElementById('questionInput').value = question.question;
+            document.getElementById('option1Input').value = question.options[0];
+            document.getElementById('option2Input').value = question.options[1];
+            document.getElementById('option3Input').value = question.options[2];
+            document.getElementById('option4Input').value = question.options[3];
+            document.getElementById('correctAnswerInput').value = question.correctAnswer;
+
+            editingIndex = index;
+            manageQuestions(); // Refresh the list of questions
+        }
+
+        // Delete an existing question
+        function deleteQuestion(index) {
+            questions.splice(index, 1);
+            localStorage.setItem('questions', JSON.stringify(questions));
+            manageQuestions(); // Refresh the list of questions
+        }
+        function goBack() {
+    window.location.href = 'maq2024.html'; // Update 'index.html' with the exact URL of your homepage
+        }
+    </script>
+
+</body>
+
+</html>
