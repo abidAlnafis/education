@@ -189,7 +189,7 @@
 
         .image-section {
             padding-top: 35px;
-            padding-bottom: 35px;
+            padding-bottom: 10px;
             text-align: center;
         }
     </style>
@@ -198,18 +198,17 @@
 <body>
 
     <div class="container">
-        <h2>Medical Admission Quiz 2024</h2>
-
-        <!-- Start Quiz Button -->
-        <div id="quizButtonContainer">
-            <button onclick="startQuiz()">Start Quiz</button>
-        </div>
+        <h2 style="margin-top: 5px;">Medical Admission Quiz 2024</h2>
 
         <!-- Manage Questions Button -->
         <div id="manageButtonContainer" class="manage-container">
             <button onclick="manageQuestions()">Manage Questions</button>
         </div>
-        <div id="imageSection" class="image-section" style="padding-top: 35px; padding-bottom: 35px;"><img
+        <!-- Start Quiz Button -->
+        <div id="quizButtonContainer">
+            <button onclick="startQuiz()">Start Quiz</button>
+        </div>
+        <div id="imageSection" class="image-section" style="padding-top: 35px; padding-bottom: 5px;"><img
                 src="img/maxresdefault.jpg" height="400px" width="342px" alt=""></div>
 
         <!-- Quiz Form -->
@@ -258,7 +257,7 @@
         </div>
 
     </div>
-    <div style="padding-top: 30px;" align="center"><br><br>
+    <div style="padding-top: 30px;" align="center"><br>
         <hr style="margin-bottom:10px ;">
         <p style="margin-bottom: 10px;">Developed By</p>
         <h3 style="margin-top: 0px;">Abid All Nafish</h3>
@@ -442,7 +441,7 @@
             manageQuestions(); // Refresh the list of questions
         }
         function goBack() {
-    window.location.href = 'maq2024.html'; // Update 'index.html' with the exact URL of your homepage
+            window.location.href = 'maq2024.html'; // Update 'index.html' with the exact URL of your homepage
         }
     </script>
 
