@@ -20,18 +20,6 @@
             height: 100%;
             object-fit: cover;
         }
-        .toolbar {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-            display: none;
-            gap: 10px;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px;
-            border-radius: 10px;
-        }
         button {
             width: 50px;
             height: 50px;
@@ -44,42 +32,29 @@
             border-radius: 50%;
             cursor: pointer;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-        }
-        button:hover {
-            background-color: #ddd;
-        }
-        #fullscreenButton {
             position: absolute;
             bottom: 20px;
             right: 20px;
             z-index: 1000;
         }
+        button:hover {
+            background-color: #ddd;
+        }
     </style>
 </head>
 <body>
     <video id="camera" autoplay playsinline></video>
-    <div id="fullscreenButton">
-        <button id="fullscreen">🔲</button>
-    </div>
-    <div class="toolbar" id="toolbar">
-        <button id="toggleOrientation">↔️</button>
-        <button id="playPause">⏯️</button>
-    </div>
+    <button id="fullscreen">🔲</button>
 
     <script>
         const videoElement = document.getElementById('camera');
-        const toggleButton = document.getElementById('toggleOrientation');
         const fullscreenButton = document.getElementById('fullscreen');
-        const playPauseButton = document.getElementById('playPause');
-        const toolbar = document.getElementById('toolbar');
-        const fullscreenWrapper = document.getElementById('fullscreenButton');
-
-        let isVertical = true;
-        let isPlaying = true;
 
         async function setupCamera() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "environment" } // Use the rear camera
+                });
                 videoElement.srcObject = stream;
             } catch (error) {
                 alert('Camera access denied or not available.');
@@ -87,35 +62,12 @@
             }
         }
 
-        function applyOrientation() {
-            videoElement.style.transform = isVertical ? 'rotate(0deg)' : 'rotate(90deg)';
-        }
-
-        toggleButton.addEventListener('click', () => {
-            isVertical = !isVertical;
-            applyOrientation();
-        });
-
         fullscreenButton.addEventListener('click', () => {
             if (document.fullscreenElement) {
                 document.exitFullscreen();
-                toolbar.style.display = 'none';
-                fullscreenWrapper.style.display = 'block';
             } else {
-                videoElement.requestFullscreen().then(() => {
-                    toolbar.style.display = 'flex';
-                    fullscreenWrapper.style.display = 'none';
-                });
+                videoElement.requestFullscreen();
             }
-        });
-
-        playPauseButton.addEventListener('click', () => {
-            if (isPlaying) {
-                videoElement.pause();
-            } else {
-                videoElement.play();
-            }
-            isPlaying = !isPlaying;
         });
 
         setupCamera();
