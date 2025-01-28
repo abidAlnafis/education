@@ -53,7 +53,11 @@
         async function setupCamera() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: "environment" } // Use the rear camera
+                    video: {
+                        facingMode: "environment", // Use the rear camera
+                        width: { ideal: 1920 },   // Request Full HD width
+                        height: { ideal: 1080 }  // Request Full HD height
+                    }
                 });
                 videoElement.srcObject = stream;
             } catch (error) {
