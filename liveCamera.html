@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phone Camera and Microphone Feed</title>
+</head>
+<body>
+  <h1>Phone Camera and Microphone Stream</h1>
+  <video id="video" autoplay playsinline controls style="width: 100%;"></video>
+
+  <script>
+    async function startCameraAndAudio() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    const videoElement = document.getElementById('video');
+    videoElement.srcObject = stream;
+
+    // Log audio tracks
+    const audioTracks = stream.getAudioTracks();
+    if (audioTracks.length > 0) {
+      console.log('Audio track is available:', audioTracks[0].label);
+    } else {
+      console.error('No audio tracks available.');
+    }
+  } catch (error) {
+    console.error('Error accessing camera or microphone:', error);
+  }
+}
+
+startCameraAndAudio();
+
+  </script>
+</body>
+</html>

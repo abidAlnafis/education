@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hill Climb Game</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #87CEEB; /* Sky blue */
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="game-canvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById("game-canvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Terrain and scrolling settings
+    const terrain = [];
+    const segmentLength = 50; // Length of each terrain segment
+    const terrainHeight = canvas.height / 2;
+    const terrainAmplitude = 60; // Hill height
+    const scrollSpeed = 3;
+
+    // Background settings
+    let backgroundX = 0; // Background scrolling offset
+
+    // Car settings
+    const car = {
+      x: canvas.width / 2, // Car stays centered; terrain moves instead
+      y: 0,
+      width: 50,
+      height: 20,
+      wheelRadius: 12,
+      velocityX: 0,
+      velocityY: 0,
+      acceleration: 0.2,
+      maxSpeed: 5,
+      friction: 0.98,
+      isGrounded: false,
+    };
+
+    // Generate terrain
+    function generateTerrain() {
+      terrain.length = 0;
+      let x = 0;
+      let y = terrainHeight;
+
+      for (let i = 0; i < canvas.width / segmentLength + 100; i++) {
+        y = terrainHeight + Math.sin(i * 0.5) * terrainAmplitude;
+        terrain.push({ x, y });
+        x += segmentLength;
+      }
+    }
+
+    // Draw terrain
+    function drawTerrain(offset) {
+      ctx.beginPath();
+      ctx.moveTo(0, canvas.height);
+      terrain.forEach((point, i) => {
+        const screenX = point.x - offset; // Adjust position by scrolling offset
+        ctx.lineTo(screenX, point.y);
+      });
+      ctx.lineTo(canvas.width, canvas.height); // Close the terrain path
+      ctx.closePath();
+      ctx.fillStyle = "#654321"; // Brown terrain
+      ctx.fill();
+
+      // Grass on top
+      terrain.forEach((point, i) => {
+        const screenX = point.x - offset;
+        ctx.beginPath();
+        ctx.arc(screenX, point.y - 2, 2, 0, Math.PI * 2);
+        ctx.fillStyle = "#228B22"; // Grass green
+        ctx.fill();
+      });
+    }
+
+    // Draw background
+    function drawBackground() {
+      const backgroundWidth = canvas.width * 2; // Extra-wide background for scrolling
+      ctx.fillStyle = "#87CEEB"; // Sky blue
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Simulate a moving sky
+      ctx.fillStyle = "#FFFFFF";
+      ctx.font = "50px Arial";
+      ctx.fillText("☁", backgroundX % backgroundWidth, 100); // Cloud scrolling
+    }
+
+    // Draw the car
+    function drawCar() {
+      ctx.save();
+      ctx.translate(car.x, car.y);
+
+      // Car body
+      ctx.fillStyle = "#FF0000";
+      ctx.fillRect(-car.width / 2, -car.height / 2, car.width, car.height);
+
+      // Wheels
+      ctx.beginPath();
+      ctx.arc(-car.width / 2, car.height / 2, car.wheelRadius, 0, Math.PI * 2);
+      ctx.arc(car.width / 2, car.height / 2, car.wheelRadius, 0, Math.PI * 2);
+      ctx.fillStyle = "#000000";
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    // Move car and terrain
+    function updateGame() {
+      if (keys["ArrowRight"]) {
+        car.velocityX += car.acceleration;
+      }
+      if (keys["ArrowLeft"]) {
+        car.velocityX -= car.acceleration;
+      }
+
+      // Limit speed
+      car.velocityX = Math.min(Math.max(car.velocityX, -car.maxSpeed), car.maxSpeed);
+
+      // Apply friction
+      car.velocityX *= car.friction;
+
+      // Simulate gravity
+      if (!car.isGrounded) {
+        car.velocityY += 0.5; // Gravity
+      }
+
+      // Detect terrain collision
+      const segmentIndex = Math.floor((car.x + backgroundX) / segmentLength);
+      if (segmentIndex >= 0 && segmentIndex < terrain.length) {
+        const groundY = terrain[segmentIndex].y;
+        if (car.y >= groundY - car.height / 2) {
+          car.y = groundY - car.height / 2;
+          car.velocityY = 0; // Stop falling
+          car.isGrounded = true;
+        } else {
+          car.isGrounded = false;
+        }
+      }
+
+      // Update car position
+      car.x += car.velocityX;
+      car.y += car.velocityY;
+
+      // Scroll background
+      backgroundX -= scrollSpeed;
+    }
+
+    // Handle keyboard input
+    const keys = {};
+    window.addEventListener("keydown", (e) => {
+      keys[e.key] = true;
+    });
+    window.addEventListener("keyup", (e) => {
+      keys[e.key] = false;
+    });
+
+    // Game loop
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw background and terrain
+      drawBackground();
+      drawTerrain(backgroundX);
+
+      // Draw car
+      drawCar();
+
+      // Update game physics
+      updateGame();
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Start the game
+    generateTerrain();
+    car.y = terrain[0].y - car.height / 2; // Start the car on the terrain
+    gameLoop();
+  </script>
+</body>
+</html>
