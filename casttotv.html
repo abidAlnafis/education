@@ -1,45 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cast to Samsung TV</title>
-    <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
-    <script>
-        function initCast() {
-            if (!chrome || !chrome.cast) {
-                alert("Casting is only supported in Google Chrome.");
-                return;
-            }
-            
-            let session = null;
-
-            const sessionRequest = new chrome.cast.SessionRequest(chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID);
-            const apiConfig = new chrome.cast.ApiConfig(sessionRequest, function(s) {
-                session = s;
-            }, function(error) {
-                console.error("Error initializing Cast API", error);
-            });
-
-            chrome.cast.initialize(apiConfig, function() {
-                console.log("Cast API initialized");
-            }, function(error) {
-                console.error("Error initializing Cast API", error);
-            });
-
-            document.getElementById("castButton").addEventListener("click", function() {
-                chrome.cast.requestSession(function(s) {
-                    session = s;
-                    alert("Casting Started!");
-                }, function(error) {
-                    console.error("Error starting Cast session", error);
-                });
-            });
-        }
-    </script>
+    <title>Media Server</title>
 </head>
-<body onload="initCast()">
-    <h1>Cast to Samsung TV</h1>
-    <button id="castButton">Cast Screen</button>
+<body>
+    <h1>Upload and Stream Media</h1>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <button type="submit">Upload</button>
+    </form>
+    <h2>Available Files:</h2>
+    <ul>
+        {% for file in files %}
+            <li><a href="/media/{{ file }}">{{ file }}</a></li>
+        {% endfor %}
+    </ul>
 </body>
 </html>
+    <h2>
+        <a>
+            <a href="/media/{{ file }}">{{ file }}</a>
+        </a>
+    </h2> 

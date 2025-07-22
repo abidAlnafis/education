@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>PM-15 Class Routine</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #049c55;
+      --white: #ffffff;
+      --text-dark: #2c3e50;
+      --text-muted: #7f8c8d;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: url('img/popularmbbs.jpg') no-repeat center center fixed;
+      background-size: cover;
+      padding: 150px 20px 20px 20px;
+      color: var(--text-dark);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+
+
+
+    h1 {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .section-select {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      position: relative;
+    }
+
+    .section-select label {
+      font-weight: 500;
+      font-size: 1rem;
+      user-select: none;
+    }
+
+    /* Hide native select */
+    .hidden-select {
+      display: none;
+    }
+
+    /* Custom Dropdown Styles */
+    .custom-dropdown {
+      position: relative;
+      width: 80px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .custom-dropdown__selected {
+      padding: 10px 16px;
+      border: 2px solid var(--primary);
+      border-radius: var(--radius);
+      background: var(--white);
+      color: var(--primary);
+      font-weight: 500;
+      box-shadow: var(--shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+
+    .custom-dropdown__selected:hover,
+    .custom-dropdown__selected:focus {
+      border-color: #03854a;
+      outline: none;
+    }
+
+    /* Arrow Icon */
+    .custom-dropdown__arrow {
+      border: solid var(--primary);
+      border-width: 0 2px 2px 0;
+      display: inline-block;
+      padding: 5px;
+      transform: rotate(45deg);
+      transition: transform 0.3s ease;
+      margin-left: 10px;
+    }
+
+    /* Arrow rotated when open */
+    .custom-dropdown.open .custom-dropdown__arrow {
+      transform: rotate(-135deg);
+    }
+
+    /* Dropdown options container */
+    .custom-dropdown__options {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      right: 0;
+      background: var(--white);
+      border: 2px solid var(--primary);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+    }
+
+    .custom-dropdown.open .custom-dropdown__options {
+      display: block;
+    }
+
+    .custom-dropdown__option {
+      padding: 10px 16px;
+      font-size: 1rem;
+      color: var(--text-dark);
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .custom-dropdown__option:hover,
+    .custom-dropdown__option.highlighted {
+      background-color: var(--primary);
+      color: var(--white);
+    }
+
+    .routine-box {
+      background: var(--white);
+      width: 100%;
+      max-width: 500px;
+      padding: 25px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-top: 10px;
+      transition: 0.3s;
+    }
+
+    .day-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 20px;
+    }
+
+    .time-slot {
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e0e0e0;
+      text-align: left;
+    }
+
+    .time {
+      font-weight: 600;
+      color: var(--text-dark);
+      font-size: 1rem;
+    }
+
+    .subject {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-top: 5px;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .routine-box {
+        padding: 18px;
+      }
+
+      .custom-dropdown {
+        width: 100%;
+        max-width: 300px;
+      }
+
+      .custom-dropdown__selected {
+        font-size: 0.95rem;
+      }
+
+      .custom-dropdown__option {
+        font-size: 0.95rem;
+      }
+
+      .time {
+        font-size: 0.95rem;
+      }
+
+      .subject {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <h1>PM-15 Class Routine</h1>
+
+  <div class="section-select">
+    <label for="batchSelect">Choose Section:</label>
+
+    <!-- Hidden native select for form compatibility -->
+    <select id="batchSelect" class="hidden-select" aria-label="Choose Section">
+      <option value="A">A</option>
+      <option value="B">B</option>
+      <option value="C" selected>C</option>
+      <option value="D">D</option>
+    </select>
+
+    <!-- Custom dropdown -->
+    <div class="custom-dropdown" tabindex="0" aria-haspopup="listbox" aria-expanded="false" role="combobox"
+      aria-labelledby="batchSelectLabel">
+      <div class="custom-dropdown__selected" id="batchSelectLabel" aria-live="polite">C
+        <span class="custom-dropdown__arrow"></span>
+      </div>
+      <div class="custom-dropdown__options" role="listbox" tabindex="-1">
+        <div class="custom-dropdown__option" data-value="A" role="option" tabindex="0">A</div>
+        <div class="custom-dropdown__option" data-value="B" role="option" tabindex="0">B</div>
+        <div class="custom-dropdown__option" data-value="C" role="option" tabindex="0" aria-selected="true">C</div>
+        <div class="custom-dropdown__option" data-value="D" role="option" tabindex="0">D</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="routine-box">
+    <div class="day-title" id="todayTitle">Today is ...</div>
+    <div id="routineContainer"></div>
+  </div>
+
+  <script>
+    const routines = {
+      "A": {
+        "Saturday": [
+          { time: "8:00–10:00 AM", subject: "Physiology (Tutorial-A)" },
+          { time: "10:00–11:00 AM", subject: "Biochemistry Lecture (LG-II)" },
+          { time: "11:30 AM–12:30 PM", subject: "Generic topic / Anatomy tutorial (LG-I)" },
+          { time: "12:30–2:30 PM", subject: "Anatomy Histology-A" }
+        ],
+        "Sunday": [
+          { time: "8:00–10:00 AM", subject: "Anatomy Histology-B" },
+          { time: "10:00–11:00 AM", subject: "Physiology Lecture (LG-I)" },
+          { time: "11:30 AM–12:30 PM", subject: "Anatomy Lecture (LG-II)" },
+          { time: "12:30–2:30 PM", subject: "Physiology (Practical-A)" }
+        ],
+        "Monday": [
+          { time: "8:00–10:00 AM", subject: "Physiology (Tutorial-A)" },
+          { time: "10:00–11:00 AM", subject: "Anatomy Lecture (LG-I)" },
+          { time: "11:30 AM–12:30 PM", subject: "Biochemistry Lecture (LG-II)" },
+          { time: "12:30–2:30 PM", subject: "Physiology (Practical-A)" }
+        ],
+        "Tuesday": [
+          { time: "8:00–10:00 AM", subject: "Physiology (Tutorial-A)" },
+          { time: "10:00–11:00 AM", subject: "Anatomy Lecture (LG-I)" },
+          { time: "11:30 AM–12:30 PM", subject: "Biochemistry Lecture (LG-II)" },
+          { time: "12:30–2:30 PM", subject: "Anatomy Dissection-A" }
+        ],
+        "Wednesday": [
+          { time: "8:00–10:00 AM", subject: "Physiology (Tutorial-A)" },
+          { time: "10:00–11:00 AM", subject: "Anatomy Lecture (LG-I)" },
+          { time: "11:30 AM–12:30 PM", subject: "Physiology Lecture (LG-II)" },
+          { time: "12:30–2:30 PM", subject: "Anatomy Dissection-A" }
+        ],
+        "Thursday": [
+          { time: "8:00–10:00 AM", subject: "Physiology (Tutorial-C)" },
+          { time: "10:00–11:00 AM", subject: "Physiology or Biochem Lecture (LG-I)" },
+          { time: "11:30 AM–12:30 PM", subject: "Anatomy Tutorial (Batch A–D)" },
+          { time: "12:30–2:30 PM", subject: "Anatomy Dissection-A" }
+        ]
+      },
+      "B": {
+        // Just copy similar to A but with your own B schedule if needed
+      },
+      "C": {
+        "Saturday": [
+          { time: "8:00–10:00 AM", subject: "Biochemistry Tutorial" },
+          { time: "10:00–11:00 AM", subject: "Biochemistry Lecture (LG-II)" },
+          { time: "11:30 AM–12:30 PM", subject: "Generic topic / Anatomy Tutorial (LG-I)" },
+          { time: "12:30–2:30 PM", subject: "Anatomy Dissection" }
+        ],
+        "Sunday": [
+          { time: "8:00–10:00 AM", subject: "Anatomy Dissection" },
+          { time: "10:00–11:00 AM", subject: "Physiology Lecture (LG-II)" },
+          { time: "11:30 AM–12:30 PM", subject: "Anatomy Lecture (LG-II) (Rayhan Sir)" },
+          { time: "12:30–2:30 PM", subject: "Physiology Tutorial" }
+        ],
+        "Monday": [
+          { time: "8:00–10:00 AM", subject: "Biochemistry Practical" },
+          { time: "10:00–11:00 AM", subject: "Anatomy Lecture (LG-II)" },
+          { time: "11:30 AM–12:30 PM", subject: "Biochemistry Lecture (LG-II)" },
+          { time: "12:30–2:30 PM", subject: "Anatomy Dissection" }
+        ],
+        "Tuesday": [
+          { time: "8:00–10:00 AM", subject: "Anatomy Histology" },
+          { time: "10:00–11:00 AM", subject: "Physiology Lecture (LG-II)" },
+          { time: "11:30 AM–12:30 PM", subject: "Biochemistry Lecture (LG-II)" },
+          { time: "12:30–2:30 PM", subject: "Physiology Practical" }
+        ],
+        "Wednesday": [
+          { time: "8:00–10:00 AM", subject: "Biochemistry Tutorial" },
+          { time: "10:00–11:00 AM", subject: "Anatomy Lecture (LG-II)" },
+          { time: "11:30 AM–12:30 PM", subject: "Physiology Lecture (LG-II)" },
+          { time: "12:30–2:30 PM", subject: "Anatomy Dissection" }
+        ],
+        "Thursday": [
+          { time: "8:00–10:00 AM", subject: "Anatomy Dissection" },
+          { time: "10:00–11:00 AM", subject: "Anatomy Tutorial (Batch A–D)" },
+          { time: "11:30 AM–12:30 PM", subject: "Physiology Lecture (LG-II)" },
+          { time: "12:30–2:30 PM", subject: "Physiology Tutorial" }
+        ]
+      },
+      "D": {
+        // Add your own values for D if needed
+      }
+    };
+
+    // Custom dropdown logic
+    const nativeSelect = document.getElementById('batchSelect');
+    const customDropdown = document.querySelector('.custom-dropdown');
+    const selected = customDropdown.querySelector('.custom-dropdown__selected');
+    const optionsContainer = customDropdown.querySelector('.custom-dropdown__options');
+    const options = optionsContainer.querySelectorAll('.custom-dropdown__option');
+
+    function closeDropdown() {
+      customDropdown.classList.remove('open');
+      customDropdown.setAttribute('aria-expanded', 'false');
+      // Remove highlight from all options
+      options.forEach(o => o.classList.remove('highlighted'));
+    }
+
+    function openDropdown() {
+      customDropdown.classList.add('open');
+      customDropdown.setAttribute('aria-expanded', 'true');
+    }
+
+    // Toggle dropdown on click
+    selected.addEventListener('click', () => {
+      if (customDropdown.classList.contains('open')) {
+        closeDropdown();
+      } else {
+        openDropdown();
+      }
+    });
+
+    // Close dropdown if clicked outside
+    document.addEventListener('click', (e) => {
+      if (!customDropdown.contains(e.target)) {
+        closeDropdown();
+      }
+    });
+
+    // Option click event
+    options.forEach(option => {
+      option.addEventListener('click', () => {
+        const value = option.getAttribute('data-value');
+        selectOption(value);
+        closeDropdown();
+      });
+
+      // Keyboard nav for options
+      option.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          option.click();
+        }
+      });
+    });
+
+    // Keyboard nav for the dropdown itself
+    customDropdown.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        openDropdown();
+        // Highlight first or last option based on key
+        const highlighted = optionsContainer.querySelector('.highlighted');
+        if (!highlighted) {
+          if (e.key === 'ArrowDown') {
+            options[0].classList.add('highlighted');
+            options[0].focus();
+          } else {
+            options[options.length - 1].classList.add('highlighted');
+            options[options.length - 1].focus();
+          }
+        } else {
+          let idx = Array.from(options).indexOf(highlighted);
+          highlighted.classList.remove('highlighted');
+          if (e.key === 'ArrowDown') {
+            idx = (idx + 1) % options.length;
+          } else {
+            idx = (idx - 1 + options.length) % options.length;
+          }
+          options[idx].classList.add('highlighted');
+          options[idx].focus();
+        }
+      } else if (e.key === 'Escape') {
+        closeDropdown();
+        selected.focus();
+      }
+    });
+
+    function selectOption(value) {
+      // Update native select
+      nativeSelect.value = value;
+      // Update custom dropdown display text
+      selected.textContent = value;
+      // Add arrow span back
+      const arrowSpan = document.createElement('span');
+      arrowSpan.classList.add('custom-dropdown__arrow');
+      selected.appendChild(arrowSpan);
+      // Update aria-selected in options
+      options.forEach(o => {
+        if (o.getAttribute('data-value') === value) {
+          o.setAttribute('aria-selected', 'true');
+        } else {
+          o.removeAttribute('aria-selected');
+        }
+      });
+      // Update routine content
+      updateRoutine();
+    }
+
+    // Initial load
+    selectOption(nativeSelect.value);
+
+    // Also update routine on native select change (if ever)
+    nativeSelect.addEventListener('change', () => {
+      selectOption(nativeSelect.value);
+    });
+
+    // Your existing routine update function
+    function updateRoutine() {
+      const batch = nativeSelect.value;
+      const now = new Date();
+      let dayIndex = now.getDay();
+      if (now.getHours() >= 18) {
+        dayIndex = (dayIndex + 1) % 7;
+      }
+
+      const dayNames = [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+      ];
+      const todayName = dayNames[dayIndex];
+      const titleText =
+        now.getHours() >= 18
+          ? `Tomorrow's (${todayName}) Routine`
+          : `Today is ${todayName}`;
+      document.getElementById('todayTitle').innerText = titleText;
+
+      const container = document.getElementById('routineContainer');
+      container.innerHTML = '';
+
+      const routine =
+        routines[batch][todayName] || [
+          { time: '-', subject: 'No classes today! Just enjoy your life 😄' },
+        ];
+      routine.forEach((item) => {
+        const div = document.createElement('div');
+        div.className = 'time-slot';
+        div.innerHTML = `<div class="time">${item.time}</div><div class="subject">${item.subject}</div>`;
+        container.appendChild(div);
+      });
+    }
+  </script>
+</body>
+
+</html>

@@ -6,34 +6,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
     integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-  <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="path/to/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
-    integrity="sha512-JcPdbabLqdpnjx3qX+IUnyW2dV78N+9XzoPJSiHFgI5Li/2mMu3+9D10iI4oRxTyl2wJyH0qmZOMp3yAgiZSmg=="
-    crossorigin="anonymous">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="custom-styles.css">
 
   <title>Education</title>
 </head>
 
 <body class="fonty">
 
-  <nav class="navbar navbar-expand-lg navbar-white fixed-top bg-white shadow">
-    <a class="navbar-brand mr-5 ml-2" href="#">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-white fixed-top bg-white shadow">
+    <a class="navbar-brand mr-5" href="#">
       <img src="img/mainlogo.png" alt="" srcset="" width="70">
     </a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
-      aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarCollapse">
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item ">
-          <a class="nav-link active" href="index.html">Home <span class="sr-only">(current)</span></a>
+          <a class="nav-link active" href="index.html">Home</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="Syllabus.html">Syllabus</a>
@@ -47,16 +43,30 @@
         <li class="nav-item">
           <a class="nav-link" href="About.html">About</a>
         </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
+            Tools<a class="text-gray">(Beta)</a>
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="speechAI.html">Speech AI</a>
+            <a class="dropdown-item" href="swebcamera.html">Ip Webcam</a>
+            <a class="dropdown-item" href="liveCamera.html">Live Camera</a>
+            <a class="dropdown-item" href="nfc.html">Nfc</a>
+            <a class="dropdown-item" href="openworld.html">Open World</a>
+            <a class="dropdown-item" href="maq2024.html">MAQ</a>
+          </div>
+        </li>
       </ul>
-      <form class="form-inline mt-2 mt-md-0">
-        <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
-        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+      <form class="form-inline my-2 my-lg-0">
+        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+        <button class="btn btn-search my-2 my-sm-0" type="submit">Search</button>
       </form>
     </div>
   </nav>
   <main role="main" class="container-fluid p-0">
 
-    <div class=" justify-content-around">
+    <div class="caro1 justify-content-around">
       <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
         <ol class="carousel-indicators">
           <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
@@ -162,7 +172,6 @@
     <hr>
   </main>
 
-
   <div class="container-fluid">
     <footer class="text-center text-lg-start bg-body-tertiary text-muted">
       <section class="">
@@ -234,10 +243,7 @@
           </div>
         </div>
       </section>
-      <div class="footer-copyright text-center py-3" style="background-color: rgba(0, 0, 0, 0.05);">
-        <sup>©</sup> 2024 Copyright
-        <a class="text-reset fw-bold" href="#!"><b>Abid All Nafish</b></a>
-      </div>
+
     </footer>
   </div>
 
@@ -258,4 +264,5 @@
     AOS.init();
   </script>
 </body>
+
 </html>

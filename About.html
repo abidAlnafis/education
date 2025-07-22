@@ -6,26 +6,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
     integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-  <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="custom-styles.css">
   <title>Education</title>
 </head>
 
 <body class="fonty">
 
 
-  <nav class="navbar navbar-expand-md navbar-white fixed-top bg-white shadow ">
-    <a class="navbar-brand mr-5 ml-2" href="#">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-white fixed-top bg-white shadow">
+    <a class="navbar-brand mr-5" href="#">
       <img src="img/mainlogo.png" alt="" srcset="" width="70">
     </a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
-      aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarCollapse">
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item ">
           <a class="nav-link" href="index.html">Home <span class="sr-only">(current)</span></a>
@@ -42,39 +43,49 @@
         <li class="nav-item">
           <a class="nav-link active" href="About.html">About</a>
         </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
+            Tools<a class="text-gray">(Beta)</a>
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="speechAI.html">Speech AI</a>
+            <a class="dropdown-item" href="swebcamera.html">Ip Webcam</a>
+            <a class="dropdown-item" href="liveCamera.html">Live Camera</a>
+            <a class="dropdown-item" href="nfc.html">Nfc</a>
+            <a class="dropdown-item" href="openworld.html">Open World</a>
+            <a class="dropdown-item" href="maq2024.html">MAQ</a>
+          </div>
+        </li>
       </ul>
-      <form class="form-inline mt-2 mt-md-0">
-        <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
-        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+      <form class="form-inline my-2 my-lg-0">
+        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+        <button class="btn btn-search my-2 my-sm-0" type="submit">Search</button>
       </form>
     </div>
   </nav>
   <br><br>
-  <div class="container">
-    <div class="row">
-      <div class="col">
-        <img src="img/about.png" alt="" class="w-100">
-      </div>
-      <div class="col"><br><br>
-        <h2>
-          About Us
-        </h2>
-        <div class="line-height">
-          <p class="text-justify" style="margin-right: 50px; font-size: 15px;">
-            Welcome to Education BD, where education meets innovation. Founded in 2020, our mission is to provide a
-            dynamic and engaging learning environment that empowers individuals to thrive academically. Our team,
-            comprised
-            of experienced educators and passionate professionals, is dedicated to delivering high-quality courses that
-            blend traditional knowledge with cutting-edge insights. With a commitment to excellence, we aim to inspire a
-            love for learning and equip our learners with the skills they need for success. Explore our diverse range of
-            courses and join us on a journey of knowledge and growth.
-          </p>
+  <div class="container py-5 mt-4">
+    <div class="container">
+      <div class="row g-5">
+        <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s" style="min-height: 400px;">
+          <div class="position-relative h-100">
+            <img class="img-fluid position-absolute w-100 h-100" src="img/about.png" alt="" style="object-fit: cover;">
+          </div>
+        </div>
+        <div class="col-lg-6 wow fadeInUp text-center" data-wow-delay="0.3s">
+          <h1 class="mb-4 mt-4 text-center">About Us</h1>
+          <p class="text-justify fs-5">Welcome to Education BD, where education meets innovation. Founded in 2020, our
+            mission is to provide a dynamic and engaging learning environment that empowers individuals to thrive
+            academically. Our team, comprised of experienced educators and passionate professionals, is dedicated to
+            delivering high-quality courses that blend traditional knowledge with cutting-edge insights. With a
+            commitment to excellence, we aim to inspire a love for learning and equip our learners with the skills they
+            need for success. Explore our diverse range of courses and join us on a journey of knowledge and growth.</p>
         </div>
       </div>
     </div>
-    <hr>
   </div>
-
+  <hr>
   <div class="container-fluid">
     <footer class="text-center text-lg-start bg-body-tertiary text-muted">
       <section class="">
@@ -146,13 +157,13 @@
           </div>
         </div>
       </section>
-      <div class="footer-copyright text-center py-3" style="background-color: rgba(0, 0, 0, 0.05);">
-        <sup>©</sup> 2024 Copyright
-        <a class="text-reset fw-bold" href="#!"><b>Abid All Nafish</b></a>
-      </div>
+
     </footer>
   </div>
-
+  <div class="footer-copyright text-center py-3 text-muted fonty" style="background-color: rgba(0, 0, 0, 0.164);">
+    <sup>©</sup> 2024 Copyright
+    <a class="text-reset fw-bold" href="#!"><b>Abid All Nafish</b></a>
+  </div>
   <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
     integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
     crossorigin="anonymous"></script>

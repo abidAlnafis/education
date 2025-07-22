@@ -135,3 +135,6 @@ button {
 #loading-container {
   text-align: center;
 }
+.fixed-top{
+  position: fixed !important;
+}

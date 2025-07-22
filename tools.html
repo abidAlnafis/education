@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Websites</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+        }
+        .btn {
+            display: block;
+            width: 200px;
+            padding: 15px;
+            margin: 10px auto;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background: #ff5722;
+            border-radius: 10px;
+            transition: 0.3s;
+        }
+        .btn:hover {
+            background: #e64a19;
+            transform: scale(1.1);
+        }
+        @media (max-width: 600px) {
+            .btn {
+                width: 150px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="color: white;">My Websites</h1>
+        <a href="https://example1.com" class="btn" target="_blank">Website 1</a>
+        <a href="https://example2.com" class="btn" target="_blank">Website 2</a>
+        <a href="https://example3.com" class="btn" target="_blank">Website 3</a>
+        <a href="https://example4.com" class="btn" target="_blank">Website 4</a>
+        <a href="https://example5.com" class="btn" target="_blank">Website 5</a>
+    </div>
+</body>
+</html>
