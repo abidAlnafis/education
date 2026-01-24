@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fun Encrypted Chat (Custom Auth)</title>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    body { margin:0; font-family: Arial, sans-serif; background:#f0f2f5; }
+    #login, #chat { height:100vh; display:none; }
+    #login { display:flex; align-items:center; justify-content:center; }
+    .box { background:#fff; padding:30px; border-radius:8px; width:320px; box-shadow:0 0 10px #ccc; }
+    input, button { width:100%; padding:10px; margin-top:10px; font-size:16px; box-sizing: border-box; }
+    button { background:#0084ff; color:#fff; border:none; cursor:pointer; }
+    button:hover { background:#006ad1; }
+    #chat { display:flex; }
+    .users { width:220px; background:#fff; border-right:1px solid #ddd; overflow-y:auto; }
+    .users div { padding:15px; cursor:pointer; border-bottom:1px solid #eee; user-select:none; }
+    .users div:hover { background:#f5f5f5; }
+    .users .selected { background:#0084ff; color:#fff; }
+    .chatbox { flex:1; display:flex; flex-direction:column; background:#fff; }
+    .messages { flex:1; padding:15px; overflow-y:auto; }
+    .msg { padding:10px; margin-bottom:10px; max-width:60%; border-radius:12px; word-wrap: break-word; }
+    .me { background:#0084ff; color:#fff; margin-left:auto; border-bottom-right-radius:2px; }
+    .other { background:#e4e6eb; border-bottom-left-radius:2px; }
+    .input { display:flex; padding:10px; background:#fff; border-top:1px solid #ddd; }
+    .input input {
+  flex: 1;                      /* fill available width */
+  font-size: 18px;              /* bigger text */
+  padding: 12px 20px;           /* more padding */
+  border: 1px solid #ccc;
+  border-radius: 25px;
+  outline: none;
+  background: white !important; /* ensure white background */
+  color: black !important;      /* ensure black text */
+  pointer-events: auto !important;
+  user-select: text !important;
+  position: relative !important;
+  z-index: 1000 !important;
+  box-sizing: border-box;
+  min-height: 44px;             /* make input taller */
+  line-height: 1.3;
+}
+
+    .input button { margin-left:10px; padding:10px 20px; border-radius:20px; }
+    .header { padding:15px; border-bottom:1px solid #ddd; font-weight:bold; background:#fafafa; user-select:none; }
+  </style>
+</head>
+<body>
+
+<div id="login">
+  <div class="box">
+    <h2>Login or Register</h2>
+    <input id="email" placeholder="Email" type="email" autocomplete="username" />
+    <input id="password" placeholder="Password" type="password" autocomplete="current-password" />
+    <button id="loginBtn">Login / Register</button>
+  </div>
+</div>
+
+<div id="chat">
+  <div class="users" id="users"></div>
+  <div class="chatbox">
+    <div class="header" id="chatHeader">Select a user to chat</div>
+    <div class="messages" id="messages"></div>
+    <div class="input" id="inputArea" style="display:none;">
+        <input id="msgInput" placeholder="Type your message..." autocomplete="off" tabindex="0" />
+      <button id="sendBtn">Send</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // --- Firebase config (replace with YOUR config) ---
+  const firebaseConfig = {
+    apiKey: "AIzaSyDEdvwTvt-tSuWt5cJN5vInxWhm5gCuefo",
+    authDomain: "cryptchat-web.firebaseapp.com",
+    projectId: "cryptchat-web",
+    storageBucket: "cryptchat-web.firebasestorage.app",
+    messagingSenderId: "612397008475",
+    appId: "1:612397008475:web:17895e97044d57544da17e"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  // --- Global variables ---
+  let currentUser = null;     // current logged in user doc data
+  let currentUserId = null;   // current logged in user doc id
+  let selectedChatUser = null; // user you chat with (object with id & email)
+  let cryptoKey = null;       // AES-GCM key for encrypt/decrypt
+
+  // --- Utility: generate/import key once ---
+  async function getKey() {
+    if (cryptoKey) return cryptoKey;
+    const enc = new TextEncoder();
+    const keyMaterial = enc.encode(currentUserId || "default");
+    cryptoKey = await crypto.subtle.importKey(
+      "raw", keyMaterial, {name:"AES-GCM"}, false, ["encrypt","decrypt"]);
+    return cryptoKey;
+  }
+
+  // --- Encrypt message ---
+  async function encryptMessage(text) {
+    const key = await getKey();
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const encoded = new TextEncoder().encode(text);
+    const cipher = await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, encoded);
+    return { cipher: Array.from(new Uint8Array(cipher)), iv: Array.from(iv) };
+  }
+
+  // --- Decrypt message ---
+  async function decryptMessage(cipherArray, ivArray) {
+    const key = await getKey();
+    const cipher = new Uint8Array(cipherArray);
+    const iv = new Uint8Array(ivArray);
+    try {
+      const decrypted = await crypto.subtle.decrypt({name:"AES-GCM", iv}, key, cipher);
+      return new TextDecoder().decode(decrypted);
+    } catch(e) {
+      return "[decryption failed]";
+    }
+  }
+
+  // --- UI Elements ---
+  const loginDiv = document.getElementById("login");
+  const chatDiv = document.getElementById("chat");
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
+  const loginBtn = document.getElementById("loginBtn");
+  const usersDiv = document.getElementById("users");
+  const chatHeader = document.getElementById("chatHeader");
+  const messagesDiv = document.getElementById("messages");
+  const inputArea = document.getElementById("inputArea");
+  const msgInput = document.getElementById("msgInput");
+  const sendBtn = document.getElementById("sendBtn");
+
+  // --- Login or Register ---
+  loginBtn.onclick = async () => {
+    const email = emailInput.value.trim().toLowerCase();
+    const password = passwordInput.value;
+    if (!email || !password) {
+      alert("Please enter email and password.");
+      return;
+    }
+
+    // Check if user exists
+    const userQuery = await db.collection("users").where("email", "==", email).get();
+    if (!userQuery.empty) {
+      // User exists: check password
+      const userDoc = userQuery.docs[0];
+      const userData = userDoc.data();
+      if (userData.password !== password) {
+        alert("Incorrect password.");
+        return;
+      }
+      currentUserId = userDoc.id;
+      currentUser = userData;
+      afterLogin();
+    } else {
+      // Register new user
+      const newUser = await db.collection("users").add({ email, password });
+      currentUserId = newUser.id;
+      currentUser = { email, password };
+      alert("Registered and logged in!");
+      afterLogin();
+    }
+  };
+
+  // --- After login setup ---
+  function afterLogin() {
+    loginDiv.style.display = "none";
+    chatDiv.style.display = "flex";
+    loadUsersList();
+  }
+
+  // --- Load users except current ---
+  function loadUsersList() {
+    db.collection("users").onSnapshot(snapshot => {
+      usersDiv.innerHTML = "";
+      snapshot.forEach(doc => {
+        if (doc.id === currentUserId) return; // skip yourself
+        const user = doc.data();
+        const div = document.createElement("div");
+        div.textContent = user.email;
+        div.dataset.id = doc.id;
+        div.onclick = () => selectUser(doc.id, user.email, div);
+        if (selectedChatUser && selectedChatUser.id === doc.id) {
+          div.classList.add("selected");
+        }
+        usersDiv.appendChild(div);
+      });
+    });
+  }
+
+  // --- Select user to chat ---
+  function selectUser(id, email, div) {
+    selectedChatUser = { id, email };
+    chatHeader.textContent = `Chat with ${email} 🔒 End-to-End Encrypted`;
+    inputArea.style.display = "flex";
+    Array.from(usersDiv.children).forEach(c => c.classList.remove("selected"));
+    div.classList.add("selected");
+    loadMessages();
+    msgInput.focus();  // Focus input on user select
+  }
+
+  // --- Compose chat ID (sorted user IDs) ---
+  function chatId() {
+    return [currentUserId, selectedChatUser.id].sort().join("_");
+  }
+
+  // --- Load messages and listen ---
+  let unsubscribeMessages = null;
+  function loadMessages() {
+    if (unsubscribeMessages) unsubscribeMessages();
+    messagesDiv.innerHTML = "";
+
+    unsubscribeMessages = db.collection("chats").doc(chatId())
+      .collection("msgs").orderBy("timestamp")
+      .onSnapshot(async snapshot => {
+        messagesDiv.innerHTML = "";
+        for (const doc of snapshot.docs) {
+          const data = doc.data();
+          const decrypted = await decryptMessage(data.cipher, data.iv);
+          const div = document.createElement("div");
+          div.className = "msg " + (data.sender === currentUserId ? "me" : "other");
+          div.textContent = decrypted;
+          messagesDiv.appendChild(div);
+          messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+      });
+  }
+
+  // --- Send message ---
+  sendBtn.onclick = async () => {
+    const text = msgInput.value.trim();
+    if (!text || !selectedChatUser) return;
+    const encrypted = await encryptMessage(text);
+    await db.collection("chats").doc(chatId()).collection("msgs").add({
+      sender: currentUserId,
+      cipher: encrypted.cipher,
+      iv: encrypted.iv,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    msgInput.value = "";
+    msgInput.focus();
+  };
+
+  // --- Start with login visible ---
+  loginDiv.style.display = "flex";
+</script>
+</body>
+</html>
