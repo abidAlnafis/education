@@ -14,34 +14,43 @@ body { margin:0; font-family:Arial; background:#f0f2f5 }
 #login,#chat { height:100vh; display:none }
 #login { display:flex; align-items:center; justify-content:center }
 .box { background:#fff; padding:30px; width:320px; border-radius:8px; box-shadow:0 0 10px #ccc }
-input,button { width:100%; padding:10px; margin-top:10px; font-size:16px }
-button { background:#0084ff; color:#fff; border:none }
+input,button { width:100%; padding:10px; margin-top:10px; font-size:16px; box-sizing:border-box }
+button { background:#0084ff; color:#fff; border:none; cursor:pointer }
 #chat { display:flex }
 .users { width:220px; background:#fff; border-right:1px solid #ddd; overflow:auto }
 .users div { padding:15px; cursor:pointer; border-bottom:1px solid #eee }
+.users div:hover { background:#f5f5f5 }
 .users .selected { background:#0084ff; color:white }
 .chatbox { flex:1; display:flex; flex-direction:column; background:white }
 .header { padding:15px; border-bottom:1px solid #ddd; font-weight:bold }
 .messages { flex:1; padding:15px; overflow:auto }
-.msg { padding:10px; margin-bottom:10px; max-width:60%; border-radius:12px }
+.msg { padding:10px; margin-bottom:10px; max-width:60%; border-radius:12px; word-wrap:break-word }
 .me { background:#0084ff; color:white; margin-left:auto }
 .other { background:#e4e6eb }
 .input { display:flex; padding:10px; border-top:1px solid #ddd }
-.input input { flex:1; font-size:18px; padding:12px 20px; border-radius:25px }
+.input input {
+  flex:1;
+  font-size:18px;
+  padding:12px 20px;
+  border-radius:25px;
+  border:1px solid #ccc;
+}
 .input button { margin-left:10px; border-radius:20px }
 </style>
 </head>
 <body>
 
+<!-- LOGIN -->
 <div id="login">
   <div class="box">
     <h2>Login / Register</h2>
-    <input id="email" placeholder="Email">
+    <input id="email" type="email" placeholder="Email">
     <input id="password" type="password" placeholder="Password">
     <button id="loginBtn">Continue</button>
   </div>
 </div>
 
+<!-- CHAT -->
 <div id="chat">
   <div class="users" id="users"></div>
   <div class="chatbox">
@@ -86,7 +95,7 @@ async function getKey() {
   cryptoKey = await crypto.subtle.deriveKey(
     {
       name: "PBKDF2",
-      salt: enc.encode("chat-salt"),
+      salt: enc.encode("chat-app-salt"),
       iterations: 100000,
       hash: "SHA-256"
     },
@@ -98,7 +107,7 @@ async function getKey() {
   return cryptoKey;
 }
 
-async function encrypt(text) {
+async function encryptMessage(text) {
   const key = await getKey();
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const data = new TextEncoder().encode(text);
@@ -106,7 +115,7 @@ async function encrypt(text) {
   return { c:[...new Uint8Array(cipher)], iv:[...iv] };
 }
 
-async function decrypt(c, iv) {
+async function decryptMessage(c, iv) {
   try {
     const key = await getKey();
     const data = await crypto.subtle.decrypt(
@@ -120,18 +129,31 @@ async function decrypt(c, iv) {
   }
 }
 
-/* ---------------- Login ---------------- */
+/* ---------------- Login / Register ---------------- */
 loginBtn.onclick = async () => {
-  const email = email.value.trim().toLowerCase();
-  const pass = password.value;
-  if (!email || !pass) return alert("Fill all");
+  const emailVal = document.getElementById("email").value.trim().toLowerCase();
+  const passVal  = document.getElementById("password").value;
 
-  const q = await db.collection("users").where("email","==",email).get();
+  if (!emailVal || !passVal) {
+    alert("Fill all fields");
+    return;
+  }
+
+  const q = await db.collection("users")
+    .where("email", "==", emailVal)
+    .get();
+
   if (!q.empty) {
-    if (q.docs[0].data().password !== pass) return alert("Wrong password");
+    if (q.docs[0].data().password !== passVal) {
+      alert("Wrong password");
+      return;
+    }
     currentUserId = q.docs[0].id;
   } else {
-    const u = await db.collection("users").add({ email, password: pass });
+    const u = await db.collection("users").add({
+      email: emailVal,
+      password: passVal
+    });
     currentUserId = u.id;
   }
 
@@ -157,7 +179,7 @@ function loadUsers() {
 function selectUser(id, email, el) {
   selectedChatUser = { id, email };
   cryptoKey = null;
-  chatHeader.textContent = "Chat with " + email;
+  chatHeader.textContent = "Chat with " + email + " 🔒";
   inputArea.style.display = "flex";
   [...users.children].forEach(c => c.classList.remove("selected"));
   el.classList.add("selected");
@@ -178,7 +200,7 @@ function loadMessages() {
       messages.innerHTML = "";
       for (const d of s.docs) {
         const m = d.data();
-        const text = await decrypt(m.c, m.iv);
+        const text = await decryptMessage(m.c, m.iv);
         const div = document.createElement("div");
         div.className = "msg " + (m.sender === currentUserId ? "me":"other");
         div.textContent = text;
@@ -191,8 +213,9 @@ function loadMessages() {
 /* ---------------- Send ---------------- */
 sendBtn.onclick = async () => {
   const text = msgInput.value.trim();
-  if (!text) return;
-  const e = await encrypt(text);
+  if (!text || !selectedChatUser) return;
+
+  const e = await encryptMessage(text);
   await db.collection("chats").doc(chatId())
     .collection("msgs").add({
       sender: currentUserId,
@@ -200,12 +223,16 @@ sendBtn.onclick = async () => {
       iv: e.iv,
       time: firebase.firestore.FieldValue.serverTimestamp()
     });
+
   msgInput.value = "";
   msgInput.focus();
 };
 
 msgInput.addEventListener("keydown", e => {
-  if (e.key === "Enter") sendBtn.click();
+  if (e.key === "Enter") {
+    e.preventDefault();
+    sendBtn.click();
+  }
 });
 
 /* ---------------- Start ---------------- */
