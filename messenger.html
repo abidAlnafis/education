@@ -1,15 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<<<<<<< HEAD
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>বাংলা মেসেঞ্জার</title>
+=======
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Encrypted Chat</title>
+>>>>>>> e395bb40245a93f33ba80760a6392be8c127312f
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <style>
+<<<<<<< HEAD
    /* Reset & base */
    html, body {
     margin: 0;
@@ -258,10 +265,39 @@
     background-color: rgba(0,0,0,0.1);
     border-radius: 4px;
   }
+=======
+body { margin:0; font-family:Arial; background:#f0f2f5 }
+#login,#chat { height:100vh; display:none }
+#login { display:flex; align-items:center; justify-content:center }
+.box { background:#fff; padding:30px; width:320px; border-radius:8px; box-shadow:0 0 10px #ccc }
+input,button { width:100%; padding:10px; margin-top:10px; font-size:16px; box-sizing:border-box }
+button { background:#0084ff; color:#fff; border:none; cursor:pointer }
+#chat { display:flex }
+.users { width:220px; background:#fff; border-right:1px solid #ddd; overflow:auto }
+.users div { padding:15px; cursor:pointer; border-bottom:1px solid #eee }
+.users div:hover { background:#f5f5f5 }
+.users .selected { background:#0084ff; color:white }
+.chatbox { flex:1; display:flex; flex-direction:column; background:white }
+.header { padding:15px; border-bottom:1px solid #ddd; font-weight:bold }
+.messages { flex:1; padding:15px; overflow:auto }
+.msg { padding:10px; margin-bottom:10px; max-width:60%; border-radius:12px; word-wrap:break-word }
+.me { background:#0084ff; color:white; margin-left:auto }
+.other { background:#e4e6eb }
+.input { display:flex; padding:10px; border-top:1px solid #ddd }
+.input input {
+  flex:1;
+  font-size:18px;
+  padding:12px 20px;
+  border-radius:25px;
+  border:1px solid #ccc;
+}
+.input button { margin-left:10px; border-radius:20px }
+>>>>>>> e395bb40245a93f33ba80760a6392be8c127312f
 </style>
 </head>
 <body>
 
+<<<<<<< HEAD
 <!-- HOME -->
 <div id="home">
   বাংলা মেসেঞ্জার
@@ -281,12 +317,19 @@
   ">Get Started</button>
 </div>
 
+=======
+>>>>>>> e395bb40245a93f33ba80760a6392be8c127312f
 <!-- LOGIN -->
 <div id="login">
   <div class="box">
     <h2>Login / Register</h2>
+<<<<<<< HEAD
     <input id="email" type="email" placeholder="Email" />
     <input id="password" type="password" placeholder="Password" />
+=======
+    <input id="email" type="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+>>>>>>> e395bb40245a93f33ba80760a6392be8c127312f
     <button id="loginBtn">Continue</button>
   </div>
 </div>
@@ -298,8 +341,12 @@
     <div class="header" id="chatHeader">Select a user</div>
     <div class="messages" id="messages"></div>
     <div class="input" id="inputArea" style="display:none">
+<<<<<<< HEAD
       <input id="msgInput" class="msgInput" type="text" placeholder="Type message..." autocomplete="off" />
       <input type="file" id="fileInput" class="file-upload" />
+=======
+      <input id="msgInput" placeholder="Type message...">
+>>>>>>> e395bb40245a93f33ba80760a6392be8c127312f
       <button id="sendBtn">Send</button>
     </div>
   </div>
@@ -318,7 +365,10 @@ const db = firebase.firestore();
 let currentUserId = null;
 let selectedChatUser = null;
 let cryptoKey = null;
+<<<<<<< HEAD
 let unsubscribeMessages = null;
+=======
+>>>>>>> e395bb40245a93f33ba80760a6392be8c127312f
 
 /* ---------------- Encryption ---------------- */
 async function getKey() {
@@ -367,12 +417,17 @@ async function decryptMessage(c, iv) {
       new Uint8Array(c)
     );
     return new TextDecoder().decode(data);
+<<<<<<< HEAD
   } catch (e) {
     console.error("Decrypt failed for c:", c, "iv:", iv, e);
+=======
+  } catch {
+>>>>>>> e395bb40245a93f33ba80760a6392be8c127312f
     return "[decrypt failed]";
   }
 }
 
+<<<<<<< HEAD
 /* ---------------- Homepage -> Login transition ---------------- */
 const home = document.getElementById("home");
 const login = document.getElementById("login");
@@ -392,10 +447,19 @@ loginBtn.onclick = async () => {
   const p = password.value;
 
   if (!e || !p) {
+=======
+/* ---------------- Login / Register ---------------- */
+loginBtn.onclick = async () => {
+  const emailVal = document.getElementById("email").value.trim().toLowerCase();
+  const passVal  = document.getElementById("password").value;
+
+  if (!emailVal || !passVal) {
+>>>>>>> e395bb40245a93f33ba80760a6392be8c127312f
     alert("Fill all fields");
     return;
   }
 
+<<<<<<< HEAD
   try {
     const snap = await db.collection("users").where("email", "==", e).get();
 
@@ -424,9 +488,28 @@ loginBtn.onclick = async () => {
   } catch (err) {
     console.error("LOGIN ERROR:", err);
     alert("Login failed. Check console.");
+=======
+  const q = await db.collection("users")
+    .where("email", "==", emailVal)
+    .get();
+
+  if (!q.empty) {
+    if (q.docs[0].data().password !== passVal) {
+      alert("Wrong password");
+      return;
+    }
+    currentUserId = q.docs[0].id;
+  } else {
+    const u = await db.collection("users").add({
+      email: emailVal,
+      password: passVal
+    });
+    currentUserId = u.id;
+>>>>>>> e395bb40245a93f33ba80760a6392be8c127312f
   }
 };
 
+<<<<<<< HEAD
 /* ---------------- Users ---------------- */
 const users = document.getElementById("users");
 const chatHeader = document.getElementById("chatHeader");
@@ -435,6 +518,14 @@ const msgInput = document.getElementById("msgInput");
 const sendBtn = document.getElementById("sendBtn");
 const messages = document.getElementById("messages");
 
+=======
+  login.style.display = "none";
+  chat.style.display = "flex";
+  loadUsers();
+};
+
+/* ---------------- Users ---------------- */
+>>>>>>> e395bb40245a93f33ba80760a6392be8c127312f
 function loadUsers() {
   db.collection("users").onSnapshot(s => {
     users.innerHTML = "";
@@ -444,6 +535,7 @@ function loadUsers() {
       div.textContent = d.data().email;
       div.onclick = () => selectUser(d.id, d.data().email, div);
       users.appendChild(div);
+<<<<<<< HEAD
     });
   });
 }
@@ -538,13 +630,67 @@ sendBtn.onclick = async () => {
     await db.collection("chats").doc(chatId()).collection("msgs").add({
       sender: currentUserId,
       type: "text",
+=======
+    });
+  });
+}
+
+function selectUser(id, email, el) {
+  selectedChatUser = { id, email };
+  cryptoKey = null;
+  chatHeader.textContent = "Chat with " + email + " 🔒";
+  inputArea.style.display = "flex";
+  [...users.children].forEach(c => c.classList.remove("selected"));
+  el.classList.add("selected");
+  loadMessages();
+  msgInput.focus();
+}
+
+/* ---------------- Messages ---------------- */
+function chatId() {
+  return [currentUserId, selectedChatUser.id].sort().join("_");
+}
+
+function loadMessages() {
+  messages.innerHTML = "";
+  db.collection("chats").doc(chatId())
+    .collection("msgs").orderBy("time")
+    .onSnapshot(async s => {
+      messages.innerHTML = "";
+      for (const d of s.docs) {
+        const m = d.data();
+        const text = await decryptMessage(m.c, m.iv);
+        const div = document.createElement("div");
+        div.className = "msg " + (m.sender === currentUserId ? "me":"other");
+        div.textContent = text;
+        messages.appendChild(div);
+      }
+      messages.scrollTop = messages.scrollHeight;
+    });
+}
+
+/* ---------------- Send ---------------- */
+sendBtn.onclick = async () => {
+  const text = msgInput.value.trim();
+  if (!text || !selectedChatUser) return;
+
+  const e = await encryptMessage(text);
+  await db.collection("chats").doc(chatId())
+    .collection("msgs").add({
+      sender: currentUserId,
+>>>>>>> e395bb40245a93f33ba80760a6392be8c127312f
       c: e.c,
       iv: e.iv,
       time: firebase.firestore.FieldValue.serverTimestamp()
     });
+<<<<<<< HEAD
     msgInput.value = "";
   }
 
+=======
+
+  msgInput.value = "";
+>>>>>>> e395bb40245a93f33ba80760a6392be8c127312f
   msgInput.focus();
 };
 
@@ -555,6 +701,7 @@ msgInput.addEventListener("keydown", e => {
   }
 });
 
+<<<<<<< HEAD
 /* ---------------- Cloudinary upload ---------------- */
 async function uploadFileToCloudinary(file) {
   const url = "https://api.cloudinary.com/v1_1/dpv173a1d/auto/upload";
@@ -587,6 +734,10 @@ async function uploadFileToCloudinary(file) {
 home.style.display = "flex";
 login.style.display = "none";
 chat.style.display = "none";
+=======
+/* ---------------- Start ---------------- */
+login.style.display = "flex";
+>>>>>>> e395bb40245a93f33ba80760a6392be8c127312f
 </script>
 </body>
 </html>
