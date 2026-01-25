@@ -1,149 +1,218 @@
-height:100vh  outline: none;
-  background: white !important; /* ensure white background */
-  color: black !important;      /* ensure black text */
-  pointer-events: auto !important;
-  user-select: text !important;
-  position: relative !important;
-  z-index: 1000 !important;
-  box-sizing: border-box;
-  min-height: 44px;             /* make input taller */
-  line-height: 1.3;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Encrypted Chat</title>
 
-    .input button { margin-left:10px; padding:10px 20px; border-radius:20px; }
-    .header { padding:15px; border-bottom:1px solid #ddd; font-weight:bold; background:#fafafa; user-select:none; }
-  </style>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<style>
+body { margin:0; font-family:Arial; background:#f0f2f5 }
+#login,#chat { height:100vh; display:none }
+#login { display:flex; align-items:center; justify-content:center }
+.box { background:#fff; padding:30px; width:320px; border-radius:8px; box-shadow:0 0 10px #ccc }
+input,button { width:100%; padding:10px; margin-top:10px; font-size:16px }
+button { background:#0084ff; color:#fff; border:none }
+#chat { display:flex }
+.users { width:220px; background:#fff; border-right:1px solid #ddd; overflow:auto }
+.users div { padding:15px; cursor:pointer; border-bottom:1px solid #eee }
+.users .selected { background:#0084ff; color:white }
+.chatbox { flex:1; display:flex; flex-direction:column; background:white }
+.header { padding:15px; border-bottom:1px solid #ddd; font-weight:bold }
+.messages { flex:1; padding:15px; overflow:auto }
+.msg { padding:10px; margin-bottom:10px; max-width:60%; border-radius:12px }
+.me { background:#0084ff; color:white; margin-left:auto }
+.other { background:#e4e6eb }
+.input { display:flex; padding:10px; border-top:1px solid #ddd }
+.input input { flex:1; font-size:18px; padding:12px 20px; border-radius:25px }
+.input button { margin-left:10px; border-radius:20px }
+</style>
 </head>
 <body>
 
 <div id="login">
   <div class="box">
-    <h2>Login or Register</h2>
-    <input id="email" placeholder="Email" type="email" autocomplete="username" />
-    <input id="password" placeholder="Password" type="password" autocomplete="current-password" />
-    <button id="loginBtn">Login / Register</button>
+    <h2>Login / Register</h2>
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <button id="loginBtn">Continue</button>
   </div>
 </div>
 
 <div id="chat">
   <div class="users" id="users"></div>
   <div class="chatbox">
-    <div class="header" id="chatHeader">Select a user to chat</div>
+    <div class="header" id="chatHeader">Select a user</div>
     <div class="messages" id="messages"></div>
-    <div class="input" id="inputArea" style="display:none;">
-        <input id="msgInput" placeholder="Type your message..." autocomplete="off" tabindex="0" />
+    <div class="input" id="inputArea" style="display:none">
+      <input id="msgInput" placeholder="Type message...">
       <button id="sendBtn">Send</button>
     </div>
   </div>
 </div>
 
 <script>
-  // --- Firebase config (replace with YOUR config) ---
-  const firebaseConfig = {
-    apiKey: "AIzaSyDEdvwTvt-tSuWt5cJN5vInxWhm5gCuefo",
-    authDomain: "cryptchat-web.firebaseapp.com",
-    projectId: "cryptchat-web",
-    storageBucket: "cryptchat-web.firebasestorage.app",
-    messagingSenderId: "612397008475",
-    appId: "1:612397008475:web:17895e97044d57544da17e"
-  };
+/* ---------------- Firebase ---------------- */
+firebase.initializeApp({
+  apiKey: "AIzaSyDEdvwTvt-tSuWt5cJN5vInxWhm5gCuefo",
+  authDomain: "cryptchat-web.firebaseapp.com",
+  projectId: "cryptchat-web"
+});
+const db = firebase.firestore();
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
+/* ---------------- Globals ---------------- */
+let currentUserId = null;
+let selectedChatUser = null;
+let cryptoKey = null;
 
-  // --- Global variables ---
-  let currentUser = null;     // current logged in user doc data
-  let currentUserId = null;   // current logged in user doc id
-  let selectedChatUser = null; // user you chat with (object with id & email)
-  let cryptoKey = null;       // AES-GCM key for encrypt/decrypt
+/* ---------------- Encryption ---------------- */
+async function getKey() {
+  if (cryptoKey) return cryptoKey;
 
-  // --- Utility: generate/import key once ---
-  async function getKey() {
-    if (cryptoKey) return cryptoKey;
-    const enc = new TextEncoder();
-    const keyMaterial = enc.encode(currentUserId || "default");
-    cryptoKey = await crypto.subtle.importKey(
-      "raw", keyMaterial, {name:"AES-GCM"}, false, ["encrypt","decrypt"]);
-    return cryptoKey;
-  }
+  const enc = new TextEncoder();
+  const secret = [currentUserId, selectedChatUser.id].sort().join(":");
 
-  // --- Encrypt message ---
-  async function encryptMessage(text) {
+  const baseKey = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(secret),
+    "PBKDF2",
+    false,
+    ["deriveKey"]
+  );
+
+  cryptoKey = await crypto.subtle.deriveKey(
+    {
+      name: "PBKDF2",
+      salt: enc.encode("chat-salt"),
+      iterations: 100000,
+      hash: "SHA-256"
+    },
+    baseKey,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt", "decrypt"]
+  );
+  return cryptoKey;
+}
+
+async function encrypt(text) {
+  const key = await getKey();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const data = new TextEncoder().encode(text);
+  const cipher = await crypto.subtle.encrypt({ name:"AES-GCM", iv }, key, data);
+  return { c:[...new Uint8Array(cipher)], iv:[...iv] };
+}
+
+async function decrypt(c, iv) {
+  try {
     const key = await getKey();
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const encoded = new TextEncoder().encode(text);
-    const cipher = await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, encoded);
-    return { cipher: Array.from(new Uint8Array(cipher)), iv: Array.from(iv) };
+    const data = await crypto.subtle.decrypt(
+      { name:"AES-GCM", iv:new Uint8Array(iv) },
+      key,
+      new Uint8Array(c)
+    );
+    return new TextDecoder().decode(data);
+  } catch {
+    return "[decrypt failed]";
+  }
+}
+
+/* ---------------- Login ---------------- */
+loginBtn.onclick = async () => {
+  const email = email.value.trim().toLowerCase();
+  const pass = password.value;
+  if (!email || !pass) return alert("Fill all");
+
+  const q = await db.collection("users").where("email","==",email).get();
+  if (!q.empty) {
+    if (q.docs[0].data().password !== pass) return alert("Wrong password");
+    currentUserId = q.docs[0].id;
+  } else {
+    const u = await db.collection("users").add({ email, password: pass });
+    currentUserId = u.id;
   }
 
-  // --- Decrypt message ---
-  async function decryptMessage(cipherArray, ivArray) {
-    const key = await getKey();
-    const cipher = new Uint8Array(cipherArray);
-    const iv = new Uint8Array(ivArray);
-    try {
-      const decrypted = await crypto.subtle.decrypt({name:"AES-GCM", iv}, key, cipher);
-      return new TextDecoder().decode(decrypted);
-    } catch(e) {
-      return "[decryption failed]";
-    }
-  }
+  login.style.display = "none";
+  chat.style.display = "flex";
+  loadUsers();
+};
 
-  // --- UI Elements ---
-  const loginDiv = document.getElementById("login");
-  const chatDiv = document.getElementById("chat");
-  const emailInput = document.getElementById("email");
-  const passwordInput = document.getElementById("password");
-  const loginBtn = document.getElementById("loginBtn");
-  const usersDiv = document.getElementById("users");
-  const chatHeader = document.getElementById("chatHeader");
-  const messagesDiv = document.getElementById("messages");
-  const inputArea = document.getElementById("inputArea");
-  const msgInput = document.getElementById("msgInput");
-  const sendBtn = document.getElementById("sendBtn");
+/* ---------------- Users ---------------- */
+function loadUsers() {
+  db.collection("users").onSnapshot(s => {
+    users.innerHTML = "";
+    s.forEach(d => {
+      if (d.id === currentUserId) return;
+      const div = document.createElement("div");
+      div.textContent = d.data().email;
+      div.onclick = () => selectUser(d.id, d.data().email, div);
+      users.appendChild(div);
+    });
+  });
+}
 
-  // --- Login or Register ---
-  loginBtn.onclick = async () => {
-    const email = emailInput.value.trim().toLowerCase();
-    const password = passwordInput.value;
-    if (!email || !password) {
-      alert("Please enter email and password.");
-      return;
-    }
+function selectUser(id, email, el) {
+  selectedChatUser = { id, email };
+  cryptoKey = null;
+  chatHeader.textContent = "Chat with " + email;
+  inputArea.style.display = "flex";
+  [...users.children].forEach(c => c.classList.remove("selected"));
+  el.classList.add("selected");
+  loadMessages();
+  msgInput.focus();
+}
 
-    // Check if user exists
-    const userQuery = await db.collection("users").where("email", "==", email).get();
-    if (!userQuery.empty) {
-      // User exists: check password
-      const userDoc = userQuery.docs[0];
-      const userData = userDoc.data();
-      if (userData.password !== password) {
-        alert("Incorrect password.");
-        return;
+/* ---------------- Messages ---------------- */
+function chatId() {
+  return [currentUserId, selectedChatUser.id].sort().join("_");
+}
+
+function loadMessages() {
+  messages.innerHTML = "";
+  db.collection("chats").doc(chatId())
+    .collection("msgs").orderBy("time")
+    .onSnapshot(async s => {
+      messages.innerHTML = "";
+      for (const d of s.docs) {
+        const m = d.data();
+        const text = await decrypt(m.c, m.iv);
+        const div = document.createElement("div");
+        div.className = "msg " + (m.sender === currentUserId ? "me":"other");
+        div.textContent = text;
+        messages.appendChild(div);
       }
-      currentUserId = userDoc.id;
-      currentUser = userData;
-      afterLogin();
-    } else {
-      // Register new user
-      const newUser = await db.collection("users").add({ email, password });
-      currentUserId = newUser.id;
-      currentUser = { email, password };
-      alert("Registered and logged in!");
-      afterLogin();
-    }
-  };
+      messages.scrollTop = messages.scrollHeight;
+    });
+}
 
-  // --- After login setup ---
-  function afterLogin() {
-    loginDiv.style.display = "none";
-    chatDiv.style.display = "flex";
-    loadUsersList();
-  }
+/* ---------------- Send ---------------- */
+sendBtn.onclick = async () => {
+  const text = msgInput.value.trim();
+  if (!text) return;
+  const e = await encrypt(text);
+  await db.collection("chats").doc(chatId())
+    .collection("msgs").add({
+      sender: currentUserId,
+      c: e.c,
+      iv: e.iv,
+      time: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  msgInput.value = "";
+  msgInput.focus();
+};
 
-  // --- Load users except current ---
-  function loadUsersList() {
-    db.collection("users").onSnapshot(snapshot => {
+msgInput.addEventListener("keydown", e => {
+  if (e.key === "Enter") sendBtn.click();
+});
+
+/* ---------------- Start ---------------- */
+login.style.display = "flex";
+</script>
+</body>
+</html>
       usersDiv.innerHTML = "";
       snapshot.forEach(doc => {
         if (doc.id === currentUserId) return; // skip yourself
