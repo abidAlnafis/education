@@ -13,15 +13,60 @@
 
   <style>
     /* ======================
-        🎨 VARIABLES & RESET
+        🎨 VARIABLES (THEMING)
     ====================== */
     :root {
+      /* --- LIGHT MODE (Default) --- */
       --primary-gradient: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
-      --text-dark: #2d3436;
-      --text-grey: #636e72;
-      --bg-color: #fff0f5;
+      --primary-solid: #ff758c;
+      
+      --bg-body: #fff0f5; /* Light Pinkish Bg */
+      --bg-card: rgba(255, 255, 255, 0.9);
+      --bg-glass-border: rgba(255, 255, 255, 0.6);
+      
+      --text-main: #2d3436;
+      --text-sec: #636e72;
+      
+      --chat-header-bg: rgba(255, 255, 255, 0.95);
+      --chat-bg-color: #efe7dd; 
+      
+      --msg-in-bg: #ffffff;
+      --msg-in-text: #2d3436;
+      --msg-out-text: #ffffff;
+      
+      --input-bar-bg: #ffffff;
+      --input-field-bg: #f0f2f5;
+      
       --shadow-soft: 0 15px 35px rgba(255, 118, 142, 0.15);
-      --glass-border: 1px solid rgba(255, 255, 255, 0.6);
+      
+      /* Background Blend for Doodle (Darken for light mode) */
+      --doodle-blend: overlay; 
+      --doodle-opacity: 0.15; 
+    }
+
+    /* --- DARK MODE OVERRIDES --- */
+    [data-theme="dark"] {
+      --bg-body: #121212; /* Deep Dark */
+      --bg-card: rgba(30, 30, 40, 0.9);
+      --bg-glass-border: rgba(255, 255, 255, 0.1);
+      
+      --text-main: #e0e0e0;
+      --text-sec: #b0b0b0;
+      
+      --chat-header-bg: #1f1f1f;
+      --chat-bg-color: #0d0d0d;
+      
+      --msg-in-bg: #2b2b2b;
+      --msg-in-text: #ffffff;
+      
+      --input-bar-bg: #1f1f1f;
+      --input-field-bg: #2b2b2b;
+      
+      --shadow-soft: 0 15px 35px rgba(0, 0, 0, 0.5);
+      
+      /* Lighter blend for dark mode so doodle shows */
+      --doodle-blend: screen; 
+      --doodle-opacity: 0.2;
     }
 
     * {
@@ -36,13 +81,23 @@
       padding: 0;
       height: 100dvh;
       width: 100%;
-      background: var(--bg-color);
-      background-image:
-        radial-gradient(at 0% 0%, hsla(340, 100%, 76%, 0.2) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, hsla(320, 100%, 89%, 0.3) 0px, transparent 50%);
-      background-size: cover;
-      color: var(--text-dark);
+      background-color: var(--bg-body);
+      color: var(--text-main);
       overflow: hidden;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    
+    /* Global Background Pattern for App (Outside Chat) */
+    body::before {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top:0; left:0;
+        z-index: -1;
+        background-image: 
+            radial-gradient(at 0% 0%, hsla(340, 100%, 76%, 0.1) 0px, transparent 50%),
+            radial-gradient(at 100% 100%, hsla(320, 100%, 89%, 0.1) 0px, transparent 50%);
     }
 
     /* ======================
@@ -67,9 +122,9 @@
     }
 
     button.secondary-btn {
-      background: white;
-      color: #ff758c;
-      border: 2px solid #ff758c;
+      background: transparent;
+      color: var(--primary-solid);
+      border: 2px solid var(--primary-solid);
       box-shadow: none;
     }
 
@@ -84,29 +139,28 @@
       width: 100%;
       padding: 16px 20px;
       border-radius: 20px;
-      border: 1px solid #eee;
-      background: #f8f9fa;
+      border: 1px solid var(--bg-glass-border);
+      background: var(--input-field-bg);
       font-size: 15px;
-      color: var(--text-dark);
+      color: var(--text-main);
       margin-bottom: 15px;
       outline: none;
       transition: all 0.2s;
     }
 
     input:focus {
-      border-color: #ff758c;
-      background: white;
+      border-color: var(--primary-solid);
       box-shadow: 0 0 0 4px rgba(255, 117, 140, 0.1);
     }
 
-    /* Glass Modal Overlay */
+    /* Glass Modal */
     .modal-overlay {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(255, 255, 255, 0.4);
+      background: rgba(0, 0, 0, 0.6);
       backdrop-filter: blur(12px);
       display: none;
       justify-content: center;
@@ -122,15 +176,16 @@
     }
 
     .box {
-      background: rgba(255, 255, 255, 0.95);
+      background: var(--bg-card);
       padding: 35px 30px;
       width: 90%;
       max-width: 380px;
       border-radius: 30px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
       text-align: center;
       position: relative;
-      border: var(--glass-border);
+      border: 1px solid var(--bg-glass-border);
+      color: var(--text-main);
     }
 
     .box.animate-zoom {
@@ -142,13 +197,13 @@
       top: 15px;
       right: 20px;
       font-size: 28px;
-      color: #ccc;
+      color: var(--text-sec);
       cursor: pointer;
       line-height: 1;
     }
 
     .close-btn:hover {
-      color: #ff758c;
+      color: var(--primary-solid);
     }
 
     /* ======================
@@ -165,15 +220,15 @@
     }
 
     .home-card {
-      background: rgba(255, 255, 255, 0.65);
+      background: var(--bg-card);
       backdrop-filter: blur(20px);
       padding: 50px 30px;
       border-radius: 40px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+      box-shadow: var(--shadow-soft);
       text-align: center;
       max-width: 360px;
       width: 100%;
-      border: 1px solid rgba(255, 255, 255, 0.8);
+      border: 1px solid var(--bg-glass-border);
       animation: fadeInUp 0.8s ease-out;
     }
 
@@ -195,27 +250,25 @@
     }
 
     #home p {
-      color: var(--text-grey);
+      color: var(--text-sec);
       font-size: 15px;
       margin-bottom: 35px;
       line-height: 1.5;
     }
 
-    /* === NEW: Footer Text Style === */
     .footer-text {
       position: absolute;
       bottom: 20px;
-      font-size: 18px;
-      color: #888;
+      font-size: 16px;
+      color: var(--text-sec);
       font-weight: 500;
       text-align: center;
       width: 100%;
       opacity: 0.8;
-      letter-spacing: 0.5px;
     }
     
     .footer-text span {
-        color: #ff758c;
+        color: var(--primary-solid);
     }
 
     @keyframes float {
@@ -246,14 +299,14 @@
     }
 
     .profile-card {
-      background: rgba(255, 255, 255, 0.9);
+      background: var(--bg-card);
       padding: 45px 30px;
       border-radius: 35px;
       box-shadow: var(--shadow-soft);
       width: 90%;
       max-width: 350px;
       position: relative;
-      border: var(--glass-border);
+      border: 1px solid var(--bg-glass-border);
     }
 
     .avatar {
@@ -271,7 +324,7 @@
       height: 100%;
       border-radius: 50%;
       object-fit: cover;
-      border: 4px solid white;
+      border: 4px solid var(--bg-card);
       background: #fff;
       display: flex;
       align-items: center;
@@ -290,24 +343,19 @@
     .profile-name-container h2 {
       margin: 0;
       font-size: 24px;
-      color: var(--text-dark);
+      color: var(--text-main);
     }
 
     .edit-icon-btn {
       background: none;
       box-shadow: none;
-      color: #ff758c;
+      color: var(--primary-solid);
       padding: 5px;
       font-size: 20px;
       width: auto;
       border-radius: 50%;
       display: flex;
       align-items: center;
-    }
-
-    .edit-icon-btn:hover {
-      color: #ff758c;
-      background: #fff0f5;
     }
 
     .status-container {
@@ -317,7 +365,7 @@
       gap: 6px;
       margin-bottom: 30px;
       font-size: 14px;
-      color: #888;
+      color: var(--text-sec);
     }
 
     .green-dot {
@@ -335,7 +383,7 @@
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      background: #ffe0e6;
+      background: rgba(255, 71, 87, 0.1);
       color: #ff4757;
       border: none;
       display: flex;
@@ -357,7 +405,7 @@
       display: none;
       height: 100dvh;
       width: 100%;
-      background: #fff;
+      background: var(--bg-body);
       overflow: hidden;
       flex-direction: column;
     }
@@ -368,7 +416,7 @@
       height: 100%;
       display: flex;
       flex-direction: column;
-      background: #fff;
+      background: var(--bg-card);
     }
 
     .users-header {
@@ -376,17 +424,25 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(255, 201, 243, 0.737);
+      background: var(--chat-header-bg);
       backdrop-filter: blur(10px);
       z-index: 2;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+      border-bottom: 1px solid var(--bg-glass-border);
     }
 
     .users-header h2 {
       font-size: 24px;
-      color: #ff4757;
+      color: var(--primary-solid);
       margin: 0;
       font-weight: 700;
+    }
+    
+    .users-header .secondary-btn {
+        padding: 6px 14px; 
+        font-size:12px;
+        background: transparent;
+        color: var(--primary-solid);
+        border: 1px solid var(--primary-solid);
     }
 
     .friend-list {
@@ -402,11 +458,11 @@
       padding: 15px 20px;
       cursor: pointer;
       transition: background 0.2s;
-      border-bottom: 1px solid #f9f9f9;
+      border-bottom: 1px solid var(--bg-glass-border);
     }
 
     .user-item:hover {
-      background: #fff5f7;
+      background: rgba(255, 117, 140, 0.05);
     }
 
     .user-info-group {
@@ -424,7 +480,6 @@
       margin-right: 15px;
       background: #eee;
       flex-shrink: 0;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     }
 
     .user-item .placeholder {
@@ -437,14 +492,14 @@
     .user-item span {
       font-weight: 600;
       font-size: 16px;
-      color: #333;
+      color: var(--text-main);
     }
 
     .user-options-btn {
       background: none;
       box-shadow: none;
       padding: 5px;
-      color: #b2bec3;
+      color: var(--text-sec);
       font-size: 22px;
       border-radius: 50%;
       display: flex;
@@ -454,26 +509,22 @@
       height: 35px;
     }
 
-    .user-options-btn:hover {
-      background: #f0f0f0;
-      color: #ff4757;
-    }
-
     /* --- Chatbox --- */
     .chatbox {
       display: flex;
       flex-direction: column;
       height: 100%;
       width: 100%;
-      background: #fff;
+      background: var(--bg-body);
+      position: relative; 
     }
 
     .chat-header {
       height: 70px;
       padding: 0 15px;
-      background: rgba(255, 255, 255, 0.9);
+      background: var(--chat-header-bg);
       backdrop-filter: blur(15px);
-      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      border-bottom: 1px solid var(--bg-glass-border);
       display: flex;
       align-items: center;
       gap: 10px;
@@ -486,7 +537,7 @@
       background: none;
       border: none;
       padding: 0;
-      color: #ff758c;
+      color: var(--primary-solid);
       font-size: 26px;
       cursor: pointer;
       display: flex;
@@ -503,6 +554,7 @@
       flex-shrink: 0;
       border-radius: 50%;
       overflow: hidden;
+      cursor: pointer;
     }
 
     .chat-avatar img,
@@ -524,22 +576,15 @@
       font-size: 17px;
       font-weight: 600;
       line-height: 1.2;
+      color: var(--text-main);
     }
 
     .chat-info span {
       font-size: 12px;
-      color: #888;
+      color: var(--text-sec);
       display: flex;
       align-items: center;
       gap: 5px;
-    }
-
-    .chat-info .active-dot {
-      width: 6px;
-      height: 6px;
-      background: #2ecc71;
-      border-radius: 50%;
-      display: inline-block;
     }
 
     .chat-options-container {
@@ -552,7 +597,7 @@
       box-shadow: none;
       border: none;
       font-size: 24px;
-      color: #ff758c;
+      color: var(--primary-solid);
       cursor: pointer;
       width: 40px;
       height: 40px;
@@ -562,20 +607,20 @@
       justify-content: center;
     }
 
-    /* Refined Dropdown Style */
+    /* Dropdown Style */
     .chat-dropdown {
       position: absolute;
       top: 50px;
       right: 0;
       width: 240px;
-      background: white;
+      background: var(--bg-card);
       border-radius: 16px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
       display: none;
       flex-direction: column;
       overflow: hidden;
       z-index: 100;
-      border: 1px solid rgba(0,0,0,0.06);
+      border: 1px solid var(--bg-glass-border);
       padding-top: 5px;
       animation: fadeInMenu 0.2s ease-out forwards;
     }
@@ -592,7 +637,7 @@
     .dropdown-item {
       padding: 12px 20px;
       font-size: 14px;
-      color: #444;
+      color: var(--text-main);
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -607,40 +652,20 @@
     }
 
     .dropdown-item:hover {
-      background: #fff0f5;
-      color: #ff758c;
+      background: rgba(255, 117, 140, 0.1);
+      color: var(--primary-solid);
     }
 
     .dropdown-item.danger {
       color: #ff4757;
     }
 
-    .dropdown-item.danger:hover {
-      background: #ffe0e6;
-    }
-
-    /* Refined E2EE Badge */
-    .encrypted-badge {
-      font-size: 11px;
-      color: #27ae60;
-      background: #f0fff4;
-      padding: 10px;
-      text-align: center;
-      cursor: default;
-      border-top: 1px solid #eee;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      margin-top: 5px;
-    }
-
+    /* Chat Search Bar */
     .chat-search-bar {
       display: none;
       padding: 10px 15px;
-      background: white;
-      border-bottom: 1px solid #eee;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--bg-glass-border);
       animation: slideDown 0.2s ease-out;
       flex-shrink: 0;
       position: relative;
@@ -656,61 +681,75 @@
       flex: 1;
       padding: 8px 15px;
       border-radius: 20px;
-      border: 1px solid #ddd;
+      border: 1px solid var(--bg-glass-border);
       font-size: 14px;
       outline: none;
-      background: #f5f5f5;
+      background: var(--input-field-bg);
       margin: 0;
-    }
-
-    .close-search-btn {
-      background: none;
-      border: none;
-      color: #ff4757;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      cursor: pointer;
-      box-shadow: none;
-      transition: all 0.2s;
+      color: var(--text-main);
     }
     
+    .close-search-btn {
+        background: none;
+        border:none;
+        color: #ff4757;
+        box-shadow: none;
+        padding: 5px;
+    }
 
     @keyframes slideDown {
       from { transform: translateY(-10px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
 
-    /* --- MESSAGES AREA --- */
+    /* --- MESSAGES AREA & BACKGROUND --- */
     .messages {
       flex: 1;
-      padding: 15px 15px 5px 15px;
+      padding: 15px 15px 60px 15px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      background-color: #efe7dd;
-      background-image: url("https://www.transparenttextures.com/patterns/cubes.png");
-      background-blend-mode: overlay;
-      background: linear-gradient(rgba(255, 240, 245, 0.9), rgba(255, 240, 245, 0.9)), url("https://www.transparenttextures.com/patterns/cubes.png");
+      gap: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* 🚀 DOODLE BACKGROUND CONFIGURATION 🚀 */
+    .messages::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        /* Local Path */
+        background-image: url("img/space-5654794_1280.webp"); 
+        background-size: 300px;
+        background-repeat: repeat;
+        opacity: var(--doodle-opacity);
+        pointer-events: none;
+        z-index: -1;
+        mix-blend-mode: var(--doodle-blend);
     }
 
     .date-separator {
       text-align: center;
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 600;
-      color: #888;
-      margin: 20px 0 10px;
+      color: var(--text-sec);
+      margin: 15px 0 5px;
       text-transform: uppercase;
-      background: rgba(255, 255, 255, 0.7);
+      background: var(--bg-card);
       padding: 4px 12px;
       border-radius: 12px;
       align-self: center;
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .time-separator {
+        text-align: center;
+        font-size: 10px;
+        color: var(--text-sec);
+        margin-top: 5px;
+        margin-bottom: 2px;
+        font-weight: 500;
     }
 
     .msg-row {
@@ -719,7 +758,6 @@
       gap: 5px;
       max-width: 80%;
       position: relative;
-      margin-bottom: 2px;
     }
 
     .msg-row.hidden-by-search {
@@ -733,6 +771,7 @@
 
     .msg-row.other {
       align-self: flex-start;
+      flex-direction: row;
     }
 
     .msg-bubble {
@@ -741,20 +780,20 @@
       line-height: 1.4;
       position: relative;
       word-wrap: break-word;
-      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
       border-radius: 20px;
     }
 
     .msg-row.me .msg-bubble {
       background: var(--primary-gradient);
-      color: white;
+      color: var(--msg-out-text);
       border-bottom-right-radius: 4px;
       box-shadow: 0 4px 15px rgba(255, 117, 140, 0.2);
     }
 
     .msg-row.other .msg-bubble {
-      background: white;
-      color: var(--text-dark);
+      background: var(--msg-in-bg);
+      color: var(--msg-in-text);
       border-bottom-left-radius: 4px;
     }
 
@@ -766,17 +805,19 @@
     }
 
     .like-msg {
-      font-size: 40px;
+      font-size: 35px;
       background: none !important;
       box-shadow: none !important;
       padding: 0;
     }
 
-    /* 3-Dots for Message */
     .msg-menu-container {
       position: relative;
       opacity: 0;
       transition: opacity 0.2s;
+      width: 20px;
+      display: flex;
+      justify-content: center;
     }
 
     .msg-row:hover .msg-menu-container {
@@ -787,19 +828,19 @@
       background: none;
       border: none;
       font-size: 18px;
-      color: #999;
+      color: var(--text-sec);
       cursor: pointer;
-      padding: 0 5px;
+      padding: 0;
       box-shadow: none;
     }
 
     .msg-delete-popup {
       position: absolute;
-      top: 20px;
-      background: white;
-      padding: 8px 12px;
-      border-radius: 8px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      top: -25px;
+      background: var(--bg-card);
+      padding: 5px 10px;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
       display: none;
       z-index: 20;
       font-size: 12px;
@@ -808,25 +849,64 @@
       cursor: pointer;
       white-space: nowrap;
     }
-
-    .msg-row.me .msg-delete-popup {
-      right: 0;
+    
+    /* Typing Indicator */
+    .typing-indicator {
+        position: absolute; 
+        bottom: 80px; 
+        left: 20px;
+        z-index: 10;
+        
+        background: var(--msg-in-bg);
+        padding: 12px 18px; 
+        border-radius: 20px;
+        border-bottom-left-radius: 4px; 
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        
+        display: none;
+        align-items: center;
+        justify-content: center;
+        
+        width: fit-content;
+        min-width: 60px;
+        height: 45px;
     }
-
-    .msg-row.other .msg-delete-popup {
-      left: 0;
+    
+    .typing-dots {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        height: 100%;
+    }
+    
+    .typing-dots span {
+        width: 7px;
+        height: 7px;
+        background: var(--primary-solid);
+        display: inline-block;
+        border-radius: 50%;
+        animation: bounce 1.4s infinite ease-in-out both;
+    }
+    
+    .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+    
+    @keyframes bounce {
+        0%, 80%, 100% { transform: scale(0); }
+        40% { transform: scale(1); }
     }
 
     /* Input Bar */
     .input-bar {
       min-height: 70px;
       padding: 10px 15px;
-      background: white;
+      background: var(--input-bar-bg);
       display: flex;
       align-items: center;
       gap: 10px;
-      border-top: 1px solid rgba(0, 0, 0, 0.05);
+      border-top: 1px solid var(--bg-glass-border);
       flex-shrink: 0;
+      z-index: 20;
     }
 
     .icon-btn {
@@ -836,7 +916,7 @@
       height: 44px;
       font-size: 24px;
       cursor: pointer;
-      color: #ff758c;
+      color: var(--primary-solid);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -847,12 +927,12 @@
     }
 
     .icon-btn:hover {
-      background: #fff0f5;
+      background: rgba(255, 117, 140, 0.1);
     }
 
     .input-wrapper {
       flex: 1;
-      background: #f0f2f5;
+      background: var(--input-field-bg);
       border-radius: 24px;
       display: flex;
       align-items: center;
@@ -862,7 +942,8 @@
     }
 
     .input-wrapper:focus-within {
-      background: #fff0f5;
+      background: var(--input-field-bg);
+      border: 1px solid var(--primary-solid);
     }
 
     .input-wrapper input {
@@ -872,13 +953,12 @@
       padding: 0;
       margin: 0;
       font-size: 16px;
-      color: var(--text-dark);
+      color: var(--text-main);
       height: 100%;
     }
-
+    
     .input-wrapper input:focus {
-      box-shadow: none;
-      border: none;
+        box-shadow: none;
     }
 
     #sendBtn,
@@ -897,6 +977,7 @@
     #likeBtn {
       background: transparent;
       font-size: 32px;
+      color: var(--primary-solid);
     }
 
     #sendBtn {
@@ -933,7 +1014,7 @@
 
     #filePreviewName {
       font-size: 10px;
-      color: #ff758c;
+      color: var(--primary-solid);
       font-weight: 600;
       max-width: 60px;
       overflow: hidden;
@@ -956,7 +1037,7 @@
   <div id="home">
     <div class="home-card">
       <div class="home-logo">🌸</div>
-      <h1>বাংলা মেসেঞ্জার</h1>
+      <h1>Bangla Messenger</h1>
       <p>Connect with your friends in a simple & aesthetic way.</p>
       <button id="startBtn">Get Started</button>
     </div>
@@ -967,8 +1048,8 @@
   <div id="loginModal" class="modal-overlay" style="display: none;">
     <div class="box">
       <span class="close-btn" onclick="closeLoginAndShowHome()">&times;</span>
-      <h2 class="login-head">স্বাগতম আপনাকে 💖</h2>
-      <p style="color:#888; margin-bottom: 20px;">Login or Sign up to Join the chat</p>
+      <h2 class="login-head">Welcome Back 💖</h2>
+      <p style="color:#888; margin-bottom: 20px;">Login or Sign up to Join</p>
       <input id="username" type="text" placeholder="Username" />
       <input id="password" type="password" placeholder="Password" />
       <button id="loginBtn" style="width:100%">Continue</button>
@@ -996,6 +1077,7 @@
       <div style="display:flex; flex-direction:column; gap:12px;">
         <button id="addFriendBtn" class="secondary-btn">Add Friend</button>
         <button id="goToChatsBtn">Go to Chats 💬</button>
+        <button class="secondary-btn" onclick="toggleTheme()" style="font-size:13px;">🌗 Switch Theme</button>
       </div>
     </div>
   </div>
@@ -1047,8 +1129,7 @@
     <div class="users">
       <div class="users-header">
         <h2>Chats</h2>
-        <button onclick="goToProfile()" class="secondary-btn"
-          style="padding: 8px 16px; font-size:12px;">Profile</button>
+        <button onclick="goToProfile()" class="secondary-btn">Profile</button>
       </div>
       <div id="friendsListContainer" class="friend-list"></div>
     </div>
@@ -1059,7 +1140,7 @@
         <div class="chat-avatar" id="chatHeaderIcon" onclick="showFriendProfile()"></div>
         <div class="chat-info">
           <h3 id="chatHeaderName">User</h3>
-          <span><span class="active-dot"></span> Active now</span>
+          <span>Active now</span>
         </div>
 
         <div class="chat-options-container">
@@ -1071,16 +1152,12 @@
                 <button class="dropdown-item" onclick="toggleSearch(); toggleChatMenu()">
                    🔍 Search
                 </button>
-                <button class="dropdown-item" onclick="alert('Privacy Policy: Your messages are stored securely in Firebase.'); toggleChatMenu()">
+                <button class="dropdown-item" onclick="alert('Privacy Policy: End-to-end encrypted locally.'); toggleChatMenu()">
                     🛡 Privacy
-                </button>
-                <button class="dropdown-item" onclick="alert('Support: Contact Nafis for help.'); toggleChatMenu()">
-                    ❓ Support
                 </button>
                 <button class="dropdown-item danger" onclick="deleteConversation(); toggleChatMenu()">
                     🗑 Delete Chat
                 </button>
-                <div class="encrypted-badge">🔒 End-to-end Encrypted</div>
             </div>
         </div>
       </div>
@@ -1091,6 +1168,10 @@
       </div>
 
       <div class="messages" id="messages"></div>
+      
+      <div class="typing-indicator" id="typingIndicator">
+          <div class="typing-dots"><span></span><span></span><span></span></div>
+      </div>
 
       <div class="input-bar">
         <input type="file" id="fileInput" onchange="handleFileSelect()" />
@@ -1100,7 +1181,7 @@
 
         <div class="input-wrapper">
           <input id="msgInput" type="text" placeholder="Type a message..." autocomplete="off"
-            oninput="toggleSendBtn()" />
+            oninput="handleInput()" />
         </div>
 
         <button id="likeBtn" class="icon-btn" onclick="sendLike()">👍</button>
@@ -1123,7 +1204,28 @@
     let currentChatFriend = null;
     let unsubscribeMsgs = null;
     let unsubscribeFriends = null;
+    let unsubscribeTyping = null;
     let friendToDelete = null;
+    let typingTimeout = null;
+    
+    // --- THEME LOGIC ---
+    function toggleTheme() {
+        const html = document.documentElement;
+        const current = html.getAttribute("data-theme");
+        const target = current === "dark" ? "light" : "dark";
+        html.setAttribute("data-theme", target);
+        localStorage.setItem("theme", target);
+    }
+    
+    // Load saved theme
+    const savedTheme = localStorage.getItem("theme");
+    if(savedTheme) document.documentElement.setAttribute("data-theme", savedTheme);
+
+    // Helper: Title Case
+    function toTitleCase(str) {
+        if (!str) return "";
+        return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    }
 
     window.addEventListener("DOMContentLoaded", () => {
       const storedId = localStorage.getItem("uid");
@@ -1156,6 +1258,7 @@
         const doc = await db.collection("users").doc(uid).get();
         if (doc.exists) {
           currentUser = { id: doc.id, ...doc.data() };
+          currentUser.username = toTitleCase(currentUser.username); 
           localStorage.setItem("uid", uid);
 
           document.getElementById("loginModal").classList.remove("active");
@@ -1208,27 +1311,12 @@
       }
     };
 
-    // === UPDATED: Logout with Confirmation ===
     document.getElementById("logoutBtn").onclick = () => {
-      if(!confirm("Are you sure you want to log out?")) return; // Confirmation Alert
-
+      if(!confirm("Are you sure you want to log out?")) return;
       localStorage.clear();
       currentUser = null;
       currentChatFriend = null;
-
-      document.getElementById("profile").style.display = "none";
-      document.getElementById("chat").style.display = "none";
-      document.getElementById("home").style.display = "none";
-
-      const modal = document.getElementById("loginModal");
-      modal.classList.add("active");
-      const box = modal.querySelector('.box');
-      box.classList.remove('animate-zoom');
-      void box.offsetWidth;
-      box.classList.add('animate-zoom');
-
-      document.getElementById("username").value = "";
-      document.getElementById("password").value = "";
+      location.reload();
     };
 
     function showProfilePage() {
@@ -1236,7 +1324,7 @@
       document.getElementById("chat").style.display = "none";
       document.getElementById("home").style.display = "none";
 
-      document.getElementById("profileNameDisplay").textContent = formatName(currentUser.username);
+      document.getElementById("profileNameDisplay").textContent = currentUser.username;
       const avatarDiv = document.getElementById("myAvatarDisplay");
       if (currentUser.photoUrl) avatarDiv.innerHTML = `<img src="${currentUser.photoUrl}" />`;
       else avatarDiv.innerHTML = `<div>👤</div>`;
@@ -1251,19 +1339,21 @@
     };
 
     document.getElementById("saveProfileBtn").onclick = async () => {
-      const newName = document.getElementById("newUsernameInput").value.trim().toLowerCase();
+      const newName = document.getElementById("newUsernameInput").value.trim();
+      const newNameLower = newName.toLowerCase();
       let newUrl = document.getElementById("newPhotoUrlInput").value.trim();
       const file = document.getElementById("profilePicUpload").files[0];
 
       if (file) newUrl = await uploadToCloudinary(file);
 
-      if (newName !== currentUser.username) {
-        const check = await db.collection("users").where("username", "==", newName).get();
+      if (newNameLower !== currentUser.username.toLowerCase()) {
+        const check = await db.collection("users").where("username", "==", newNameLower).get();
         if (!check.empty) return alert("Username taken!");
       }
 
-      await db.collection("users").doc(currentUser.id).update({ username: newName, photoUrl: newUrl });
-      currentUser.username = newName;
+      await db.collection("users").doc(currentUser.id).update({ username: newNameLower, photoUrl: newUrl });
+      
+      currentUser.username = toTitleCase(newNameLower);
       currentUser.photoUrl = newUrl;
       closeModal('editProfileModal');
       showProfilePage();
@@ -1277,7 +1367,7 @@
 
     document.getElementById("searchFriendBtn").onclick = async () => {
       const targetName = document.getElementById("friendUsernameInput").value.trim().toLowerCase();
-      if (targetName === currentUser.username) return alert("Cannot add yourself.");
+      if (targetName === currentUser.username.toLowerCase()) return alert("Cannot add yourself.");
 
       const snap = await db.collection("users").where("username", "==", targetName).get();
       if (snap.empty) return alert("User not found.");
@@ -1321,7 +1411,7 @@
           currentUser.friends = data.friends || [];
 
           if (!currentUser.friends || currentUser.friends.length === 0) {
-            container.innerHTML = "<div style='text-align:center;margin-top:40px;color:#888;'>No friends yet.<br>Click 'Profile' to add some!</div>";
+            container.innerHTML = "<div style='text-align:center;margin-top:40px;color:var(--text-sec);'>No friends yet.<br>Click 'Profile' to add some!</div>";
             return;
           }
 
@@ -1340,7 +1430,7 @@
 
               const infoDiv = document.createElement("div");
               infoDiv.className = "user-info-group";
-              infoDiv.innerHTML = `${imgHTML} <span>${formatName(fData.username)}</span>`;
+              infoDiv.innerHTML = `${imgHTML} <span>${toTitleCase(fData.username)}</span>`;
               infoDiv.onclick = () => openChat({ id: fDoc.id, ...fData });
 
               const menuBtn = document.createElement("button");
@@ -1361,7 +1451,7 @@
 
     function showDeleteModal(fid, fname) {
       friendToDelete = fid;
-      document.getElementById("deleteTargetName").textContent = formatName(fname);
+      document.getElementById("deleteTargetName").textContent = toTitleCase(fname);
       const modal = document.getElementById("deleteChatModal");
       modal.classList.add("active");
       modal.querySelector('.box').classList.add('animate-zoom');
@@ -1382,15 +1472,15 @@
       chatDiv.classList.remove("show-users");
       chatDiv.classList.add("show-chat");
 
-      document.getElementById("chatHeaderName").textContent = formatName(friend.username);
+      document.getElementById("chatHeaderName").textContent = toTitleCase(friend.username);
       const iconDiv = document.getElementById("chatHeaderIcon");
       if (friend.photoUrl) iconDiv.innerHTML = `<img src="${friend.photoUrl}">`;
       else iconDiv.innerHTML = `<div>👤</div>`;
 
-      // Reset search
       document.getElementById("chatSearchBar").classList.remove("active");
       document.getElementById("messageSearchInput").value = "";
 
+      setupTypingListener();
       loadMessages();
     }
 
@@ -1400,6 +1490,7 @@
       chatDiv.classList.remove("show-chat");
       chatDiv.classList.add("show-users");
       if (unsubscribeMsgs) unsubscribeMsgs();
+      if (unsubscribeTyping) unsubscribeTyping();
       currentChatFriend = null;
       
       document.getElementById("chatMenuDropdown").classList.remove("active");
@@ -1411,10 +1502,45 @@
       const modal = document.getElementById("friendProfileModal");
       modal.classList.add("active");
       modal.querySelector('.box').classList.add('animate-zoom');
-      document.getElementById("friendModalName").textContent = formatName(currentChatFriend.username);
+      document.getElementById("friendModalName").textContent = toTitleCase(currentChatFriend.username);
       const av = document.getElementById("friendModalAvatar");
       if (currentChatFriend.photoUrl) av.innerHTML = `<img src="${currentChatFriend.photoUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
       else av.innerHTML = `<div style="width:100%;height:100%;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center;font-size:40px;">👤</div>`;
+    }
+
+    // --- TYPING INDICATOR LOGIC ---
+    function handleInput() {
+        toggleSendBtn();
+        const chatId = [currentUser.id, currentChatFriend.id].sort().join("_");
+        db.collection("chats").doc(chatId).set({
+            typing: { [currentUser.id]: true }
+        }, { merge: true });
+
+        if (typingTimeout) clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(() => {
+            db.collection("chats").doc(chatId).set({
+                typing: { [currentUser.id]: false }
+            }, { merge: true });
+        }, 1500);
+    }
+
+    function setupTypingListener() {
+        const chatId = [currentUser.id, currentChatFriend.id].sort().join("_");
+        const ind = document.getElementById("typingIndicator");
+
+        unsubscribeTyping = db.collection("chats").doc(chatId).onSnapshot(doc => {
+            if(doc.exists) {
+                const data = doc.data();
+                const typingMap = data.typing || {};
+                const isFriendTyping = typingMap[currentChatFriend.id];
+                
+                if(isFriendTyping) {
+                    ind.style.display = "flex";
+                } else {
+                    ind.style.display = "none";
+                }
+            }
+        });
     }
 
     function loadMessages() {
@@ -1427,6 +1553,7 @@
         .onSnapshot(snap => {
           msgsDiv.innerHTML = "";
           let lastDate = null;
+          let lastTimeStr = null; // Track time
 
           snap.forEach(doc => {
             const m = doc.data();
@@ -1434,22 +1561,35 @@
             const date = m.time ? m.time.toDate() : new Date();
 
             const dateStr = date.toDateString();
+            const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            // 1. DATE HEADER
             if (dateStr !== lastDate) {
               const sep = document.createElement("div");
               sep.className = "date-separator";
               const isToday = new Date().toDateString() === dateStr;
-              sep.textContent = isToday
-                ? `${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-                : `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+              sep.textContent = isToday ? "Today" : date.toLocaleDateString();
               msgsDiv.appendChild(sep);
               lastDate = dateStr;
+              lastTimeStr = null; // Reset time tracker on new day
             }
 
+            // 2. STACKED TIME HEADER (If time changes minute)
+            if (timeStr !== lastTimeStr) {
+                const timeDiv = document.createElement("div");
+                timeDiv.className = "time-separator";
+                timeDiv.textContent = timeStr;
+                msgsDiv.appendChild(timeDiv);
+                lastTimeStr = timeStr;
+            }
+
+            // 3. MESSAGE ROW
             const rowDiv = document.createElement("div");
             const isMe = m.sender === currentUser.id;
             rowDiv.className = "msg-row " + (isMe ? "me" : "other");
 
             if (isMe) {
+              // Sender: Menu on Left, Bubble on Right
               const menuContainer = document.createElement("div");
               menuContainer.className = "msg-menu-container";
               menuContainer.innerHTML = `
@@ -1459,30 +1599,56 @@
               const btn = menuContainer.querySelector('.msg-dots-btn');
               const popup = menuContainer.querySelector('.msg-delete-popup');
               btn.onclick = () => { popup.style.display = popup.style.display === 'block' ? 'none' : 'block'; };
+              
+              const bubble = createBubble(m);
+              
+              rowDiv.appendChild(bubble); // Bubble 1st
+              rowDiv.appendChild(menuContainer); // Menu 2nd (reversed via flex)
+            } else {
+              // Receiver: Bubble on Left, Menu on Right
+              const bubble = createBubble(m);
+              
+              const menuContainer = document.createElement("div");
+              menuContainer.className = "msg-menu-container";
+              menuContainer.innerHTML = `
+                            <button class="msg-dots-btn">⋮</button>
+                            <div class="msg-delete-popup" style="left:0" onclick="deleteMessage('${chatId}', '${msgId}')">Delete</div>
+                        `;
+              const btn = menuContainer.querySelector('.msg-dots-btn');
+              const popup = menuContainer.querySelector('.msg-delete-popup');
+              btn.onclick = () => { popup.style.display = popup.style.display === 'block' ? 'none' : 'block'; };
+
+              rowDiv.appendChild(bubble);
               rowDiv.appendChild(menuContainer);
             }
 
-            const bubble = document.createElement("div");
-            bubble.className = "msg-bubble";
-
-            if (m.type === "text") {
-              bubble.textContent = m.content;
-            } else if (m.type === "file") {
-              if (m.fileType && m.fileType.startsWith("image")) {
-                bubble.innerHTML = `<img src="${m.url}">`;
-              } else {
-                bubble.innerHTML = `<a href="${m.url}" target="_blank" style="color:inherit;text-decoration:underline;">📄 File Attachment</a>`;
-              }
-            } else if (m.type === "like") {
-              bubble.className += " like-msg";
-              bubble.textContent = "👍";
-            }
-            rowDiv.appendChild(bubble);
             msgsDiv.appendChild(rowDiv);
           });
           msgsDiv.scrollTop = msgsDiv.scrollHeight;
           filterMessages();
         });
+    }
+
+    function createBubble(m) {
+        const bubble = document.createElement("div");
+        bubble.className = "msg-bubble";
+
+        let content = "";
+        if (m.type === "text") {
+            content = m.content;
+        } else if (m.type === "file") {
+            if (m.fileType && m.fileType.startsWith("image")) {
+                content = `<img src="${m.url}">`;
+            } else {
+                content = `<a href="${m.url}" target="_blank" style="color:inherit;text-decoration:underline;">📄 File Attachment</a>`;
+            }
+        } else if (m.type === "like") {
+            bubble.className += " like-msg";
+            content = "👍";
+        }
+        
+        bubble.innerHTML = content;
+        return bubble;
     }
 
     async function deleteMessage(chatId, msgId) {
@@ -1517,6 +1683,11 @@
         });
         input.value = "";
       }
+      
+      db.collection("chats").doc(chatId).set({
+          typing: { [currentUser.id]: false }
+      }, { merge: true });
+      
       toggleSendBtn();
     }
 
@@ -1556,8 +1727,6 @@
       return data.secure_url;
     }
 
-    function formatName(name) { return name.charAt(0).toUpperCase() + name.slice(1); }
-
     function closeModal(id) {
       document.getElementById(id).classList.remove("active");
     }
@@ -1578,9 +1747,6 @@
       }
     }
 
-    /* =========================================
-       Menu, Search Toggle & Logic
-    ========================================= */
     function toggleChatMenu() {
         const drop = document.getElementById("chatMenuDropdown");
         drop.classList.toggle("active");
@@ -1588,13 +1754,10 @@
 
     function toggleSearch() {
         const bar = document.getElementById("chatSearchBar");
-        
-        // If hidden, show it
         if(!bar.classList.contains("active")) {
             bar.classList.add("active");
             document.getElementById("messageSearchInput").focus();
         } else {
-            // If already shown, close it
             closeSearch();
         }
     }
@@ -1602,11 +1765,9 @@
     function closeSearch() {
         const bar = document.getElementById("chatSearchBar");
         bar.classList.remove("active");
-        
-        // Clear input and restore messages
         const input = document.getElementById("messageSearchInput");
         input.value = "";
-        filterMessages(); // Triggers reset
+        filterMessages(); 
     }
 
     function filterMessages() {
