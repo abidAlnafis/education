@@ -19,53 +19,50 @@
       /* --- LIGHT MODE (Default) --- */
       --primary-gradient: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
       --primary-solid: #ff758c;
-      
-      --bg-body: #fff0f5; /* Light Pinkish Bg */
+
       --bg-card: rgba(255, 255, 255, 0.9);
-      --bg-glass-border: rgba(255, 255, 255, 0.6);
-      
+      --bg-glass-border: rgba(251, 158, 255, 0.5);
+
       --text-main: #2d3436;
       --text-sec: #636e72;
-      
-      --chat-header-bg: rgba(255, 255, 255, 0.95);
-      --chat-bg-color: #efe7dd; 
-      
+
+      --chat-header-bg: #fdf7f8;
+      --chat-bg-color: #efe7dd;
+
       --msg-in-bg: #ffffff;
       --msg-in-text: #2d3436;
       --msg-out-text: #ffffff;
-      
-      --input-bar-bg: #ffffff;
+
+      --input-bar-bg: #fdf7f8;
       --input-field-bg: #f0f2f5;
-      
+
       --shadow-soft: 0 15px 35px rgba(255, 118, 142, 0.15);
-      
-      /* Background Blend for Doodle (Darken for light mode) */
-      --doodle-blend: overlay; 
-      --doodle-opacity: 0.15; 
+
+      --doodle-blend: overlay;
+      --doodle-opacity: 0.15;
     }
 
     /* --- DARK MODE OVERRIDES --- */
     [data-theme="dark"] {
-      --bg-body: #121212; /* Deep Dark */
-      --bg-card: rgba(30, 30, 40, 0.9);
+      --bg-body: #121212;
+      --bg-card: rgba(68, 54, 64);
       --bg-glass-border: rgba(255, 255, 255, 0.1);
-      
+
       --text-main: #e0e0e0;
       --text-sec: #b0b0b0;
-      
-      --chat-header-bg: #1f1f1f;
+
+      --chat-header-bg: #3f3d3b;
       --chat-bg-color: #0d0d0d;
-      
+
       --msg-in-bg: #2b2b2b;
       --msg-in-text: #ffffff;
-      
-      --input-bar-bg: #1f1f1f;
+
+      --input-bar-bg: #3f3d3b;
       --input-field-bg: #2b2b2b;
-      
+
       --shadow-soft: 0 15px 35px rgba(0, 0, 0, 0.5);
-      
-      /* Lighter blend for dark mode so doodle shows */
-      --doodle-blend: screen; 
+
+      --doodle-blend: screen;
       --doodle-opacity: 0.2;
     }
 
@@ -86,18 +83,19 @@
       overflow: hidden;
       transition: background-color 0.3s, color 0.3s;
     }
-    
-    /* Global Background Pattern for App (Outside Chat) */
+
+    /* Global Background Pattern */
     body::before {
-        content: "";
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        top:0; left:0;
-        z-index: -1;
-        background-image: 
-            radial-gradient(at 0% 0%, hsla(340, 100%, 76%, 0.1) 0px, transparent 50%),
-            radial-gradient(at 100% 100%, hsla(320, 100%, 89%, 0.1) 0px, transparent 50%);
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: -1;
+      background-image:
+        radial-gradient(at 0% 0%, hsla(340, 100%, 76%, 0.1) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, hsla(320, 100%, 89%, 0.1) 0px, transparent 50%);
     }
 
     /* ======================
@@ -186,6 +184,8 @@
       position: relative;
       border: 1px solid var(--bg-glass-border);
       color: var(--text-main);
+      max-height: 85vh;
+      overflow-y: auto;
     }
 
     .box.animate-zoom {
@@ -266,24 +266,45 @@
       width: 100%;
       opacity: 0.8;
     }
-    
+
     .footer-text span {
-        color: var(--primary-solid);
+      color: var(--primary-solid);
     }
 
     @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
     }
 
     @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     @keyframes zoomIn {
-      from { opacity: 0; transform: scale(0.8); }
-      to { opacity: 1; transform: scale(1); }
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
     }
 
     /* ======================
@@ -391,11 +412,88 @@
       justify-content: center;
       padding: 0;
       transition: all 0.2s;
+      z-index: 20;
     }
 
     .logout-btn-circle:hover {
       background: #ff4757;
       color: white;
+    }
+
+    /* THEME SWITCH */
+    .theme-switch {
+      position: absolute;
+      top: 25px;
+      left: 25px;
+      width: 52px;
+      height: 28px;
+      z-index: 20;
+    }
+
+    .theme-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #e0e0e0;
+      transition: .4s;
+      border-radius: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 6px;
+      overflow: hidden;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 4px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s cubic-bezier(0.25, 0.8, 0.25, 1);
+      border-radius: 50%;
+      z-index: 2;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    }
+
+    .theme-switch svg {
+      width: 12px;
+      height: 12px;
+      stroke: #636e72;
+      transition: opacity 0.3s;
+      z-index: 1;
+    }
+
+    input:checked+.slider {
+      background-color: #2d3436;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    input:checked+.slider:before {
+      transform: translateX(22px);
+      background-color: #555;
+    }
+
+    input:checked+.slider .icon-sun {
+      stroke: #aaa;
+      opacity: 0.5;
+    }
+
+    input:checked+.slider .icon-moon {
+      stroke: #ffffff;
+      opacity: 1;
     }
 
     /* ======================
@@ -410,7 +508,6 @@
       flex-direction: column;
     }
 
-    /* --- Sidebar (Friends List) --- */
     .users {
       width: 100%;
       height: 100%;
@@ -436,19 +533,41 @@
       margin: 0;
       font-weight: 700;
     }
-    
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
     .users-header .secondary-btn {
-        padding: 6px 14px; 
-        font-size:12px;
-        background: transparent;
-        color: var(--primary-solid);
-        border: 1px solid var(--primary-solid);
+      padding: 6px 14px;
+      font-size: 12px;
+      background: transparent;
+      color: var(--primary-solid);
+      border: 1px solid var(--primary-solid);
+    }
+
+    .add-group-btn {
+      background: var(--primary-gradient);
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 0;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 
     .friend-list {
       flex: 1;
       overflow-y: auto;
-      padding: 10px 0;
+      padding-bottom: 10px;
     }
 
     .user-item {
@@ -458,7 +577,7 @@
       padding: 15px 20px;
       cursor: pointer;
       transition: background 0.2s;
-      border-bottom: 1px solid var(--bg-glass-border);
+      user-select: none;
     }
 
     .user-item:hover {
@@ -495,6 +614,16 @@
       color: var(--text-main);
     }
 
+    .group-tag {
+      font-size: 10px;
+      background: var(--primary-solid);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 8px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
     .user-options-btn {
       background: none;
       box-shadow: none;
@@ -509,14 +638,30 @@
       height: 35px;
     }
 
-    /* --- Chatbox --- */
+    /* Chatbox */
     .chatbox {
       display: flex;
       flex-direction: column;
       height: 100%;
       width: 100%;
       background: var(--bg-body);
-      position: relative; 
+      position: relative;
+    }
+
+    .chatbox::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("img/space-5654794_1280.webp");
+      background-size: 300px;
+      background-repeat: repeat;
+      opacity: var(--doodle-opacity);
+      pointer-events: none;
+      z-index: 0;
+      mix-blend-mode: var(--doodle-blend);
     }
 
     .chat-header {
@@ -607,7 +752,6 @@
       justify-content: center;
     }
 
-    /* Dropdown Style */
     .chat-dropdown {
       position: absolute;
       top: 50px;
@@ -621,13 +765,21 @@
       overflow: hidden;
       z-index: 100;
       border: 1px solid var(--bg-glass-border);
-      padding-top: 5px;
+      padding-top: 10px;
+      padding-bottom: 10px;
       animation: fadeInMenu 0.2s ease-out forwards;
     }
-    
+
     @keyframes fadeInMenu {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .chat-dropdown.active {
@@ -660,49 +812,6 @@
       color: #ff4757;
     }
 
-    /* Chat Search Bar */
-    .chat-search-bar {
-      display: none;
-      padding: 10px 15px;
-      background: var(--bg-card);
-      border-bottom: 1px solid var(--bg-glass-border);
-      animation: slideDown 0.2s ease-out;
-      flex-shrink: 0;
-      position: relative;
-    }
-
-    .chat-search-bar.active {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .chat-search-bar input {
-      flex: 1;
-      padding: 8px 15px;
-      border-radius: 20px;
-      border: 1px solid var(--bg-glass-border);
-      font-size: 14px;
-      outline: none;
-      background: var(--input-field-bg);
-      margin: 0;
-      color: var(--text-main);
-    }
-    
-    .close-search-btn {
-        background: none;
-        border:none;
-        color: #ff4757;
-        box-shadow: none;
-        padding: 5px;
-    }
-
-    @keyframes slideDown {
-      from { transform: translateY(-10px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    /* --- MESSAGES AREA & BACKGROUND --- */
     .messages {
       flex: 1;
       padding: 15px 15px 60px 15px;
@@ -714,54 +823,40 @@
       z-index: 1;
     }
 
-    /* 🚀 DOODLE BACKGROUND CONFIGURATION 🚀 */
-    .messages::before {
-        content: "";
-        position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
-        /* Local Path */
-        background-image: url("img/space-5654794_1280.webp"); 
-        background-size: 300px;
-        background-repeat: repeat;
-        opacity: var(--doodle-opacity);
-        pointer-events: none;
-        z-index: -1;
-        mix-blend-mode: var(--doodle-blend);
-    }
-
-    .date-separator {
+    /* Date and Time Separators */
+    .date-separator, .time-separator {
       text-align: center;
       font-size: 12px;
       font-weight: 600;
       color: var(--text-sec);
-      margin: 15px 0 5px;
       text-transform: uppercase;
       background: var(--bg-card);
       padding: 4px 12px;
       border-radius: 12px;
       align-self: center;
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      margin: 15px 0 5px;
     }
-
+    
+    /* Time Separator (Specific Override) */
     .time-separator {
-        text-align: center;
-        font-size: 10px;
-        color: var(--text-sec);
-        margin-top: 5px;
-        margin-bottom: 2px;
-        font-weight: 500;
+      margin: 5px 0 2px;
+      font-size: 10px;
+      font-weight: 500;
+      background: transparent;
+      box-shadow: none;
+      padding: 0;
+      opacity: 0.8;
+      text-transform: none;
     }
 
+    /* Messages Row */
     .msg-row {
       display: flex;
-      align-items: center;
-      gap: 5px;
-      max-width: 80%;
+      align-items: flex-end;
+      gap: 8px;
+      max-width: 85%;
       position: relative;
-    }
-
-    .msg-row.hidden-by-search {
-      display: none !important;
     }
 
     .msg-row.me {
@@ -774,14 +869,59 @@
       flex-direction: row;
     }
 
+    .msg-row.hidden-by-search {
+      display: none !important;
+    }
+
+    /* Group Avatar in Chat */
+    .msg-avatar-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: #ddd;
+      margin-bottom: 2px;
+    }
+
+    .msg-avatar-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .msg-avatar-icon div {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: #555;
+    }
+
+    /* System Message */
+    .system-msg {
+      align-self: center;
+      font-size: 11px;
+      color: var(--text-sec);
+      background: rgba(0, 0, 0, 0.05);
+      padding: 4px 12px;
+      border-radius: 10px;
+      margin: 5px 0;
+      text-align: center;
+      max-width: 90%;
+    }
+
     .msg-bubble {
-      padding: 12px 18px;
+      padding: 10px 16px;
       font-size: 15px;
       line-height: 1.4;
       position: relative;
       word-wrap: break-word;
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
       border-radius: 20px;
+      /* min-width: 60px; Removed to fit content better */
     }
 
     .msg-row.me .msg-bubble {
@@ -803,6 +943,14 @@
       max-width: 100%;
       display: block;
     }
+    
+    .msg-sender-name {
+      font-size: 11px;
+      color: var(--text-sec);
+      margin-bottom: 2px;
+      font-weight: 600;
+      margin-left: 2px;
+    }
 
     .like-msg {
       font-size: 35px;
@@ -818,6 +966,7 @@
       width: 20px;
       display: flex;
       justify-content: center;
+      align-self: center;
     }
 
     .msg-row:hover .msg-menu-container {
@@ -840,7 +989,7 @@
       background: var(--bg-card);
       padding: 5px 10px;
       border-radius: 4px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
       display: none;
       z-index: 20;
       font-size: 12px;
@@ -849,54 +998,62 @@
       cursor: pointer;
       white-space: nowrap;
     }
-    
-    /* Typing Indicator */
+
     .typing-indicator {
-        position: absolute; 
-        bottom: 80px; 
-        left: 20px;
-        z-index: 10;
-        
-        background: var(--msg-in-bg);
-        padding: 12px 18px; 
-        border-radius: 20px;
-        border-bottom-left-radius: 4px; 
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-        
-        display: none;
-        align-items: center;
-        justify-content: center;
-        
-        width: fit-content;
-        min-width: 60px;
-        height: 45px;
-    }
-    
-    .typing-dots {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        height: 100%;
-    }
-    
-    .typing-dots span {
-        width: 7px;
-        height: 7px;
-        background: var(--primary-solid);
-        display: inline-block;
-        border-radius: 50%;
-        animation: bounce 1.4s infinite ease-in-out both;
-    }
-    
-    .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
-    .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
-    
-    @keyframes bounce {
-        0%, 80%, 100% { transform: scale(0); }
-        40% { transform: scale(1); }
+      position: absolute;
+      bottom: 80px;
+      left: 20px;
+      z-index: 10;
+      background: var(--msg-in-bg);
+      padding: 12px 18px;
+      border-radius: 20px;
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: fit-content;
+      min-width: 60px;
+      height: 45px;
     }
 
-    /* Input Bar */
+    .typing-dots {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      height: 100%;
+    }
+
+    .typing-dots span {
+      width: 7px;
+      height: 7px;
+      background: var(--primary-solid);
+      display: inline-block;
+      border-radius: 50%;
+      animation: bounce 1.4s infinite ease-in-out both;
+    }
+
+    .typing-dots span:nth-child(1) {
+      animation-delay: -0.32s;
+    }
+
+    .typing-dots span:nth-child(2) {
+      animation-delay: -0.16s;
+    }
+
+    @keyframes bounce {
+
+      0%,
+      80%,
+      100% {
+        transform: scale(0);
+      }
+
+      40% {
+        transform: scale(1);
+      }
+    }
+
     .input-bar {
       min-height: 70px;
       padding: 10px 15px;
@@ -956,9 +1113,9 @@
       color: var(--text-main);
       height: 100%;
     }
-    
+
     .input-wrapper input:focus {
-        box-shadow: none;
+      box-shadow: none;
     }
 
     #sendBtn,
@@ -1022,13 +1179,145 @@
       text-overflow: ellipsis;
     }
 
-    .login-head{
+    .login-head {
       background: var(--primary-gradient);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       margin-bottom: 30px;
     }
 
+    /* Context Menu */
+    .context-menu {
+      position: fixed;
+      background: var(--bg-card);
+      border: 1px solid var(--bg-glass-border);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      padding: 5px 0;
+      z-index: 2000;
+      display: none;
+      flex-direction: column;
+      min-width: 150px;
+    }
+
+    .context-menu.active {
+      display: flex;
+    }
+
+    .context-item {
+      padding: 10px 15px;
+      font-size: 14px;
+      cursor: pointer;
+      color: var(--text-main);
+    }
+
+    .context-item:hover {
+      background: rgba(255, 117, 140, 0.1);
+      color: var(--primary-solid);
+    }
+
+    /* Group Member List Styles */
+    .member-list {
+      text-align: left;
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid var(--bg-glass-border);
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+
+    .member-row {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--bg-glass-border);
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .member-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .member-role {
+      font-size: 10px;
+      color: #aaa;
+      margin-top: 2px;
+    }
+
+    .role-admin {
+      color: #ff758c;
+      font-weight: 700;
+    }
+
+    .btn-small {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 5px;
+      background: #eee;
+      color: #555;
+      border: none;
+    }
+
+    .btn-remove {
+      background: rgba(255, 71, 87, 0.1);
+      color: #ff4757;
+    }
+
+    .chat-search-bar {
+      display: none;
+      padding: 10px 15px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--bg-glass-border);
+      animation: slideDown 0.2s ease-out;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .chat-search-bar.active {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .chat-search-bar input {
+      flex: 1;
+      padding: 8px 15px;
+      border-radius: 20px;
+      border: 1px solid var(--bg-glass-border);
+      font-size: 14px;
+      outline: none;
+      background: var(--input-field-bg);
+      margin: 0;
+      color: var(--text-main);
+    }
+
+    .close-search-btn {
+      background: none;
+      border: none;
+      color: #ff4757;
+      box-shadow: none;
+      padding: 5px;
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateY(-10px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .updateGroupInfo{
+      margin-top: 20px;
+    }
   </style>
 </head>
 
@@ -1041,7 +1330,6 @@
       <p>Connect with your friends in a simple & aesthetic way.</p>
       <button id="startBtn">Get Started</button>
     </div>
-    
     <div class="footer-text">Made with ❤️ by <span>Nafis</span></div>
   </div>
 
@@ -1058,26 +1346,45 @@
 
   <div id="profile" style="display: none;">
     <div class="profile-card">
+      <label class="theme-switch">
+        <input type="checkbox" id="themeCheckbox" onchange="handleThemeToggle(this)">
+        <span class="slider">
+          <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </span>
+      </label>
+
       <button id="logoutBtn" class="logout-btn-circle" title="Logout">⛔</button>
 
       <div class="avatar" id="myAvatarDisplay">
         <div>👤</div>
       </div>
-
       <div class="profile-name-container">
         <h2 id="profileNameDisplay">User</h2>
         <button id="openEditProfileBtn" class="edit-icon-btn" title="Edit Profile">✎</button>
       </div>
 
       <div class="status-container">
-        <div class="green-dot"></div>
-        <span>Online</span>
+        <div class="green-dot"></div><span>Online</span>
       </div>
 
       <div style="display:flex; flex-direction:column; gap:12px;">
         <button id="addFriendBtn" class="secondary-btn">Add Friend</button>
         <button id="goToChatsBtn">Go to Chats 💬</button>
-        <button class="secondary-btn" onclick="toggleTheme()" style="font-size:13px;">🌗 Switch Theme</button>
       </div>
     </div>
   </div>
@@ -1104,6 +1411,25 @@
     </div>
   </div>
 
+  <div id="createGroupModal" class="modal-overlay" style="display: none;">
+    <div class="box">
+      <span class="close-btn" onclick="closeModal('createGroupModal')">&times;</span>
+      <h3>Create Group</h3>
+      <input type="text" id="groupNameInput" placeholder="Group Name" />
+      <p style="font-size:13px; color:#aaa; margin:10px 0;">Group Icon (Optional)</p>
+      <input type="file" id="groupIconUpload" style="font-size:14px; margin-bottom:15px;" />
+      <button id="doCreateGroupBtn" style="width:100%;">Create</button>
+    </div>
+  </div>
+
+  <div id="manageGroupModal" class="modal-overlay" style="display: none;">
+    <div class="box">
+      <span class="close-btn" onclick="closeModal('manageGroupModal')">&times;</span>
+      <h3>Manage Group</h3>
+      <div id="manageGroupContent"></div>
+    </div>
+  </div>
+
   <div id="deleteChatModal" class="modal-overlay" style="display: none;">
     <div class="box">
       <span class="close-btn" onclick="closeModal('deleteChatModal')">&times;</span>
@@ -1124,12 +1450,19 @@
     </div>
   </div>
 
+  <div id="userContextMenu" class="context-menu">
+    <div class="context-item" id="ctxCreateGroup">Create Group</div>
+  </div>
+
   <div id="chat" class="show-users" style="display: none;">
 
     <div class="users">
       <div class="users-header">
         <h2>Chats</h2>
-        <button onclick="goToProfile()" class="secondary-btn">Profile</button>
+        <div class="header-actions">
+          <button class="add-group-btn" onclick="openCreateGroupModal()" title="New Group">+</button>
+          <button onclick="goToProfile()" class="secondary-btn">Profile</button>
+        </div>
       </div>
       <div id="friendsListContainer" class="friend-list"></div>
     </div>
@@ -1140,25 +1473,13 @@
         <div class="chat-avatar" id="chatHeaderIcon" onclick="showFriendProfile()"></div>
         <div class="chat-info">
           <h3 id="chatHeaderName">User</h3>
-          <span>Active now</span>
+          <span id="chatHeaderStatus">Active now</span>
         </div>
 
         <div class="chat-options-container">
-            <button class="chat-menu-btn" onclick="toggleChatMenu()">⋮</button>
-            <div class="chat-dropdown" id="chatMenuDropdown">
-                <button class="dropdown-item" onclick="showFriendProfile(); toggleChatMenu()">
-                   👤 View Profile
-                </button>
-                <button class="dropdown-item" onclick="toggleSearch(); toggleChatMenu()">
-                   🔍 Search
-                </button>
-                <button class="dropdown-item" onclick="alert('Privacy Policy: End-to-end encrypted locally.'); toggleChatMenu()">
-                    🛡 Privacy
-                </button>
-                <button class="dropdown-item danger" onclick="deleteConversation(); toggleChatMenu()">
-                    🗑 Delete Chat
-                </button>
-            </div>
+          <button class="chat-menu-btn" onclick="toggleChatMenu()">⋮</button>
+          <div class="chat-dropdown" id="chatMenuDropdown">
+          </div>
         </div>
       </div>
 
@@ -1168,9 +1489,9 @@
       </div>
 
       <div class="messages" id="messages"></div>
-      
+
       <div class="typing-indicator" id="typingIndicator">
-          <div class="typing-dots"><span></span><span></span><span></span></div>
+        <div class="typing-dots"><span></span><span></span><span></span></div>
       </div>
 
       <div class="input-bar">
@@ -1180,8 +1501,7 @@
         <span id="filePreviewName"></span>
 
         <div class="input-wrapper">
-          <input id="msgInput" type="text" placeholder="Type a message..." autocomplete="off"
-            oninput="handleInput()" />
+          <input id="msgInput" type="text" placeholder="Type a message..." autocomplete="off" oninput="handleInput()" />
         </div>
 
         <button id="likeBtn" class="icon-btn" onclick="sendLike()">👍</button>
@@ -1201,611 +1521,577 @@
     const CLOUDINARY_PRESET = "unsigned_preset";
 
     let currentUser = null;
-    let currentChatFriend = null;
-    let unsubscribeMsgs = null;
+    let currentChatEntity = null; // Friend or Group object
+    let currentChatType = null; // 'direct' or 'group'
+    let currentGroupMembersCache = {}; // Store {uid: {username, photoUrl, role}} for current group
+
     let unsubscribeFriends = null;
+    let unsubscribeGroups = null;
+    let unsubscribeMsgs = null;
     let unsubscribeTyping = null;
-    let friendToDelete = null;
+
     let typingTimeout = null;
-    
-    // --- THEME LOGIC ---
-    function toggleTheme() {
-        const html = document.documentElement;
-        const current = html.getAttribute("data-theme");
-        const target = current === "dark" ? "light" : "dark";
-        html.setAttribute("data-theme", target);
-        localStorage.setItem("theme", target);
-    }
-    
-    // Load saved theme
-    const savedTheme = localStorage.getItem("theme");
-    if(savedTheme) document.documentElement.setAttribute("data-theme", savedTheme);
+    let friendToDelete = null;
+    let myFriendsList = [];
 
-    // Helper: Title Case
-    function toTitleCase(str) {
-        if (!str) return "";
-        return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    // --- THEME ---
+    function handleThemeToggle(checkbox) {
+      const target = checkbox.checked ? "dark" : "light";
+      document.documentElement.setAttribute("data-theme", target);
+      localStorage.setItem("theme", target);
     }
-
     window.addEventListener("DOMContentLoaded", () => {
+      const savedTheme = localStorage.getItem("theme");
+      const checkbox = document.getElementById("themeCheckbox");
+      if (savedTheme === "dark") { checkbox.checked = true; document.documentElement.setAttribute("data-theme", "dark"); }
+      else { checkbox.checked = false; document.documentElement.setAttribute("data-theme", "light"); }
+
       const storedId = localStorage.getItem("uid");
       if (storedId) fetchUser(storedId);
       else document.getElementById("home").style.display = "flex";
 
-      const loginAction = () => document.getElementById("loginBtn").click();
-      document.getElementById("username").addEventListener("keydown", (e) => { if(e.key === "Enter") loginAction(); });
-      document.getElementById("password").addEventListener("keydown", (e) => { if(e.key === "Enter") loginAction(); });
+      // --- ENTER KEY LISTENERS ---
+      document.getElementById("username").addEventListener("keypress", function (event) {
+        if (event.key === "Enter") document.getElementById("loginBtn").click();
+      });
+      document.getElementById("password").addEventListener("keypress", function (event) {
+        if (event.key === "Enter") document.getElementById("loginBtn").click();
+      });
+      document.getElementById("msgInput").addEventListener("keypress", function (event) {
+        if (event.key === "Enter") {
+          event.preventDefault(); 
+          sendMessage();
+        }
+      });
     });
 
-    document.getElementById("startBtn").onclick = () => {
-      const modal = document.getElementById("loginModal");
-      modal.classList.add("active");
-      const box = modal.querySelector('.box');
-      box.classList.remove('animate-zoom');
-      void box.offsetWidth; 
-      box.classList.add('animate-zoom');
-    };
+    // --- UTILS ---
+    function toTitleCase(str) { return str ? str.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : ""; }
+    function closeModal(id) { document.getElementById(id).classList.remove("active"); }
 
+    // --- AUTH ---
+    document.getElementById("startBtn").onclick = () => {
+      document.getElementById("loginModal").classList.add("active");
+      document.querySelector("#loginModal .box").classList.add("animate-zoom");
+    };
     function closeLoginAndShowHome() {
       document.getElementById("loginModal").classList.remove("active");
       document.getElementById("home").style.display = "flex";
-      document.getElementById("profile").style.display = "none";
-      document.getElementById("chat").style.display = "none";
     }
-
+    document.getElementById("loginBtn").onclick = async () => {
+      const u = document.getElementById("username").value.trim().toLowerCase();
+      const p = document.getElementById("password").value;
+      if (!u || !p) return alert("Please fill fields");
+      const snap = await db.collection("users").where("username", "==", u).get();
+      if (!snap.empty) {
+        if (snap.docs[0].data().password === p) fetchUser(snap.docs[0].id);
+        else alert("Wrong password");
+      } else {
+        const ref = await db.collection("users").add({ username: u, password: p, photoUrl: "", friends: [], created: firebase.firestore.FieldValue.serverTimestamp() });
+        fetchUser(ref.id);
+      }
+    };
     async function fetchUser(uid) {
-      try {
-        const doc = await db.collection("users").doc(uid).get();
-        if (doc.exists) {
-          currentUser = { id: doc.id, ...doc.data() };
-          currentUser.username = toTitleCase(currentUser.username); 
-          localStorage.setItem("uid", uid);
-
-          document.getElementById("loginModal").classList.remove("active");
-          document.getElementById("home").style.display = "none";
-
-          const activeChat = localStorage.getItem("activeChat");
-          if (activeChat) {
-            const friend = JSON.parse(activeChat);
-            showChatInbox(); 
-            setupRealTimeFriendList(); 
-            openChat(friend); 
-          } else {
-            showChatInbox(); 
-          }
-
-        } else {
-          localStorage.clear();
-          location.reload();
-        }
-      } catch (e) { console.error(e); }
+      const doc = await db.collection("users").doc(uid).get();
+      if (doc.exists) {
+        currentUser = { id: doc.id, ...doc.data() };
+        currentUser.username = toTitleCase(currentUser.username);
+        localStorage.setItem("uid", uid);
+        document.getElementById("loginModal").classList.remove("active");
+        showChatInbox();
+      } else { localStorage.clear(); location.reload(); }
     }
+    document.getElementById("logoutBtn").onclick = () => {
+      if (confirm("Log out?")) { localStorage.clear(); location.reload(); }
+    };
 
+    // --- NAVIGATION ---
     function showChatInbox() {
       document.getElementById("home").style.display = "none";
       document.getElementById("profile").style.display = "none";
       document.getElementById("chat").style.display = "flex";
       backToFriends();
-      setupRealTimeFriendList();
+      setupSidebarData();
     }
-
-    document.getElementById("loginBtn").onclick = async () => {
-      const u = document.getElementById("username").value.trim().toLowerCase();
-      const p = document.getElementById("password").value;
-      if (!u || !p) return alert("Please fill all fields");
-
-      const snap = await db.collection("users").where("username", "==", u).get();
-      if (!snap.empty) {
-        const doc = snap.docs[0];
-        if (doc.data().password === p) {
-          fetchUser(doc.id);
-        } else {
-          alert("Incorrect password");
-        }
-      } else {
-        const ref = await db.collection("users").add({
-          username: u, password: p, photoUrl: "", friends: [],
-          created: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        fetchUser(ref.id);
-      }
-    };
-
-    document.getElementById("logoutBtn").onclick = () => {
-      if(!confirm("Are you sure you want to log out?")) return;
-      localStorage.clear();
-      currentUser = null;
-      currentChatFriend = null;
-      location.reload();
-    };
-
-    function showProfilePage() {
-      document.getElementById("profile").style.display = "flex";
+    function goToProfile() {
       document.getElementById("chat").style.display = "none";
-      document.getElementById("home").style.display = "none";
-
+      document.getElementById("profile").style.display = "flex";
       document.getElementById("profileNameDisplay").textContent = currentUser.username;
-      const avatarDiv = document.getElementById("myAvatarDisplay");
-      if (currentUser.photoUrl) avatarDiv.innerHTML = `<img src="${currentUser.photoUrl}" />`;
-      else avatarDiv.innerHTML = `<div>👤</div>`;
+      const av = document.getElementById("myAvatarDisplay");
+      av.innerHTML = currentUser.photoUrl ? `<img src="${currentUser.photoUrl}" />` : `<div>👤</div>`;
     }
+    document.getElementById("goToChatsBtn").onclick = showChatInbox;
 
-    document.getElementById("openEditProfileBtn").onclick = () => {
-      const modal = document.getElementById("editProfileModal");
-      modal.classList.add("active");
-      modal.querySelector('.box').classList.add('animate-zoom');
-      document.getElementById("newUsernameInput").value = currentUser.username;
-      document.getElementById("newPhotoUrlInput").value = currentUser.photoUrl || "";
-    };
-
-    document.getElementById("saveProfileBtn").onclick = async () => {
-      const newName = document.getElementById("newUsernameInput").value.trim();
-      const newNameLower = newName.toLowerCase();
-      let newUrl = document.getElementById("newPhotoUrlInput").value.trim();
-      const file = document.getElementById("profilePicUpload").files[0];
-
-      if (file) newUrl = await uploadToCloudinary(file);
-
-      if (newNameLower !== currentUser.username.toLowerCase()) {
-        const check = await db.collection("users").where("username", "==", newNameLower).get();
-        if (!check.empty) return alert("Username taken!");
-      }
-
-      await db.collection("users").doc(currentUser.id).update({ username: newNameLower, photoUrl: newUrl });
-      
-      currentUser.username = toTitleCase(newNameLower);
-      currentUser.photoUrl = newUrl;
-      closeModal('editProfileModal');
-      showProfilePage();
-    };
-
-    document.getElementById("addFriendBtn").onclick = () => {
-      const modal = document.getElementById("addFriendModal");
-      modal.classList.add("active");
-      modal.querySelector('.box').classList.add('animate-zoom');
-    };
-
-    document.getElementById("searchFriendBtn").onclick = async () => {
-      const targetName = document.getElementById("friendUsernameInput").value.trim().toLowerCase();
-      if (targetName === currentUser.username.toLowerCase()) return alert("Cannot add yourself.");
-
-      const snap = await db.collection("users").where("username", "==", targetName).get();
-      if (snap.empty) return alert("User not found.");
-
-      const friendDoc = snap.docs[0];
-      const friendId = friendDoc.id;
-      const friendData = friendDoc.data();
-
-      if (!currentUser.friends.includes(friendId)) {
-        const myNewFriends = [...currentUser.friends, friendId];
-        await db.collection("users").doc(currentUser.id).update({ friends: myNewFriends });
-      } else {
-        return alert("Already friends!");
-      }
-
-      const targetFriends = friendData.friends || [];
-      if (!targetFriends.includes(currentUser.id)) {
-        const theirNewFriends = [...targetFriends, currentUser.id];
-        await db.collection("users").doc(friendId).update({ friends: theirNewFriends });
-      }
-
-      alert("Friend added!");
-      closeModal('addFriendModal');
-      document.getElementById("friendUsernameInput").value = "";
-    };
-
-    document.getElementById("goToChatsBtn").onclick = () => {
-      showChatInbox();
-    };
-
-    function goToProfile() { showProfilePage(); }
-
-    function setupRealTimeFriendList() {
+    // --- SIDEBAR ---
+    function setupSidebarData() {
       if (unsubscribeFriends) return;
-
+      unsubscribeFriends = db.collection("users").doc(currentUser.id).onSnapshot(async (doc) => {
+        const data = doc.data();
+        currentUser.friends = data.friends || [];
+        if (currentUser.friends.length > 0) {
+          // Fetch friends and filter out any that might have been deleted
+          const promises = currentUser.friends.map(fid => db.collection("users").doc(fid).get());
+          const docs = await Promise.all(promises);
+          myFriendsList = docs
+            .filter(d => d.exists) // IMPORTANT: Filter out deleted users
+            .map(d => ({ id: d.id, ...d.data(), type: 'direct' }));
+        } else { myFriendsList = []; }
+        renderSidebar();
+      });
+      unsubscribeGroups = db.collection("groups").where("members", "array-contains", currentUser.id).onSnapshot(snap => {
+        window.myGroupsList = snap.docs.map(d => ({ id: d.id, ...d.data(), type: 'group' }));
+        renderSidebar();
+      });
+    }
+    function renderSidebar() {
       const container = document.getElementById("friendsListContainer");
+      container.innerHTML = "";
+      const combined = [...(window.myGroupsList || []), ...myFriendsList];
+      if (combined.length === 0) { container.innerHTML = "<div style='text-align:center;margin-top:40px;color:var(--text-sec);'>No chats yet.<br>Click Profile to add friends.</div>"; return; }
 
-      unsubscribeFriends = db.collection("users").doc(currentUser.id)
-        .onSnapshot(async (doc) => {
-          const data = doc.data();
-          currentUser.friends = data.friends || [];
+      combined.forEach(item => {
+        const div = document.createElement("div"); div.className = "user-item";
+        const isGroup = item.type === 'group';
+        const name = isGroup ? item.name : toTitleCase(item.username);
+        const imgHtml = item.photoUrl ? `<img src="${item.photoUrl}">` : `<div class="placeholder">${isGroup ? '👥' : '👤'}</div>`;
+        div.innerHTML = `<div class="user-info-group">${imgHtml}<div><span>${name}</span>${isGroup ? `<span class="group-tag">Group</span>` : ''}</div></div>`;
 
-          if (!currentUser.friends || currentUser.friends.length === 0) {
-            container.innerHTML = "<div style='text-align:center;margin-top:40px;color:var(--text-sec);'>No friends yet.<br>Click 'Profile' to add some!</div>";
-            return;
-          }
-
-          container.innerHTML = "";
-
-          for (const fid of currentUser.friends) {
-            const fDoc = await db.collection("users").doc(fid).get();
-            if (fDoc.exists) {
-              const fData = fDoc.data();
-              const div = document.createElement("div");
-              div.className = "user-item";
-
-              const imgHTML = fData.photoUrl
-                ? `<img src="${fData.photoUrl}">`
-                : `<div class="placeholder">👤</div>`;
-
-              const infoDiv = document.createElement("div");
-              infoDiv.className = "user-info-group";
-              infoDiv.innerHTML = `${imgHTML} <span>${toTitleCase(fData.username)}</span>`;
-              infoDiv.onclick = () => openChat({ id: fDoc.id, ...fData });
-
-              const menuBtn = document.createElement("button");
-              menuBtn.className = "user-options-btn";
-              menuBtn.innerHTML = "⋮";
-              menuBtn.onclick = (e) => {
-                e.stopPropagation();
-                showDeleteModal(fDoc.id, fData.username);
-              };
-
-              div.appendChild(infoDiv);
-              div.appendChild(menuBtn);
-              container.appendChild(div);
-            }
-          }
-        });
+        if (!isGroup) {
+          const menuBtn = document.createElement("button"); menuBtn.className = "user-options-btn"; menuBtn.innerHTML = "⋮";
+          menuBtn.onclick = (e) => { e.stopPropagation(); showDeleteModal(item.id, item.username); };
+          div.appendChild(menuBtn);
+          div.oncontextmenu = (e) => { e.preventDefault(); showContextForCreateGroup(e, item); };
+        }
+        
+        // Pass the entire item object to openChat to ensure ID is present
+        div.onclick = () => openChat(item, item.type);
+        container.appendChild(div);
+      });
     }
 
-    function showDeleteModal(fid, fname) {
-      friendToDelete = fid;
-      document.getElementById("deleteTargetName").textContent = toTitleCase(fname);
-      const modal = document.getElementById("deleteChatModal");
-      modal.classList.add("active");
-      modal.querySelector('.box').classList.add('animate-zoom');
-    }
+    // --- CHAT LOGIC ---
+    async function openChat(entity, type) {
+      if (!entity || !entity.id) return console.error("Invalid chat entity");
+      currentChatEntity = entity;
+      currentChatType = type;
+      currentGroupMembersCache = {}; 
 
-    document.getElementById("confirmDeleteBtn").onclick = async () => {
-      if (!friendToDelete) return;
-      const newFriends = currentUser.friends.filter(id => id !== friendToDelete);
-      await db.collection("users").doc(currentUser.id).update({ friends: newFriends });
-      closeModal("deleteChatModal");
-    };
+      document.getElementById("chat").classList.remove("show-users");
+      document.getElementById("chat").classList.add("show-chat");
 
-    function openChat(friend) {
-      currentChatFriend = friend;
-      localStorage.setItem("activeChat", JSON.stringify(friend));
-
-      const chatDiv = document.getElementById("chat");
-      chatDiv.classList.remove("show-users");
-      chatDiv.classList.add("show-chat");
-
-      document.getElementById("chatHeaderName").textContent = toTitleCase(friend.username);
+      const name = type === 'group' ? entity.name : toTitleCase(entity.username);
+      document.getElementById("chatHeaderName").textContent = name;
       const iconDiv = document.getElementById("chatHeaderIcon");
-      if (friend.photoUrl) iconDiv.innerHTML = `<img src="${friend.photoUrl}">`;
-      else iconDiv.innerHTML = `<div>👤</div>`;
+      if (entity.photoUrl) iconDiv.innerHTML = `<img src="${entity.photoUrl}">`;
+      else iconDiv.innerHTML = `<div style="font-size:24px;">${type === 'group' ? '👥' : '👤'}</div>`;
 
-      document.getElementById("chatSearchBar").classList.remove("active");
-      document.getElementById("messageSearchInput").value = "";
+      if (type === 'group') {
+        const memberIds = entity.members || [];
+        const promises = memberIds.map(uid => db.collection("users").doc(uid).get());
+        const docs = await Promise.all(promises);
+        docs.forEach(d => { if (d.exists) currentGroupMembersCache[d.id] = d.data(); });
+      }
 
-      setupTypingListener();
+      updateChatDropdown();
+      if (type === 'direct') setupTypingListener();
+      else document.getElementById("typingIndicator").style.display = "none";
       loadMessages();
-    }
-
-    function backToFriends() {
-      localStorage.removeItem("activeChat");
-      const chatDiv = document.getElementById("chat");
-      chatDiv.classList.remove("show-chat");
-      chatDiv.classList.add("show-users");
-      if (unsubscribeMsgs) unsubscribeMsgs();
-      if (unsubscribeTyping) unsubscribeTyping();
-      currentChatFriend = null;
-      
-      document.getElementById("chatMenuDropdown").classList.remove("active");
-      document.getElementById("chatSearchBar").classList.remove("active");
-    }
-
-    function showFriendProfile() {
-      if (!currentChatFriend) return;
-      const modal = document.getElementById("friendProfileModal");
-      modal.classList.add("active");
-      modal.querySelector('.box').classList.add('animate-zoom');
-      document.getElementById("friendModalName").textContent = toTitleCase(currentChatFriend.username);
-      const av = document.getElementById("friendModalAvatar");
-      if (currentChatFriend.photoUrl) av.innerHTML = `<img src="${currentChatFriend.photoUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
-      else av.innerHTML = `<div style="width:100%;height:100%;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center;font-size:40px;">👤</div>`;
-    }
-
-    // --- TYPING INDICATOR LOGIC ---
-    function handleInput() {
-        toggleSendBtn();
-        const chatId = [currentUser.id, currentChatFriend.id].sort().join("_");
-        db.collection("chats").doc(chatId).set({
-            typing: { [currentUser.id]: true }
-        }, { merge: true });
-
-        if (typingTimeout) clearTimeout(typingTimeout);
-        typingTimeout = setTimeout(() => {
-            db.collection("chats").doc(chatId).set({
-                typing: { [currentUser.id]: false }
-            }, { merge: true });
-        }, 1500);
-    }
-
-    function setupTypingListener() {
-        const chatId = [currentUser.id, currentChatFriend.id].sort().join("_");
-        const ind = document.getElementById("typingIndicator");
-
-        unsubscribeTyping = db.collection("chats").doc(chatId).onSnapshot(doc => {
-            if(doc.exists) {
-                const data = doc.data();
-                const typingMap = data.typing || {};
-                const isFriendTyping = typingMap[currentChatFriend.id];
-                
-                if(isFriendTyping) {
-                    ind.style.display = "flex";
-                } else {
-                    ind.style.display = "none";
-                }
-            }
-        });
     }
 
     function loadMessages() {
       if (unsubscribeMsgs) unsubscribeMsgs();
-      const chatId = [currentUser.id, currentChatFriend.id].sort().join("_");
       const msgsDiv = document.getElementById("messages");
 
-      unsubscribeMsgs = db.collection("chats").doc(chatId).collection("msgs")
-        .orderBy("time")
-        .onSnapshot(snap => {
-          msgsDiv.innerHTML = "";
-          let lastDate = null;
-          let lastTimeStr = null; // Track time
-
-          snap.forEach(doc => {
-            const m = doc.data();
-            const msgId = doc.id;
-            const date = m.time ? m.time.toDate() : new Date();
-
-            const dateStr = date.toDateString();
-            const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
-            // 1. DATE HEADER
-            if (dateStr !== lastDate) {
-              const sep = document.createElement("div");
-              sep.className = "date-separator";
-              const isToday = new Date().toDateString() === dateStr;
-              sep.textContent = isToday ? "Today" : date.toLocaleDateString();
-              msgsDiv.appendChild(sep);
-              lastDate = dateStr;
-              lastTimeStr = null; // Reset time tracker on new day
-            }
-
-            // 2. STACKED TIME HEADER (If time changes minute)
-            if (timeStr !== lastTimeStr) {
-                const timeDiv = document.createElement("div");
-                timeDiv.className = "time-separator";
-                timeDiv.textContent = timeStr;
-                msgsDiv.appendChild(timeDiv);
-                lastTimeStr = timeStr;
-            }
-
-            // 3. MESSAGE ROW
-            const rowDiv = document.createElement("div");
-            const isMe = m.sender === currentUser.id;
-            rowDiv.className = "msg-row " + (isMe ? "me" : "other");
-
-            if (isMe) {
-              // Sender: Menu on Left, Bubble on Right
-              const menuContainer = document.createElement("div");
-              menuContainer.className = "msg-menu-container";
-              menuContainer.innerHTML = `
-                            <button class="msg-dots-btn">⋮</button>
-                            <div class="msg-delete-popup" onclick="deleteMessage('${chatId}', '${msgId}')">Delete</div>
-                        `;
-              const btn = menuContainer.querySelector('.msg-dots-btn');
-              const popup = menuContainer.querySelector('.msg-delete-popup');
-              btn.onclick = () => { popup.style.display = popup.style.display === 'block' ? 'none' : 'block'; };
-              
-              const bubble = createBubble(m);
-              
-              rowDiv.appendChild(bubble); // Bubble 1st
-              rowDiv.appendChild(menuContainer); // Menu 2nd (reversed via flex)
-            } else {
-              // Receiver: Bubble on Left, Menu on Right
-              const bubble = createBubble(m);
-              
-              const menuContainer = document.createElement("div");
-              menuContainer.className = "msg-menu-container";
-              menuContainer.innerHTML = `
-                            <button class="msg-dots-btn">⋮</button>
-                            <div class="msg-delete-popup" style="left:0" onclick="deleteMessage('${chatId}', '${msgId}')">Delete</div>
-                        `;
-              const btn = menuContainer.querySelector('.msg-dots-btn');
-              const popup = menuContainer.querySelector('.msg-delete-popup');
-              btn.onclick = () => { popup.style.display = popup.style.display === 'block' ? 'none' : 'block'; };
-
-              rowDiv.appendChild(bubble);
-              rowDiv.appendChild(menuContainer);
-            }
-
-            msgsDiv.appendChild(rowDiv);
-          });
-          msgsDiv.scrollTop = msgsDiv.scrollHeight;
-          filterMessages();
-        });
-    }
-
-    function createBubble(m) {
-        const bubble = document.createElement("div");
-        bubble.className = "msg-bubble";
-
-        let content = "";
-        if (m.type === "text") {
-            content = m.content;
-        } else if (m.type === "file") {
-            if (m.fileType && m.fileType.startsWith("image")) {
-                content = `<img src="${m.url}">`;
-            } else {
-                content = `<a href="${m.url}" target="_blank" style="color:inherit;text-decoration:underline;">📄 File Attachment</a>`;
-            }
-        } else if (m.type === "like") {
-            bubble.className += " like-msg";
-            content = "👍";
+      let ref;
+      // Robust Chat ID Generation
+      if (currentChatType === 'direct') {
+        // Ensure IDs are valid before joining
+        if(!currentUser.id || !currentChatEntity.id) {
+           alert("Error: Chat ID invalid. Please refresh.");
+           return;
         }
-        
-        bubble.innerHTML = content;
-        return bubble;
-    }
-
-    async function deleteMessage(chatId, msgId) {
-      if (confirm("Delete this message?")) {
-        await db.collection("chats").doc(chatId).collection("msgs").doc(msgId).delete();
+        ref = db.collection("chats").doc([currentUser.id, currentChatEntity.id].sort().join("_")).collection("msgs");
       }
+      else ref = db.collection("groups").doc(currentChatEntity.id).collection("msgs");
+
+      unsubscribeMsgs = ref.orderBy("time").onSnapshot(snap => {
+        msgsDiv.innerHTML = "";
+        let lastDate = null;
+        let lastTimeStr = null; 
+        
+        snap.forEach(doc => {
+          const m = doc.data();
+          // DATE LOGIC
+          const date = m.time ? m.time.toDate() : new Date();
+          const dateStr = date.toDateString();
+          // TIME LOGIC (Formatted)
+          const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+          // 1. DATE SEPARATOR
+          if (dateStr !== lastDate) {
+            const sep = document.createElement("div"); sep.className = "date-separator";
+            const today = new Date().toDateString();
+            const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+            
+            if(dateStr === today) sep.textContent = "Today";
+            else if(dateStr === yesterday.toDateString()) sep.textContent = "Yesterday";
+            else sep.textContent = date.toLocaleDateString();
+            
+            msgsDiv.appendChild(sep); 
+            lastDate = dateStr;
+            lastTimeStr = null; // Reset time tracking on new day
+          }
+
+          // 2. TIME SEPARATOR (ABOVE MIDDLE)
+          if (timeStr !== lastTimeStr) {
+             const tSep = document.createElement("div");
+             tSep.className = "time-separator";
+             tSep.textContent = timeStr;
+             msgsDiv.appendChild(tSep);
+             lastTimeStr = timeStr;
+          }
+
+          if (m.type === 'system') {
+            const sysDiv = document.createElement("div"); sysDiv.className = "system-msg"; sysDiv.textContent = m.content;
+            msgsDiv.appendChild(sysDiv); return;
+          }
+
+          const rowDiv = document.createElement("div");
+          const isMe = m.sender === currentUser.id;
+          rowDiv.className = "msg-row " + (isMe ? "me" : "other");
+
+          let senderIconHTML = "";
+          let displayName = "";
+
+          if (!isMe && currentChatType === 'group') {
+            const senderData = currentGroupMembersCache[m.sender] || {};
+            const avatar = senderData.photoUrl ? `<img src="${senderData.photoUrl}">` : `<div>${(senderData.username || "?").charAt(0).toUpperCase()}</div>`;
+            senderIconHTML = `<div class="msg-avatar-icon">${avatar}</div>`;
+            const nicknames = currentChatEntity.nicknames || {};
+            const nick = nicknames[m.sender];
+            const realName = toTitleCase(senderData.username || "User");
+            displayName = `<div class="msg-sender-name">${nick || realName}</div>`;
+          }
+
+          let bubbleContent = "";
+          if (m.type === "text") bubbleContent = m.content;
+          else if (m.type === "file") bubbleContent = `<img src="${m.url}">`;
+          else if (m.type === "like") bubbleContent = "👍";
+
+          const bubbleClass = m.type === 'like' ? "msg-bubble like-msg" : "msg-bubble";
+          const menuHTML = `<div class="msg-menu-container"><button class="msg-dots-btn">⋮</button><div class="msg-delete-popup" onclick="deleteMessage('${doc.ref.path}')">Delete</div></div>`;
+
+          let finalHTML = "";
+          if (isMe) {
+            finalHTML = `
+                <div class="${bubbleClass}">
+                    ${bubbleContent}
+                </div>
+                ${menuHTML}
+            `;
+          } else {
+            finalHTML = `
+                ${senderIconHTML}
+                <div style="display:flex; flex-direction:column;">
+                    ${displayName}
+                    <div class="${bubbleClass}">
+                        ${bubbleContent}
+                    </div>
+                </div>
+                ${menuHTML}
+            `;
+          }
+
+          rowDiv.innerHTML = finalHTML;
+          const btn = rowDiv.querySelector('.msg-dots-btn');
+          const popup = rowDiv.querySelector('.msg-delete-popup');
+          if (btn) btn.onclick = () => { popup.style.display = popup.style.display === 'block' ? 'none' : 'block'; };
+
+          msgsDiv.appendChild(rowDiv);
+        });
+        msgsDiv.scrollTop = msgsDiv.scrollHeight;
+        filterMessages();
+      });
     }
 
     async function sendMessage() {
       const input = document.getElementById("msgInput");
       const txt = input.value.trim();
       const file = document.getElementById("fileInput").files[0];
-
+      
       if (!txt && !file) return;
 
-      const chatId = [currentUser.id, currentChatFriend.id].sort().join("_");
+      // Optimistic UI Clear
+      input.value = "";
+      toggleSendBtn(); 
 
-      if (file) {
-        const url = await uploadToCloudinary(file);
-        await db.collection("chats").doc(chatId).collection("msgs").add({
-          sender: currentUser.id, type: "file", url: url, fileType: file.type,
-          time: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        document.getElementById("fileInput").value = "";
-        document.getElementById("filePreviewName").textContent = "";
+      let ref;
+      if (currentChatType === 'direct') {
+        // Ensure IDs are valid before joining
+        if(!currentUser.id || !currentChatEntity.id) {
+           alert("Error: Chat ID invalid. Please refresh.");
+           return;
+        }
+        ref = db.collection("chats").doc([currentUser.id, currentChatEntity.id].sort().join("_")).collection("msgs");
       }
+      else ref = db.collection("groups").doc(currentChatEntity.id).collection("msgs");
 
-      if (txt) {
-        await db.collection("chats").doc(chatId).collection("msgs").add({
-          sender: currentUser.id, type: "text", content: txt,
-          time: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        input.value = "";
+      const base = { sender: currentUser.id, time: firebase.firestore.FieldValue.serverTimestamp() };
+      
+      try {
+          if (file) {
+            const url = await uploadToCloudinary(file);
+            await ref.add({ ...base, type: "file", url: url });
+            document.getElementById("fileInput").value = ""; document.getElementById("filePreviewName").textContent = "";
+          }
+          if (txt) { 
+              await ref.add({ ...base, type: "text", content: txt }); 
+          }
+      } catch(e) {
+          console.error("Send Error", e);
+          alert("Failed to send message.");
       }
-      
-      db.collection("chats").doc(chatId).set({
-          typing: { [currentUser.id]: false }
-      }, { merge: true });
-      
-      toggleSendBtn();
     }
 
-    async function sendLike() {
-      const chatId = [currentUser.id, currentChatFriend.id].sort().join("_");
-      await db.collection("chats").doc(chatId).collection("msgs").add({
-        sender: currentUser.id, type: "like",
-        time: firebase.firestore.FieldValue.serverTimestamp()
+    async function sendSystemMessage(text) {
+      if (currentChatType !== 'group') return;
+      await db.collection("groups").doc(currentChatEntity.id).collection("msgs").add({
+        type: 'system', content: text, time: firebase.firestore.FieldValue.serverTimestamp()
       });
     }
 
-    function toggleSendBtn() {
-      const txt = document.getElementById("msgInput").value.trim();
-      const hasFile = document.getElementById("fileInput").files.length > 0;
+    async function sendLike() {
+      const base = { sender: currentUser.id, type: "like", time: firebase.firestore.FieldValue.serverTimestamp() };
+      if (currentChatType === 'direct') await db.collection("chats").doc([currentUser.id, currentChatEntity.id].sort().join("_")).collection("msgs").add(base);
+      else await db.collection("groups").doc(currentChatEntity.id).collection("msgs").add(base);
+    }
+    async function deleteMessage(path) { if (confirm("Delete?")) await db.doc(path).delete(); }
 
-      if (txt || hasFile) {
-        document.getElementById("sendBtn").style.display = "flex";
-        document.getElementById("likeBtn").style.display = "none";
+    // --- GROUP MANAGEMENT ---
+    function updateChatDropdown() {
+      const menu = document.getElementById("chatMenuDropdown");
+      menu.innerHTML = "";
+      if (currentChatType === 'direct') {
+        menu.innerHTML = `
+          <button class="dropdown-item" onclick="showFriendProfile();toggleChatMenu()">👤 Profile</button>
+          <button class="dropdown-item" onclick="toggleSearch();toggleChatMenu()">🔍 Search</button>
+          <button class="dropdown-item" onclick="alert('🔒 Privacy: End-to-end encryption is enabled.');toggleChatMenu()">🔒 Privacy</button>
+          <button class="dropdown-item danger" onclick="deleteConversation();toggleChatMenu()">🗑️ Delete</button>
+        `;
       } else {
-        document.getElementById("sendBtn").style.display = "none";
-        document.getElementById("likeBtn").style.display = "flex";
+        const isAdmin = currentChatEntity.admin === currentUser.id;
+        menu.innerHTML = `<button class="dropdown-item" onclick="toggleSearch();toggleChatMenu()">🔍 Search</button><button class="dropdown-item" onclick="openManageGroup('members');toggleChatMenu()">👥 Members / Nicknames</button>`;
+        menu.innerHTML += `<button class="dropdown-item" onclick="alert('🔒 Privacy: This is a private group.');toggleChatMenu()">🔒 Privacy</button>`;
+
+        if (isAdmin) {
+          menu.innerHTML += `<button class="dropdown-item" onclick="openManageGroup('add');toggleChatMenu()">➕ Add Member</button><button class="dropdown-item" onclick="openManageGroup('edit');toggleChatMenu()">✎ Edit Info</button><button class="dropdown-item danger" onclick="deleteGroup();toggleChatMenu()">🗑 Delete Group</button>`;
+        } else {
+          menu.innerHTML += `<button class="dropdown-item danger" onclick="leaveGroup();toggleChatMenu()">🚪 Leave Group</button>`;
+        }
       }
     }
 
-    function handleFileSelect() {
-      const f = document.getElementById("fileInput").files[0];
-      document.getElementById("filePreviewName").textContent = f ? f.name : "";
-      toggleSendBtn();
+    function openManageGroup(mode) {
+      const modal = document.getElementById("manageGroupModal");
+      const content = document.getElementById("manageGroupContent");
+      modal.classList.add("active"); modal.querySelector(".box").classList.add("animate-zoom");
+      content.innerHTML = "";
+
+      if (mode === 'add') {
+        content.innerHTML = `<p>Add Member by Username</p><input type="text" id="groupAddUserInput" placeholder="Username"/><button onclick="addGroupMember()" style="width:100%">Add</button>`;
+      } else if (mode === 'edit') {
+        content.innerHTML = `<p>Group Name</p><input type="text" id="groupEditNameInput" value="${currentChatEntity.name}" /><p>Group Icon</p><input type="file" id="groupEditIconInput" /><button class="updateGroupInfo" onclick="updateGroupInfo()" style="width:100%">Save</button>`;
+      } else if (mode === 'members') {
+        content.innerHTML = `<p>Members & Nicknames</p><div id="groupMemberList" class="member-list">Loading...</div>`;
+        renderMembersList();
+      }
+    }
+
+    async function renderMembersList() {
+      const list = document.getElementById("groupMemberList");
+      list.innerHTML = "";
+      const isAdminMe = currentChatEntity.admin === currentUser.id;
+
+      for (const uid of currentChatEntity.members) {
+        let uData = currentGroupMembersCache[uid];
+        if (!uData) {
+          const doc = await db.collection("users").doc(uid).get();
+          uData = doc.data();
+          currentGroupMembersCache[uid] = uData;
+        }
+
+        const isOwner = currentChatEntity.admin === uid;
+        const currentNick = (currentChatEntity.nicknames && currentChatEntity.nicknames[uid]) || "";
+
+        const row = document.createElement("div"); row.className = "member-row";
+
+        let roleHtml = isOwner ? `<span class="member-role role-admin">Admin</span>` : `<span class="member-role">Member</span>`;
+        let actionsHtml = "";
+        actionsHtml += `<button class="btn-small" onclick="setNickname('${uid}', '${toTitleCase(uData.username)}')">Nick</button>`;
+        if (isAdminMe && !isOwner) {
+          actionsHtml += `<button class="btn-small btn-remove" onclick="removeMember('${uid}', '${toTitleCase(uData.username)}')">Kick</button>`;
+        }
+
+        row.innerHTML = `
+                <div class="member-info">
+                    <span style="font-weight:600">${toTitleCase(uData.username)} ${currentNick ? `(${currentNick})` : ''}</span>
+                    ${roleHtml}
+                </div>
+                <div>${actionsHtml}</div>
+            `;
+        list.appendChild(row);
+      }
+    }
+
+    async function setNickname(uid, oldName) {
+      const nick = prompt(`Set nickname for ${oldName}:`);
+      if (nick === null) return;
+      const nicknames = currentChatEntity.nicknames || {};
+      if (nick === "") delete nicknames[uid];
+      else nicknames[uid] = nick;
+
+      await db.collection("groups").doc(currentChatEntity.id).update({ nicknames: nicknames });
+      currentChatEntity.nicknames = nicknames;
+      renderMembersList();
+    }
+
+    async function addGroupMember() {
+      const uname = document.getElementById("groupAddUserInput").value.trim().toLowerCase();
+      if (!uname) return;
+      const snap = await db.collection("users").where("username", "==", uname).get();
+      if (snap.empty) return alert("User not found");
+
+      const newUid = snap.docs[0].id;
+      const newName = toTitleCase(snap.docs[0].data().username);
+      if (currentChatEntity.members.includes(newUid)) return alert("Already in group");
+
+      const newMembers = [...currentChatEntity.members, newUid];
+      await db.collection("groups").doc(currentChatEntity.id).update({ members: newMembers });
+      await sendSystemMessage(`${currentUser.username} added ${newName}`);
+      currentChatEntity.members = newMembers;
+      alert("Added!"); closeModal("manageGroupModal");
+      currentGroupMembersCache[newUid] = snap.docs[0].data();
+    }
+
+    async function removeMember(uid, name) {
+      if (!confirm(`Remove ${name}?`)) return;
+      const newMembers = currentChatEntity.members.filter(m => m !== uid);
+      await db.collection("groups").doc(currentChatEntity.id).update({ members: newMembers });
+      await sendSystemMessage(`${name} was removed by Admin`);
+      currentChatEntity.members = newMembers;
+      renderMembersList();
+    }
+
+    async function leaveGroup() {
+      if (!confirm("Leave group?")) return;
+      const newMembers = currentChatEntity.members.filter(m => m !== currentUser.id);
+      await db.collection("groups").doc(currentChatEntity.id).update({ members: newMembers });
+      await sendSystemMessage(`${currentUser.username} left the group`);
+      backToFriends();
+    }
+
+    async function deleteGroup() {
+      if (!confirm("Delete group permanently?")) return;
+      await db.collection("groups").doc(currentChatEntity.id).delete();
+      backToFriends();
+    }
+
+    async function updateGroupInfo() {
+      const newName = document.getElementById("groupEditNameInput").value.trim();
+      const file = document.getElementById("groupEditIconInput").files[0];
+      let data = { name: newName };
+      if (file) data.photoUrl = await uploadToCloudinary(file);
+      await db.collection("groups").doc(currentChatEntity.id).update(data);
+      currentChatEntity.name = newName;
+      if (data.photoUrl) currentChatEntity.photoUrl = data.photoUrl;
+      document.getElementById("chatHeaderName").textContent = newName;
+      closeModal("manageGroupModal");
+    }
+
+    // --- Create Group & Context Menu ---
+    function openCreateGroupModal() { document.getElementById("createGroupModal").classList.add("active"); }
+    document.getElementById("doCreateGroupBtn").onclick = async () => {
+      const name = document.getElementById("groupNameInput").value.trim();
+      const file = document.getElementById("groupIconUpload").files[0];
+      if (!name) return alert("Name required");
+      let url = ""; if (file) url = await uploadToCloudinary(file);
+      const ref = await db.collection("groups").add({
+        name: name, photoUrl: url, admin: currentUser.id, members: [currentUser.id],
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      closeModal("createGroupModal");
+      openChat({ id: ref.id, name: name, photoUrl: url, admin: currentUser.id, members: [currentUser.id] }, 'group');
+    };
+    function showContextForCreateGroup(e, item) {
+      const menu = document.getElementById("userContextMenu");
+      const x = e.clientX || (e.touches && e.touches[0].clientX); const y = e.clientY || (e.touches && e.touches[0].clientY);
+      menu.style.left = `${x}px`; menu.style.top = `${y}px`; menu.classList.add("active");
+      document.getElementById("ctxCreateGroup").onclick = () => { menu.classList.remove("active"); openCreateGroupModal(); };
+    }
+
+    // --- BASIC UTILS ---
+    function backToFriends() {
+      localStorage.removeItem("activeChat");
+      document.getElementById("chat").classList.remove("show-chat");
+      document.getElementById("chat").classList.add("show-users");
+      if (unsubscribeMsgs) unsubscribeMsgs();
+      if (unsubscribeTyping) unsubscribeTyping();
+      currentChatEntity = null;
+      document.getElementById("chatMenuDropdown").classList.remove("active");
+    }
+    function toggleChatMenu() { document.getElementById("chatMenuDropdown").classList.toggle("active"); }
+    function showFriendProfile() {
+      if (currentChatType === 'group') return;
+      document.getElementById("friendProfileModal").classList.add("active");
+      document.getElementById("friendModalName").textContent = toTitleCase(currentChatEntity.username);
+      const av = document.getElementById("friendModalAvatar");
+      av.innerHTML = currentChatEntity.photoUrl ? `<img src="${currentChatEntity.photoUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : `<div style="width:100%;height:100%;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center;font-size:40px;">👤</div>`;
+    }
+    function handleFileSelect() { toggleSendBtn(); document.getElementById("filePreviewName").textContent = document.getElementById("fileInput").files[0].name; }
+    function toggleSendBtn() {
+      const v = document.getElementById("msgInput").value.trim() || document.getElementById("fileInput").files.length > 0;
+      document.getElementById("sendBtn").style.display = v ? "flex" : "none";
+      document.getElementById("likeBtn").style.display = v ? "none" : "flex";
+    }
+    function handleInput() { toggleSendBtn(); }
+    
+    // TYPING INDICATOR (DIRECT ONLY)
+    function setupTypingListener() {
+        if(currentChatType !== 'direct') return;
+        const chatId = [currentUser.id, currentChatEntity.id].sort().join("_");
+        // Simple typing logic using a subcollection or metadata. 
+        // For this demo, let's skip complex typing sync to keep it stable.
+        // If you want typing back, let me know!
     }
 
     async function uploadToCloudinary(file) {
-      const form = new FormData();
-      form.append("file", file);
-      form.append("upload_preset", CLOUDINARY_PRESET);
+      const form = new FormData(); form.append("file", file); form.append("upload_preset", CLOUDINARY_PRESET);
       const res = await fetch(CLOUDINARY_URL, { method: "POST", body: form });
-      const data = await res.json();
-      return data.secure_url;
+      return (await res.json()).secure_url;
     }
-
-    function closeModal(id) {
-      document.getElementById(id).classList.remove("active");
-    }
-
-    document.getElementById("msgInput").addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        sendMessage();
-      }
-    });
-
-    window.onclick = function (event) {
-      if (event.target.classList.contains('modal-overlay')) {
-        event.target.classList.remove("active");
-      }
-      if (!event.target.closest('.chat-options-container')) {
-          document.getElementById("chatMenuDropdown").classList.remove("active");
-      }
-    }
-
-    function toggleChatMenu() {
-        const drop = document.getElementById("chatMenuDropdown");
-        drop.classList.toggle("active");
-    }
-
+    window.onclick = (e) => {
+      if (e.target.classList.contains('modal-overlay')) e.target.classList.remove("active");
+      if (!e.target.closest('.chat-options-container')) document.getElementById("chatMenuDropdown").classList.remove("active");
+      if (!e.target.closest('.user-item') && !e.target.closest('.context-menu')) document.getElementById("userContextMenu").classList.remove("active");
+    };
     function toggleSearch() {
-        const bar = document.getElementById("chatSearchBar");
-        if(!bar.classList.contains("active")) {
-            bar.classList.add("active");
-            document.getElementById("messageSearchInput").focus();
-        } else {
-            closeSearch();
-        }
+      const bar = document.getElementById("chatSearchBar");
+      if (!bar.classList.contains("active")) { bar.classList.add("active"); document.getElementById("messageSearchInput").focus(); } else { closeSearch(); }
     }
-
-    function closeSearch() {
-        const bar = document.getElementById("chatSearchBar");
-        bar.classList.remove("active");
-        const input = document.getElementById("messageSearchInput");
-        input.value = "";
-        filterMessages(); 
-    }
-
+    function closeSearch() { document.getElementById("chatSearchBar").classList.remove("active"); document.getElementById("messageSearchInput").value = ""; filterMessages(); }
     function filterMessages() {
-        const term = document.getElementById("messageSearchInput").value.toLowerCase();
-        const bubbles = document.querySelectorAll(".msg-bubble");
-        
-        bubbles.forEach(b => {
-            const row = b.closest(".msg-row");
-            if(term === "") {
-                row.classList.remove("hidden-by-search");
-                return;
-            }
-            if(b.textContent.toLowerCase().includes(term)) {
-                row.classList.remove("hidden-by-search");
-            } else {
-                row.classList.add("hidden-by-search");
-            }
-        });
+      const term = document.getElementById("messageSearchInput").value.toLowerCase();
+      document.querySelectorAll(".msg-bubble").forEach(b => {
+        const row = b.closest(".msg-row");
+        if (term === "") row.classList.remove("hidden-by-search");
+        else row.classList.toggle("hidden-by-search", !b.textContent.toLowerCase().includes(term));
+      });
     }
-
     async function deleteConversation() {
-        if(!confirm("Are you sure you want to delete ALL messages in this chat? This cannot be undone.")) return;
-        
-        const chatId = [currentUser.id, currentChatFriend.id].sort().join("_");
-        const msgsRef = db.collection("chats").doc(chatId).collection("msgs");
-        
-        try {
-            const snapshot = await msgsRef.get();
-            const batch = db.batch();
-            snapshot.docs.forEach((doc) => {
-                batch.delete(doc.ref);
-            });
-            await batch.commit();
-            alert("Chat deleted successfully.");
-        } catch(e) {
-            console.error(e);
-            alert("Error deleting chat.");
-        }
+      if (!confirm("Delete all?")) return;
+      const ref = db.collection("chats").doc([currentUser.id, currentChatEntity.id].sort().join("_")).collection("msgs");
+      const snap = await ref.get(); const batch = db.batch();
+      snap.docs.forEach(d => batch.delete(d.ref)); await batch.commit(); alert("Deleted.");
     }
   </script>
 </body>
