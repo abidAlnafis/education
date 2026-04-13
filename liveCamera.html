@@ -2,33 +2,298 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Phone Camera and Microphone Feed</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Live Camera Web App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #000;
+      color: #fff;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* Video Container */
+    #video-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #111;
+    }
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: opacity 0.4s ease, transform 0.3s ease;
+    }
+    .video-loading { opacity: 0; }
+    .video-loaded { opacity: 1; }
+
+    /* Top Bar */
+    .top-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      z-index: 10;
+      background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, transparent 100%);
+      transition: opacity 0.4s ease;
+    }
+    .top-bar h1 {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+    }
+    .status-dot {
+      display: inline-block;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #ff3b30;
+      box-shadow: 0 0 10px #ff3b30;
+      animation: pulse 1.5s infinite alternate;
+      margin-right: 8px;
+    }
+    @keyframes pulse { from { opacity: 0.5; } to { opacity: 1; } }
+
+    /* Floating Action Buttons Container */
+    .controls-wrapper {
+      position: fixed;
+      bottom: 40px;
+      left: 0; right: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      z-index: 10;
+      pointer-events: none;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .action-btn {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      cursor: pointer;
+      display: flex; justify-content: center; align-items: center;
+      transition: all 0.2s;
+      pointer-events: all;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+    }
+    .action-btn:hover { background: rgba(255, 255, 255, 0.3); transform: scale(1.05); }
+    .action-btn:active { transform: scale(0.95); }
+
+    /* Overlay / Error messages */
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(10px);
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      z-index: 100;
+      text-align: center;
+      padding: 30px;
+    }
+    .overlay h2 { font-size: 28px; margin-bottom: 15px; color: #ff4444; }
+    .overlay p { font-size: 16px; color: rgba(255,255,255,0.7); max-width: 400px; line-height: 1.5; }
+    .overlay-btn {
+      margin-top: 24px;
+      padding: 12px 30px;
+      border-radius: 30px;
+      border: none;
+      background: #007aff; color: white;
+      font-size: 16px; font-weight: 600;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .overlay-btn:hover { background: #0056b3; }
+    
+    .hidden { display: none !important; }
+    
+    /* UI Auto-hide (Clear View) */
+    .ui-hidden {
+      opacity: 0 !important;
+      pointer-events: none !important;
+      transform: translateY(10px);
+    }
+    
+    /* Responsive styling */
+    @media (min-width: 768px) {
+      .controls-wrapper { bottom: 60px; gap: 40px; }
+      .action-btn { width: 62px; height: 62px; }
+    }
+  </style>
 </head>
 <body>
-  <h1>Phone Camera and Microphone Stream</h1>
-  <video id="video" autoplay playsinline controls style="width: 100%;"></video>
+
+  <!-- Top Status Bar -->
+  <div class="top-bar ui-element">
+    <h1><span class="status-dot"></span> LIVE</h1>
+  </div>
+
+  <!-- Video Stream -->
+  <div id="video-container">
+    <video id="video" autoplay playsinline class="video-loading" muted></video>
+  </div>
+
+  <!-- Floating Controls -->
+  <div class="controls-wrapper ui-element">
+    <button class="action-btn" id="btn-switch" title="Switch Camera" onclick="switchCamera()">
+      <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+        <path d="M12 9v4"></path>
+        <path d="M10 11l2 2 2-2"></path>
+      </svg>
+    </button>
+    <button class="action-btn" id="btn-rotate" title="Rotate Camera" onclick="rotateCamera()">
+      <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="23 4 23 10 17 10"></polyline>
+        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Error Overlay -->
+  <div class="overlay hidden" id="error-overlay">
+    <h2>Camera Error</h2>
+    <p id="error-msg">Please allow camera permissions to use this app.</p>
+    <button class="overlay-btn" onclick="startCamera()">Try Again</button>
+  </div>
 
   <script>
-    async function startCameraAndAudio() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    const videoElement = document.getElementById('video');
-    videoElement.srcObject = stream;
+    const video = document.getElementById('video');
+    const btnRotate = document.getElementById('btn-rotate');
+    const btnSwitch = document.getElementById('btn-switch');
+    const errorOverlay = document.getElementById('error-overlay');
+    const errorMsg = document.getElementById('error-msg');
 
-    // Log audio tracks
-    const audioTracks = stream.getAudioTracks();
-    if (audioTracks.length > 0) {
-      console.log('Audio track is available:', audioTracks[0].label);
-    } else {
-      console.error('No audio tracks available.');
+    let currentStream = null;
+    let rotationAngle = 0;
+    
+    // Manage device list for switching
+    let videoDevices = [];
+    let currentDeviceIndex = 0;
+
+    // Rotate camera function
+    function rotateCamera() {
+      rotationAngle += 90;
+      if (rotationAngle >= 360) rotationAngle = 0;
+      
+      const isPortrait = rotationAngle % 180 !== 0;
+      if (isPortrait) {
+        const vh = window.innerHeight;
+        const vw = window.innerWidth;
+        const scale = Math.max(vw/vh, vh/vw);
+        video.style.transform = `rotate(${rotationAngle}deg) scale(${scale})`;
+      } else {
+        video.style.transform = `rotate(${rotationAngle}deg) scale(1)`;
+      }
     }
-  } catch (error) {
-    console.error('Error accessing camera or microphone:', error);
-  }
-}
 
-startCameraAndAudio();
+    // Load available video input devices
+    async function loadCameras() {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        videoDevices = devices.filter(device => device.kind === 'videoinput');
+        
+        // Ensure switch button is always visible
+        btnSwitch.style.display = 'flex';
+      } catch (err) {
+        console.error("Error enumerating devices", err);
+      }
+    }
+    
+    // Cycle to next camera
+    function switchCamera() {
+      if (videoDevices.length > 1) {
+        currentDeviceIndex = (currentDeviceIndex + 1) % videoDevices.length;
+        startCamera(videoDevices[currentDeviceIndex].deviceId);
+      }
+    }
+
+    // Start video stream
+    async function startCamera(deviceId = null) {
+      // Hide error UI
+      errorOverlay.classList.add('hidden');
+      video.classList.remove('video-loaded');
+
+      // Stop existing tracks if any
+      if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+      }
+
+      // Constraints layout
+      const constraints = {
+        audio: true, // Attempt to get audio as requested
+        video: deviceId ? { deviceId: { exact: deviceId } } : true
+      };
+
+      try {
+        currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = currentStream;
+        
+        // Wait for video stream to load metadata before fading it in
+        video.onloadedmetadata = () => {
+          video.classList.add('video-loaded');
+        };
+
+        // When a stream is successfully initialized, refresh available devices
+        await loadCameras();
+
+      } catch (err) {
+        console.error("Camera access error:", err);
+        showError(err);
+      }
+    }
+
+    // Display beautiful error overlay
+    function showError(err) {
+      errorOverlay.classList.remove('hidden');
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        errorMsg.textContent = "Camera and microphone permissions are required. Please check your browser settings and try again.";
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        errorMsg.textContent = "No camera hardware detected on this device.";
+      } else {
+        errorMsg.textContent = "An unexpected error occurred: " + err.message;
+      }
+    }
+
+    // ─── Auto Hide UI logic ───
+    const uiElements = document.querySelectorAll('.ui-element');
+    let hideTimeout;
+
+    function resetUITimer() {
+      uiElements.forEach(el => el.classList.remove('ui-hidden'));
+      clearTimeout(hideTimeout);
+      hideTimeout = setTimeout(() => {
+        uiElements.forEach(el => el.classList.add('ui-hidden'));
+      }, 3500); // UI hides after 3.5 seconds of inactivity
+    }
+
+    // Wake up UI on any interaction
+    ['touchstart', 'mousemove', 'click'].forEach(evt => {
+      document.body.addEventListener(evt, resetUITimer);
+    });
+
+    // Initial trigger
+    window.addEventListener('load', () => {
+      startCamera();
+      resetUITimer();
+    });
 
   </script>
 </body>
