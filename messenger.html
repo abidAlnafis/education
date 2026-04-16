@@ -280,6 +280,7 @@
       font-weight: 700;
       background: var(--primary-gradient);
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
       letter-spacing: -0.5px;
     }
@@ -1259,6 +1260,7 @@
     .login-head {
       background: var(--primary-gradient);
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
       margin-bottom: 30px;
     }
@@ -1673,7 +1675,7 @@
         <span id="filePreviewName"></span>
 
         <div class="input-wrapper">
-          <input id="msgInput" type="text" placeholder="Type a message..." autocomplete="off" oninput="handleInput()" />
+          <input id="msgInput" type="text" placeholder="Type a message..." autocomplete="off" oninput="handleInput()" onblur="sendTypingStatus(false)" />
         </div>
 
         <button id="likeBtn" class="icon-btn" onclick="sendLike()">👍</button>
@@ -2402,6 +2404,7 @@
       // Optimistic UI Clear
       input.value = "";
       toggleSendBtn();
+      sendTypingStatus(false);
 
       let ref;
       if (currentChatType === 'direct') {
@@ -2617,6 +2620,7 @@
       document.getElementById("chat").classList.add("show-users");
       if (unsubscribeMsgs) unsubscribeMsgs();
       if (unsubscribeTyping) unsubscribeTyping();
+      sendTypingStatus(false);
       currentChatEntity = null;
       document.getElementById("chatMenuDropdown").classList.remove("active");
     }
@@ -2634,16 +2638,73 @@
       document.getElementById("sendBtn").style.display = v ? "flex" : "none";
       document.getElementById("likeBtn").style.display = v ? "none" : "flex";
     }
-    function handleInput() { toggleSendBtn(); }
+    function handleInput() {
+      toggleSendBtn();
+      sendTypingStatus(true);
+    }
 
-    // TYPING INDICATOR (DIRECT ONLY)
+    function sendTypingStatus(isTyping) {
+      if (!currentUser || !currentChatEntity || currentChatType !== 'direct') return;
+
+      const chatId = [currentUser.id, currentChatEntity.id].sort().join("_");
+      const ref = db.collection("chats").doc(chatId);
+
+      if (isTyping) {
+        if (typingTimeout) clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(() => sendTypingStatus(false), 3000);
+
+        if (window.isCurrentlyTyping) return;
+        window.isCurrentlyTyping = true;
+        console.log("Typing: Sending 'true' for chat", chatId);
+
+        const updateData = {};
+        updateData[`typing.${currentUser.id}`] = true;
+        
+        ref.update(updateData).catch(err => {
+          console.warn("Update failed (doc might not exist), using set:", err.message);
+          ref.set({ typing: { [currentUser.id]: true } }, { merge: true });
+        });
+      } else {
+        if (typingTimeout) clearTimeout(typingTimeout);
+        typingTimeout = null;
+        window.isCurrentlyTyping = false;
+        console.log("Typing: Sending 'false' for chat", chatId);
+
+        const updateData = {};
+        updateData[`typing.${currentUser.id}`] = false;
+        ref.update(updateData).catch(() => {});
+      }
+    }
+
     function setupTypingListener() {
       if (currentChatType !== 'direct') return;
       const chatId = [currentUser.id, currentChatEntity.id].sort().join("_");
-      // Simple typing logic using a subcollection or metadata. 
-      // For this demo, let's skip complex typing sync to keep it stable.
-      // If you want typing back, let me know!
+
+      if (unsubscribeTyping) unsubscribeTyping();
+
+      console.log("Typing: Listening to chat", chatId);
+      unsubscribeTyping = db.collection("chats").doc(chatId).onSnapshot(doc => {
+        if (doc.exists) {
+          const data = doc.data();
+          const isFriendTyping = data.typing && data.typing[currentChatEntity.id];
+          console.log("Typing: Friend status change:", isFriendTyping);
+          
+          const indicator = document.getElementById("typingIndicator");
+          if (indicator) {
+            indicator.style.display = isFriendTyping ? "flex" : "none";
+            if (isFriendTyping) {
+              const msgsDiv = document.getElementById("messages");
+              msgsDiv.scrollTop = msgsDiv.scrollHeight;
+            }
+          }
+        }
+      });
     }
+
+    // Cleanup on window close
+    window.addEventListener('beforeunload', () => {
+      sendTypingStatus(false);
+    });
 
     async function uploadToCloudinary(file) {
       const form = new FormData(); form.append("file", file); form.append("upload_preset", CLOUDINARY_PRESET);
