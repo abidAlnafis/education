@@ -2150,15 +2150,21 @@
         const imgHtml = item.photoUrl ? `<img src="${item.photoUrl}">` : `<div class="placeholder">${isGroup ? '👥' : '👤'}</div>`;
         div.innerHTML = `<div class="user-info-group">${imgHtml}<div><span>${name}</span>${isGroup ? `<span class="group-tag">Group</span>` : ''}<div class="last-msg-preview" id="lastMsg_${item.id}"></div></div></div>`;
 
-        // Fetch last message for preview
+        // --- REAL-TIME PREVIEW LISTENER ---
         let chatRef;
         if (isGroup) {
           chatRef = db.collection("groups").doc(item.id).collection("msgs");
         } else {
-          const chatId = [currentUser.id, item.id].sort().join("_");
-          chatRef = db.collection("chats").doc(chatId).collection("msgs");
+          chatRef = db.collection("chats").doc([currentUser.id, item.id].sort().join("_")).collection("msgs");
         }
-        chatRef.orderBy("time", "desc").limit(1).get().then(snap => {
+
+        // Clean up existing listener for this item if any
+        if (window.previewUnsubscribers && window.previewUnsubscribers[item.id]) {
+          window.previewUnsubscribers[item.id]();
+        }
+        if (!window.previewUnsubscribers) window.previewUnsubscribers = {};
+
+        window.previewUnsubscribers[item.id] = chatRef.orderBy("time", "desc").limit(1).onSnapshot(snap => {
           const previewEl = document.getElementById(`lastMsg_${item.id}`);
           if (!previewEl) return;
           if (!snap.empty) {
@@ -2176,6 +2182,10 @@
             const isMine = lastMsg.sender === currentUser.id;
             previewEl.textContent = isMine ? `You: ${text}` : text;
             if (!isMine) previewEl.classList.add("unread");
+            else previewEl.classList.remove("unread");
+          } else {
+            const previewEl = document.getElementById(`lastMsg_${item.id}`);
+            if (previewEl) previewEl.textContent = "No messages yet";
           }
         });
 
@@ -2661,8 +2671,11 @@
         updateData[`typing.${currentUser.id}`] = true;
         
         ref.update(updateData).catch(err => {
-          console.warn("Update failed (doc might not exist), using set:", err.message);
-          ref.set({ typing: { [currentUser.id]: true } }, { merge: true });
+          console.warn("Typing: Update failed (doc might not exist), using set:", err.message);
+          // Fallback to set with merge to create the document
+          ref.set({ typing: { [currentUser.id]: true } }, { merge: true }).catch(innerErr => {
+            console.error("Typing: Both update and set failed:", innerErr.message);
+          });
         });
       } else {
         if (typingTimeout) clearTimeout(typingTimeout);
@@ -2672,7 +2685,13 @@
 
         const updateData = {};
         updateData[`typing.${currentUser.id}`] = false;
-        ref.update(updateData).catch(() => {});
+        ref.update(updateData).catch(err => {
+          console.warn("Typing: Update 'false' failed:", err.message);
+          // Also fallback for 'false' just in case the document was never created
+          ref.set({ typing: { [currentUser.id]: false } }, { merge: true }).catch(innerErr => {
+             // Silence errors for 'false' fallback to avoid excessive noise
+          });
+        });
       }
     }
 
@@ -2683,21 +2702,27 @@
       if (unsubscribeTyping) unsubscribeTyping();
 
       console.log("Typing: Listening to chat", chatId);
+      // We listen even if the doc doesn't exist yet, as Firestore will notify when it's created
       unsubscribeTyping = db.collection("chats").doc(chatId).onSnapshot(doc => {
+        const indicator = document.getElementById("typingIndicator");
+        if (!indicator) return;
+
         if (doc.exists) {
           const data = doc.data();
           const isFriendTyping = data.typing && data.typing[currentChatEntity.id];
-          console.log("Typing: Friend status change:", isFriendTyping);
+          console.log("Typing: Friend status change:", !!isFriendTyping);
           
-          const indicator = document.getElementById("typingIndicator");
-          if (indicator) {
-            indicator.style.display = isFriendTyping ? "flex" : "none";
-            if (isFriendTyping) {
-              const msgsDiv = document.getElementById("messages");
-              msgsDiv.scrollTop = msgsDiv.scrollHeight;
-            }
+          indicator.style.display = isFriendTyping ? "flex" : "none";
+          if (isFriendTyping) {
+            const msgsDiv = document.getElementById("messages");
+            if (msgsDiv) msgsDiv.scrollTop = msgsDiv.scrollHeight;
           }
+        } else {
+          // If doc doesn't exist, nobody is typing
+          indicator.style.display = "none";
         }
+      }, err => {
+        console.error("Typing: Listener error:", err.message);
       });
     }
 
