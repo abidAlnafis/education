@@ -6,6 +6,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>Bangla Messenger</title>
 
+  <!-- Social Media Meta Tags -->
+  <meta property="og:title" content="Bangla Messenger 🌸 - Connect Beautifully" />
+  <meta property="og:description" content="🌸 A modern, secure, and beautiful messaging experience in your language." />
+  <meta property="og:image" content="https://abidalnafish.github.io/education/img/flower.png" />
+  <meta property="og:url" content="https://abidalnafish.github.io/education/messenger.html" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Bangla Messenger 🌸" />
+  <meta name="twitter:description" content="Connect with friends and family using Bangla Messenger 🌸." />
+  <meta name="twitter:image" content="https://abidalnafish.github.io/education/img/flower.png" />
+
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -604,6 +615,7 @@
       padding: 0;
       position: relative;
     }
+
     .notification-btn.has-new::after {
       content: "";
       position: absolute;
@@ -615,6 +627,7 @@
       border-radius: 50%;
       border: 2px solid var(--bg-card);
     }
+
     .notif-row {
       display: flex;
       justify-content: space-between;
@@ -650,6 +663,7 @@
       max-width: 180px;
       margin-top: 2px;
     }
+
     .last-msg-preview.unread {
       font-weight: 700;
       color: var(--text-main);
@@ -1410,8 +1424,15 @@
     }
 
     @keyframes toastSlideIn {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
     }
 
     .toast.out {
@@ -1419,8 +1440,15 @@
     }
 
     @keyframes toastSlideOut {
-      from { transform: translateX(0); opacity: 1; }
-      to { transform: translateX(100%); opacity: 0; }
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
     }
 
     .toast-icon {
@@ -1585,7 +1613,7 @@
       <span class="close-btn" onclick="closeModal('notificationsModal')">&times;</span>
       <h3>Notifications</h3>
       <div id="notificationsContent" style="max-height: 350px; overflow-y: auto; margin-top: 15px;">
-         <p style="color: var(--text-sec);">No new notifications.</p>
+        <p style="color: var(--text-sec);">No new notifications.</p>
       </div>
     </div>
   </div>
@@ -1596,7 +1624,8 @@
       <div class="users-header">
         <h2>Chats</h2>
         <div class="header-actions">
-          <button class="notification-btn" id="notifBtn" onclick="openNotificationsModal()" title="Notifications">🔔</button>
+          <button class="notification-btn" id="notifBtn" onclick="openNotificationsModal()"
+            title="Notifications">🔔</button>
           <button class="add-group-btn" onclick="openCreateGroupModal()" title="New Group">+</button>
           <button onclick="goToProfile()" class="secondary-btn">Profile</button>
         </div>
@@ -1631,7 +1660,9 @@
         <div class="typing-dots"><span></span><span></span><span></span></div>
       </div>
 
-      <div class="blocked-bar" id="chatBlockedBar" style="display:none; text-align:center; padding:15px; background:var(--chat-header-bg); color:#ff4757; font-size:14px; border-top:1px solid var(--bg-glass-border); font-weight: 500;">You can't send a message to this user. Add them as a friend to send or receive messages.</div>
+      <div class="blocked-bar" id="chatBlockedBar"
+        style="display:none; text-align:center; padding:15px; background:var(--chat-header-bg); color:#ff4757; font-size:14px; border-top:1px solid var(--bg-glass-border); font-weight: 500;">
+        You can't send a message to this user. Add them as a friend to send or receive messages.</div>
       <div class="input-bar" id="chatInputBar">
         <input type="file" id="fileInput" onchange="handleFileSelect()" />
         <label for="fileInput" class="icon-btn" title="Send File">📎</label>
@@ -1721,7 +1752,7 @@
 
     function showBrowserNotif(title, body, icon) {
       console.log(`Attempting Notification: ${title} - ${body}`);
-      
+
       // Always show in-app toast
       showToast(title, body, "🔔");
 
@@ -1740,7 +1771,7 @@
           });
           n.onclick = () => { window.focus(); n.close(); };
           setTimeout(() => n.close(), 6000);
-        } catch(e) { console.warn('Notification error:', e); }
+        } catch (e) { console.warn('Notification error:', e); }
       } else {
         console.log("Notification permission not granted. State:", Notification.permission);
       }
@@ -1834,7 +1865,7 @@
         currentUser.username = toTitleCase(currentUser.username);
         localStorage.setItem("uid", uid);
         document.getElementById("loginModal").classList.remove("active");
-        
+
         // Suggest enabling notifications if not yet granted
         if ('Notification' in window && Notification.permission === 'default') {
           setTimeout(() => {
@@ -1940,7 +1971,7 @@
       const modal = document.getElementById("notificationsModal");
       const content = document.getElementById("notificationsContent");
       modal.classList.add("active");
-      
+
       if (!window.myNotificationsList || window.myNotificationsList.length === 0) {
         content.innerHTML = `<p style="color: var(--text-sec);">No new notifications.</p>`;
         return;
@@ -1951,7 +1982,7 @@
         row.className = "notif-row";
         let text = "";
         let actions = "";
-        
+
         if (n.type === "friend_request") {
           text = `<b>${toTitleCase(n.fromName)}</b> sent you a friend request.`;
           actions = `<button class="btn-small" onclick="acceptRequest('${n.id}', '${n.from}', '${n.fromName}')">Accept</button> <button class="btn-small btn-remove" onclick="declineRequest('${n.id}', '${n.from}')">Decline</button>`;
@@ -1973,16 +2004,16 @@
 
     async function acceptRequest(notifId, fromId, fromName) {
       if (!currentUser.friends) currentUser.friends = [];
-      
+
       let myNewFriends = [...currentUser.friends];
       if (!myNewFriends.includes(fromId)) myNewFriends.push(fromId);
       let myNewChats = [...(currentUser.chats || currentUser.friends)];
       if (!myNewChats.includes(fromId)) myNewChats.push(fromId);
-      
+
       await db.collection("users").doc(currentUser.id).update({ friends: myNewFriends, chats: myNewChats });
       currentUser.friends = myNewFriends;
       currentUser.chats = myNewChats;
-      
+
       const theirDoc = await db.collection("users").doc(fromId).get();
       if (theirDoc.exists) {
         const theirData = theirDoc.data();
@@ -1990,10 +2021,10 @@
         if (!theirFriends.includes(currentUser.id)) theirFriends.push(currentUser.id);
         let theirChats = theirData.chats || theirData.friends || [];
         if (!theirChats.includes(currentUser.id)) theirChats.push(currentUser.id);
-        
+
         await db.collection("users").doc(fromId).update({ friends: theirFriends, chats: theirChats });
       }
-      
+
       await db.collection("notifications").doc(notifId).delete();
       await db.collection("notifications").add({
         to: fromId,
@@ -2134,7 +2165,7 @@
               const bytes = CryptoJS.AES.decrypt(text, secret);
               const dec = bytes.toString(CryptoJS.enc.Utf8);
               if (dec) text = dec;
-            } catch(e) {}
+            } catch (e) { }
             if (lastMsg.type === "file") text = "📎 Attachment";
             if (lastMsg.type === "like") text = "👍";
             const isMine = lastMsg.sender === currentUser.id;
@@ -2228,7 +2259,7 @@
             const msgId = change.doc.id;
             if (lastKnownMsgIds.has(msgId)) return;
             lastKnownMsgIds.add(msgId);
-            
+
             // Notify if the message is from someone else
             if (msgData.sender !== currentUser.id) {
               const senderName = currentChatType === 'group'
@@ -2240,12 +2271,12 @@
                   const secret = currentChatType === 'group' ? currentChatEntity.id : [currentUser.id, currentChatEntity.id].sort().join('_');
                   const bytes = CryptoJS.AES.decrypt(msgData.content, secret);
                   preview = bytes.toString(CryptoJS.enc.Utf8) || '📨 New message';
-                } catch(e) { preview = '📨 New message'; }
+                } catch (e) { preview = '📨 New message'; }
               } else if (msgData.type === 'file') { preview = '📎 Sent an attachment'; }
               else if (msgData.type === 'like') { preview = '👍 Liked'; }
-              
+
               const chatName = currentChatType === 'group' ? currentChatEntity.name : senderName;
-              
+
               // If tab is hidden, send a system notification. If visible, just a toast.
               if (document.hidden) {
                 showBrowserNotif(`${senderName} in ${chatName}`, preview || '📨 New message');
