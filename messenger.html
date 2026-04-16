@@ -10,6 +10,7 @@
 
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
   <style>
     /* ======================
@@ -17,6 +18,7 @@
     ====================== */
     :root {
       /* --- LIGHT MODE (Default) --- */
+      --bg-body: #fff0f5;
       --primary-gradient: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
       --primary-solid: #ff758c;
 
@@ -38,8 +40,8 @@
 
       --shadow-soft: 0 15px 35px rgba(255, 118, 142, 0.15);
 
-      --doodle-blend: overlay;
-      --doodle-opacity: 0.15;
+      --doodle-blend: multiply;
+      --doodle-opacity: 0.05;
     }
 
     /* --- DARK MODE OVERRIDES --- */
@@ -92,10 +94,28 @@
       height: 100%;
       top: 0;
       left: 0;
-      z-index: -1;
+      z-index: 0;
+      pointer-events: none;
       background-image:
-        radial-gradient(at 0% 0%, hsla(340, 100%, 76%, 0.1) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, hsla(320, 100%, 89%, 0.1) 0px, transparent 50%);
+        radial-gradient(at 0% 0%, hsla(340, 100%, 76%, 0.3) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, hsla(320, 100%, 89%, 0.3) 0px, transparent 50%);
+    }
+
+    /* Doodle Background Pattern */
+    body::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("img/space-5654794_1280.webp");
+      background-size: 300px;
+      background-repeat: repeat;
+      opacity: var(--doodle-opacity);
+      pointer-events: none;
+      z-index: 0;
+      mix-blend-mode: var(--doodle-blend);
     }
 
     /* ======================
@@ -217,6 +237,7 @@
       align-items: center;
       padding: 20px;
       position: relative;
+      z-index: 1;
     }
 
     .home-card {
@@ -317,6 +338,8 @@
       justify-content: center;
       align-items: center;
       text-align: center;
+      position: relative;
+      z-index: 1;
     }
 
     .profile-card {
@@ -503,9 +526,11 @@
       display: none;
       height: 100dvh;
       width: 100%;
-      background: var(--bg-body);
+      background: transparent;
       overflow: hidden;
       flex-direction: column;
+      position: relative;
+      z-index: 1;
     }
 
     .users {
@@ -564,6 +589,42 @@
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 
+    .notification-btn {
+      background: rgba(255, 71, 87, 0.1);
+      color: #ff4757;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 0;
+      position: relative;
+    }
+    .notification-btn.has-new::after {
+      content: "";
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 10px;
+      height: 10px;
+      background: #ff4757;
+      border-radius: 50%;
+      border: 2px solid var(--bg-card);
+    }
+    .notif-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--bg-glass-border);
+      text-align: left;
+    }
+
     .friend-list {
       flex: 1;
       overflow-y: auto;
@@ -578,6 +639,20 @@
       cursor: pointer;
       transition: background 0.2s;
       user-select: none;
+    }
+
+    .last-msg-preview {
+      font-size: 12px;
+      color: var(--text-sec);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 180px;
+      margin-top: 2px;
+    }
+    .last-msg-preview.unread {
+      font-weight: 700;
+      color: var(--text-main);
     }
 
     .user-item:hover {
@@ -644,24 +719,8 @@
       flex-direction: column;
       height: 100%;
       width: 100%;
-      background: var(--bg-body);
+      background: transparent;
       position: relative;
-    }
-
-    .chatbox::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: url("img/space-5654794_1280.webp");
-      background-size: 300px;
-      background-repeat: repeat;
-      opacity: var(--doodle-opacity);
-      pointer-events: none;
-      z-index: 0;
-      mix-blend-mode: var(--doodle-blend);
     }
 
     .chat-header {
@@ -824,7 +883,8 @@
     }
 
     /* Date and Time Separators */
-    .date-separator, .time-separator {
+    .date-separator,
+    .time-separator {
       text-align: center;
       font-size: 12px;
       font-weight: 600;
@@ -837,7 +897,7 @@
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
       margin: 15px 0 5px;
     }
-    
+
     /* Time Separator (Specific Override) */
     .time-separator {
       margin: 5px 0 2px;
@@ -943,7 +1003,7 @@
       max-width: 100%;
       display: block;
     }
-    
+
     .msg-sender-name {
       font-size: 11px;
       color: var(--text-sec);
@@ -1315,13 +1375,79 @@
       }
     }
 
-    .updateGroupInfo{
+    .updateGroupInfo {
       margin-top: 20px;
+    }
+
+    /* Toast Notifications */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: var(--bg-card);
+      backdrop-filter: blur(10px);
+      padding: 12px 20px;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+      border: 1px solid var(--bg-glass-border);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 250px;
+      max-width: 350px;
+      animation: toastSlideIn 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+      pointer-events: all;
+      cursor: pointer;
+    }
+
+    @keyframes toastSlideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    .toast.out {
+      animation: toastSlideOut 0.3s ease forwards;
+    }
+
+    @keyframes toastSlideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+
+    .toast-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .toast-content {
+      flex: 1;
+    }
+
+    .toast-title {
+      font-weight: 700;
+      font-size: 14px;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .toast-body {
+      font-size: 12px;
+      color: var(--text-sec);
     }
   </style>
 </head>
 
 <body>
+  <div id="toastContainer" class="toast-container"></div>
 
   <div id="home">
     <div class="home-card">
@@ -1454,12 +1580,23 @@
     <div class="context-item" id="ctxCreateGroup">Create Group</div>
   </div>
 
+  <div id="notificationsModal" class="modal-overlay" style="display: none;">
+    <div class="box" style="width:95%; max-width: 420px;">
+      <span class="close-btn" onclick="closeModal('notificationsModal')">&times;</span>
+      <h3>Notifications</h3>
+      <div id="notificationsContent" style="max-height: 350px; overflow-y: auto; margin-top: 15px;">
+         <p style="color: var(--text-sec);">No new notifications.</p>
+      </div>
+    </div>
+  </div>
+
   <div id="chat" class="show-users" style="display: none;">
 
     <div class="users">
       <div class="users-header">
         <h2>Chats</h2>
         <div class="header-actions">
+          <button class="notification-btn" id="notifBtn" onclick="openNotificationsModal()" title="Notifications">🔔</button>
           <button class="add-group-btn" onclick="openCreateGroupModal()" title="New Group">+</button>
           <button onclick="goToProfile()" class="secondary-btn">Profile</button>
         </div>
@@ -1494,7 +1631,8 @@
         <div class="typing-dots"><span></span><span></span><span></span></div>
       </div>
 
-      <div class="input-bar">
+      <div class="blocked-bar" id="chatBlockedBar" style="display:none; text-align:center; padding:15px; background:var(--chat-header-bg); color:#ff4757; font-size:14px; border-top:1px solid var(--bg-glass-border); font-weight: 500;">You can't send a message to this user. Add them as a friend to send or receive messages.</div>
+      <div class="input-bar" id="chatInputBar">
         <input type="file" id="fileInput" onchange="handleFileSelect()" />
         <label for="fileInput" class="icon-btn" title="Send File">📎</label>
 
@@ -1529,10 +1667,108 @@
     let unsubscribeGroups = null;
     let unsubscribeMsgs = null;
     let unsubscribeTyping = null;
+    let unsubscribeNotifications = null;
+    window.myNotificationsList = [];
 
     let typingTimeout = null;
     let friendToDelete = null;
     let myFriendsList = [];
+    let lastKnownNotifIds = new Set(); // Track seen notifications to avoid re-firing
+    let lastKnownMsgIds = new Set();   // Track seen messages to avoid re-firing
+
+    // --- BROWSER NOTIFICATION HELPERS ---
+    function requestNotificationPermission() {
+      console.log("Requesting notification permission...");
+      if ('Notification' in window) {
+        Notification.requestPermission().then(permission => {
+          console.log("Notification permission state:", permission);
+          if (permission === 'granted') {
+            showToast("System Notifications Enabled!", "You will now receive desktop alerts.", "🔔");
+          }
+        });
+      }
+    }
+
+    function showToast(title, body, icon = "🌸", duration = 5000) {
+      const container = document.getElementById("toastContainer");
+      if (!container) return;
+
+      const toast = document.createElement("div");
+      toast.className = "toast";
+      toast.innerHTML = `
+        <div class="toast-icon">${icon}</div>
+        <div class="toast-content">
+          <span class="toast-title">${title}</span>
+          <span class="toast-body">${body}</span>
+        </div>
+      `;
+
+      toast.onclick = () => {
+        window.focus();
+        toast.classList.add("out");
+        setTimeout(() => toast.remove(), 300);
+      };
+
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.classList.add("out");
+          setTimeout(() => toast.remove(), 300);
+        }
+      }, duration);
+    }
+
+    function showBrowserNotif(title, body, icon) {
+      console.log(`Attempting Notification: ${title} - ${body}`);
+      
+      // Always show in-app toast
+      showToast(title, body, "🔔");
+
+      if (!('Notification' in window)) {
+        console.warn("Notifications API not supported in this browser.");
+        return;
+      }
+
+      if (Notification.permission === 'granted') {
+        try {
+          const n = new Notification(title, {
+            body: body,
+            icon: icon || 'https://cdn.jsdelivr.net/npm/twemoji@14.0.2/assets/72x72/1f338.png',
+            badge: 'https://cdn.jsdelivr.net/npm/twemoji@14.0.2/assets/72x72/1f514.png',
+            silent: false
+          });
+          n.onclick = () => { window.focus(); n.close(); };
+          setTimeout(() => n.close(), 6000);
+        } catch(e) { console.warn('Notification error:', e); }
+      } else {
+        console.log("Notification permission not granted. State:", Notification.permission);
+      }
+    }
+
+    // --- ENCRYPTION LOGIC ---
+    function getChatSecret() {
+      if (currentChatType === 'direct') {
+        return [currentUser.id, currentChatEntity.id].sort().join("_");
+      }
+      return currentChatEntity.id;
+    }
+    function encryptText(text) {
+      if (!text) return text;
+      try {
+        return CryptoJS.AES.encrypt(text, getChatSecret()).toString();
+      } catch (e) { return text; }
+    }
+    function decryptText(ciphertext) {
+      if (!ciphertext) return ciphertext;
+      try {
+        const bytes = CryptoJS.AES.decrypt(ciphertext, getChatSecret());
+        const originalText = bytes.toString(CryptoJS.enc.Utf8);
+        return originalText || ciphertext;
+      } catch (e) {
+        return ciphertext;
+      }
+    }
 
     // --- THEME ---
     function handleThemeToggle(checkbox) {
@@ -1559,7 +1795,7 @@
       });
       document.getElementById("msgInput").addEventListener("keypress", function (event) {
         if (event.key === "Enter") {
-          event.preventDefault(); 
+          event.preventDefault();
           sendMessage();
         }
       });
@@ -1598,12 +1834,197 @@
         currentUser.username = toTitleCase(currentUser.username);
         localStorage.setItem("uid", uid);
         document.getElementById("loginModal").classList.remove("active");
+        
+        // Suggest enabling notifications if not yet granted
+        if ('Notification' in window && Notification.permission === 'default') {
+          setTimeout(() => {
+            showToast("Enable Desktop Notifications?", "Click here to allow alerts in the background.", "🔔", 8000);
+            const lastToast = document.querySelector("#toastContainer .toast:last-child");
+            if (lastToast) lastToast.onclick = () => { requestNotificationPermission(); lastToast.remove(); };
+          }, 2000);
+        }
+
         showChatInbox();
       } else { localStorage.clear(); location.reload(); }
     }
     document.getElementById("logoutBtn").onclick = () => {
       if (confirm("Log out?")) { localStorage.clear(); location.reload(); }
     };
+
+    // --- PROFILE & FRIEND LOGIC ---
+    document.getElementById("openEditProfileBtn").onclick = () => {
+      document.getElementById("editProfileModal").classList.add("active");
+      document.getElementById("newUsernameInput").value = currentUser.username.toLowerCase();
+      document.getElementById("newPhotoUrlInput").value = currentUser.photoUrl || "";
+    };
+
+    document.getElementById("addFriendBtn").onclick = () => {
+      document.getElementById("addFriendModal").classList.add("active");
+      document.getElementById("friendUsernameInput").value = "";
+    };
+
+    document.getElementById("saveProfileBtn").onclick = async () => {
+      const u = document.getElementById("newUsernameInput").value.trim().toLowerCase();
+      let photo = document.getElementById("newPhotoUrlInput").value.trim();
+      const file = document.getElementById("profilePicUpload").files[0];
+      if (file) photo = await uploadToCloudinary(file);
+      await db.collection("users").doc(currentUser.id).update({ username: u, photoUrl: photo });
+      currentUser.username = toTitleCase(u);
+      if (photo) currentUser.photoUrl = photo;
+      goToProfile();
+      closeModal("editProfileModal");
+    };
+
+    document.getElementById("searchFriendBtn").onclick = async () => {
+      const u = document.getElementById("friendUsernameInput").value.trim().toLowerCase();
+      if (!u) return;
+      if (u === currentUser.username.toLowerCase()) return alert("Can't add yourself");
+      const snap = await db.collection("users").where("username", "==", u).get();
+      if (snap.empty) return alert("User not found");
+      const friendId = snap.docs[0].id;
+      if ((currentUser.friends || []).includes(friendId)) return alert("Already friends");
+
+      // Send friend request instead of adding directly
+      await db.collection("notifications").add({
+        to: friendId,
+        from: currentUser.id,
+        fromName: currentUser.username,
+        type: "friend_request",
+        status: "unread",
+        time: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      // Browser notification: you sent a friend request
+      showBrowserNotif('Friend Request Sent 📤', `Your friend request to ${toTitleCase(u)} has been sent!`);
+      alert("Friend request sent!");
+      closeModal("addFriendModal");
+    };
+
+    function showDeleteModal(fid, fname) {
+      friendToDelete = fid;
+      document.getElementById("deleteTargetName").textContent = toTitleCase(fname);
+      document.getElementById("deleteChatModal").classList.add("active");
+    }
+
+    document.getElementById("confirmDeleteBtn").onclick = async () => {
+      if (!friendToDelete) return;
+      const newFs = currentUser.friends.filter(f => f !== friendToDelete);
+      let myChats = [...new Set([...(currentUser.chats || []), ...(currentUser.friends || []), friendToDelete])];
+      await db.collection("users").doc(currentUser.id).update({ friends: newFs, chats: myChats });
+      currentUser.friends = newFs;
+
+      const theirDoc = await db.collection("users").doc(friendToDelete).get();
+      if (theirDoc.exists) {
+        const theirData = theirDoc.data();
+        const theirFs = theirData.friends || [];
+        const newTheirFs = theirFs.filter(f => f !== currentUser.id);
+        let theirChats = [...new Set([...(theirData.chats || []), ...(theirData.friends || []), currentUser.id])];
+        await db.collection("users").doc(friendToDelete).update({ friends: newTheirFs, chats: theirChats });
+      }
+
+      await db.collection("notifications").add({
+        to: friendToDelete,
+        from: currentUser.id,
+        fromName: currentUser.username,
+        type: "friend_removed",
+        status: "unread",
+        time: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      closeModal("deleteChatModal");
+      friendToDelete = null;
+    };
+
+    // --- NOTIFICATIONS LOGIC ---
+    function openNotificationsModal() {
+      const modal = document.getElementById("notificationsModal");
+      const content = document.getElementById("notificationsContent");
+      modal.classList.add("active");
+      
+      if (!window.myNotificationsList || window.myNotificationsList.length === 0) {
+        content.innerHTML = `<p style="color: var(--text-sec);">No new notifications.</p>`;
+        return;
+      }
+      content.innerHTML = "";
+      window.myNotificationsList.forEach(n => {
+        const row = document.createElement("div");
+        row.className = "notif-row";
+        let text = "";
+        let actions = "";
+        
+        if (n.type === "friend_request") {
+          text = `<b>${toTitleCase(n.fromName)}</b> sent you a friend request.`;
+          actions = `<button class="btn-small" onclick="acceptRequest('${n.id}', '${n.from}', '${n.fromName}')">Accept</button> <button class="btn-small btn-remove" onclick="declineRequest('${n.id}', '${n.from}')">Decline</button>`;
+        } else if (n.type === "friend_removed") {
+          text = `<b>${toTitleCase(n.fromName)}</b> removed you as a friend.`;
+          actions = `<button class="btn-small" onclick="dismissNotification('${n.id}')">Dismiss</button>`;
+        } else if (n.type === "friend_accepted") {
+          text = `<b>${toTitleCase(n.fromName)}</b> accepted your friend request.`;
+          actions = `<button class="btn-small" onclick="dismissNotification('${n.id}')">Dismiss</button>`;
+        } else if (n.type === "friend_rejected") {
+          text = `<b>${toTitleCase(n.fromName)}</b> declined your friend request.`;
+          actions = `<button class="btn-small" onclick="dismissNotification('${n.id}')">Dismiss</button>`;
+        }
+
+        row.innerHTML = `<div style="flex:1; padding-right:10px;">${text}</div><div>${actions}</div>`;
+        content.appendChild(row);
+      });
+    }
+
+    async function acceptRequest(notifId, fromId, fromName) {
+      if (!currentUser.friends) currentUser.friends = [];
+      
+      let myNewFriends = [...currentUser.friends];
+      if (!myNewFriends.includes(fromId)) myNewFriends.push(fromId);
+      let myNewChats = [...(currentUser.chats || currentUser.friends)];
+      if (!myNewChats.includes(fromId)) myNewChats.push(fromId);
+      
+      await db.collection("users").doc(currentUser.id).update({ friends: myNewFriends, chats: myNewChats });
+      currentUser.friends = myNewFriends;
+      currentUser.chats = myNewChats;
+      
+      const theirDoc = await db.collection("users").doc(fromId).get();
+      if (theirDoc.exists) {
+        const theirData = theirDoc.data();
+        let theirFriends = theirData.friends || [];
+        if (!theirFriends.includes(currentUser.id)) theirFriends.push(currentUser.id);
+        let theirChats = theirData.chats || theirData.friends || [];
+        if (!theirChats.includes(currentUser.id)) theirChats.push(currentUser.id);
+        
+        await db.collection("users").doc(fromId).update({ friends: theirFriends, chats: theirChats });
+      }
+      
+      await db.collection("notifications").doc(notifId).delete();
+      await db.collection("notifications").add({
+        to: fromId,
+        from: currentUser.id,
+        fromName: currentUser.username,
+        type: "friend_accepted",
+        status: "unread",
+        time: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      alert(`You are now friends with ${toTitleCase(fromName)}!`);
+      openNotificationsModal();
+    }
+
+    async function declineRequest(notifId, fromId) {
+      await db.collection("notifications").doc(notifId).delete();
+      await db.collection("notifications").add({
+        to: fromId,
+        from: currentUser.id,
+        fromName: currentUser.username,
+        type: "friend_rejected",
+        status: "unread",
+        time: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      showBrowserNotif('Friend Request Declined', 'You declined the friend request.');
+      openNotificationsModal();
+    }
+
+    async function dismissNotification(notifId) {
+      await db.collection("notifications").doc(notifId).delete();
+      openNotificationsModal();
+    }
 
     // --- NAVIGATION ---
     function showChatInbox() {
@@ -1628,9 +2049,10 @@
       unsubscribeFriends = db.collection("users").doc(currentUser.id).onSnapshot(async (doc) => {
         const data = doc.data();
         currentUser.friends = data.friends || [];
-        if (currentUser.friends.length > 0) {
-          // Fetch friends and filter out any that might have been deleted
-          const promises = currentUser.friends.map(fid => db.collection("users").doc(fid).get());
+        currentUser.chats = data.chats || currentUser.friends || [];
+        if (currentUser.chats.length > 0) {
+          // Fetch chats (friends + past conversations) and filter out any that might have been deleted
+          const promises = currentUser.chats.map(fid => db.collection("users").doc(fid).get());
           const docs = await Promise.all(promises);
           myFriendsList = docs
             .filter(d => d.exists) // IMPORTANT: Filter out deleted users
@@ -1642,6 +2064,42 @@
         window.myGroupsList = snap.docs.map(d => ({ id: d.id, ...d.data(), type: 'group' }));
         renderSidebar();
       });
+
+      if (!unsubscribeNotifications) {
+        let isFirstLoad = true;
+        unsubscribeNotifications = db.collection("notifications").where("to", "==", currentUser.id).onSnapshot(snap => {
+          let notes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          notes.sort((a, b) => (b.time ? b.time.toMillis() : 0) - (a.time ? a.time.toMillis() : 0));
+          window.myNotificationsList = notes;
+          const btn = document.getElementById("notifBtn");
+          if (btn) btn.classList.toggle("has-new", notes.length > 0);
+
+          if (isFirstLoad) {
+            // Populate known IDs on first load so we don't alert for old notifications
+            snap.docs.forEach(doc => lastKnownNotifIds.add(doc.id));
+            isFirstLoad = false;
+            return;
+          }
+
+          // Fire browser notifications only for newly arrived items
+          snap.docChanges().forEach(change => {
+            if (change.type !== 'added') return;
+            const n = { id: change.doc.id, ...change.doc.data() };
+            if (lastKnownNotifIds.has(n.id)) return; // already seen
+            lastKnownNotifIds.add(n.id);
+            const fromName = toTitleCase(n.fromName || 'Someone');
+            if (n.type === 'friend_request') {
+              showBrowserNotif('New Friend Request 👋', `${fromName} sent you a friend request.`);
+            } else if (n.type === 'friend_accepted') {
+              showBrowserNotif('Friend Request Accepted 🎉', `${fromName} accepted your friend request!`);
+            } else if (n.type === 'friend_rejected') {
+              showBrowserNotif('Friend Request Declined 😔', `${fromName} declined your friend request.`);
+            } else if (n.type === 'friend_removed') {
+              showBrowserNotif('Unfriended 💔', `${fromName} removed you as a friend.`);
+            }
+          });
+        });
+      }
     }
     function renderSidebar() {
       const container = document.getElementById("friendsListContainer");
@@ -1654,7 +2112,36 @@
         const isGroup = item.type === 'group';
         const name = isGroup ? item.name : toTitleCase(item.username);
         const imgHtml = item.photoUrl ? `<img src="${item.photoUrl}">` : `<div class="placeholder">${isGroup ? '👥' : '👤'}</div>`;
-        div.innerHTML = `<div class="user-info-group">${imgHtml}<div><span>${name}</span>${isGroup ? `<span class="group-tag">Group</span>` : ''}</div></div>`;
+        div.innerHTML = `<div class="user-info-group">${imgHtml}<div><span>${name}</span>${isGroup ? `<span class="group-tag">Group</span>` : ''}<div class="last-msg-preview" id="lastMsg_${item.id}"></div></div></div>`;
+
+        // Fetch last message for preview
+        let chatRef;
+        if (isGroup) {
+          chatRef = db.collection("groups").doc(item.id).collection("msgs");
+        } else {
+          const chatId = [currentUser.id, item.id].sort().join("_");
+          chatRef = db.collection("chats").doc(chatId).collection("msgs");
+        }
+        chatRef.orderBy("time", "desc").limit(1).get().then(snap => {
+          const previewEl = document.getElementById(`lastMsg_${item.id}`);
+          if (!previewEl) return;
+          if (!snap.empty) {
+            const lastMsg = snap.docs[0].data();
+            let text = lastMsg.content || "";
+            // Decrypt
+            try {
+              const secret = isGroup ? item.id : [currentUser.id, item.id].sort().join("_");
+              const bytes = CryptoJS.AES.decrypt(text, secret);
+              const dec = bytes.toString(CryptoJS.enc.Utf8);
+              if (dec) text = dec;
+            } catch(e) {}
+            if (lastMsg.type === "file") text = "📎 Attachment";
+            if (lastMsg.type === "like") text = "👍";
+            const isMine = lastMsg.sender === currentUser.id;
+            previewEl.textContent = isMine ? `You: ${text}` : text;
+            if (!isMine) previewEl.classList.add("unread");
+          }
+        });
 
         if (!isGroup) {
           const menuBtn = document.createElement("button"); menuBtn.className = "user-options-btn"; menuBtn.innerHTML = "⋮";
@@ -1662,7 +2149,7 @@
           div.appendChild(menuBtn);
           div.oncontextmenu = (e) => { e.preventDefault(); showContextForCreateGroup(e, item); };
         }
-        
+
         // Pass the entire item object to openChat to ensure ID is present
         div.onclick = () => openChat(item, item.type);
         container.appendChild(div);
@@ -1674,7 +2161,7 @@
       if (!entity || !entity.id) return console.error("Invalid chat entity");
       currentChatEntity = entity;
       currentChatType = type;
-      currentGroupMembersCache = {}; 
+      currentGroupMembersCache = {};
 
       document.getElementById("chat").classList.remove("show-users");
       document.getElementById("chat").classList.add("show-chat");
@@ -1692,6 +2179,17 @@
         docs.forEach(d => { if (d.exists) currentGroupMembersCache[d.id] = d.data(); });
       }
 
+      // Messaging Restrictions
+      const inputBar = document.getElementById("chatInputBar");
+      const blockedBar = document.getElementById("chatBlockedBar");
+      if (type === 'direct' && !(currentUser.friends || []).includes(entity.id)) {
+        inputBar.style.display = "none";
+        blockedBar.style.display = "block";
+      } else {
+        inputBar.style.display = "flex";
+        blockedBar.style.display = "none";
+      }
+
       updateChatDropdown();
       if (type === 'direct') setupTypingListener();
       else document.getElementById("typingIndicator").style.display = "none";
@@ -1706,19 +2204,65 @@
       // Robust Chat ID Generation
       if (currentChatType === 'direct') {
         // Ensure IDs are valid before joining
-        if(!currentUser.id || !currentChatEntity.id) {
-           alert("Error: Chat ID invalid. Please refresh.");
-           return;
+        if (!currentUser.id || !currentChatEntity.id) {
+          alert("Error: Chat ID invalid. Please refresh.");
+          return;
         }
         ref = db.collection("chats").doc([currentUser.id, currentChatEntity.id].sort().join("_")).collection("msgs");
       }
       else ref = db.collection("groups").doc(currentChatEntity.id).collection("msgs");
 
+      // Reset message tracking when opening a new chat
+      lastKnownMsgIds = new Set();
+
+      let isFirstMsgLoad = true;
       unsubscribeMsgs = ref.orderBy("time").onSnapshot(snap => {
+        if (isFirstMsgLoad) {
+          snap.docs.forEach(doc => lastKnownMsgIds.add(doc.id));
+          isFirstMsgLoad = false;
+        } else {
+          // Browser notification for new incoming messages
+          snap.docChanges().forEach(change => {
+            if (change.type !== 'added') return;
+            const msgData = change.doc.data();
+            const msgId = change.doc.id;
+            if (lastKnownMsgIds.has(msgId)) return;
+            lastKnownMsgIds.add(msgId);
+            
+            // Notify if the message is from someone else
+            if (msgData.sender !== currentUser.id) {
+              const senderName = currentChatType === 'group'
+                ? (currentGroupMembersCache[msgData.sender]?.username ? toTitleCase(currentGroupMembersCache[msgData.sender].username) : 'Someone')
+                : toTitleCase(currentChatEntity.username || 'Someone');
+              let preview = '';
+              if (msgData.type === 'text') {
+                try {
+                  const secret = currentChatType === 'group' ? currentChatEntity.id : [currentUser.id, currentChatEntity.id].sort().join('_');
+                  const bytes = CryptoJS.AES.decrypt(msgData.content, secret);
+                  preview = bytes.toString(CryptoJS.enc.Utf8) || '📨 New message';
+                } catch(e) { preview = '📨 New message'; }
+              } else if (msgData.type === 'file') { preview = '📎 Sent an attachment'; }
+              else if (msgData.type === 'like') { preview = '👍 Liked'; }
+              
+              const chatName = currentChatType === 'group' ? currentChatEntity.name : senderName;
+              
+              // If tab is hidden, send a system notification. If visible, just a toast.
+              if (document.hidden) {
+                showBrowserNotif(`${senderName} in ${chatName}`, preview || '📨 New message');
+              } else {
+                // If we are looking at a DIFFERENT chat, show a toast. 
+                // If we are looking at the SAME chat, maybe skip? 
+                // For now, always show toast for other people's messages if we didn't just receive them in active view
+                showToast(senderName, preview || '📨 New message', "💬");
+              }
+            }
+          });
+        }
+
         msgsDiv.innerHTML = "";
         let lastDate = null;
-        let lastTimeStr = null; 
-        
+        let lastTimeStr = null;
+
         snap.forEach(doc => {
           const m = doc.data();
           // DATE LOGIC
@@ -1732,23 +2276,23 @@
             const sep = document.createElement("div"); sep.className = "date-separator";
             const today = new Date().toDateString();
             const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-            
-            if(dateStr === today) sep.textContent = "Today";
-            else if(dateStr === yesterday.toDateString()) sep.textContent = "Yesterday";
+
+            if (dateStr === today) sep.textContent = "Today";
+            else if (dateStr === yesterday.toDateString()) sep.textContent = "Yesterday";
             else sep.textContent = date.toLocaleDateString();
-            
-            msgsDiv.appendChild(sep); 
+
+            msgsDiv.appendChild(sep);
             lastDate = dateStr;
             lastTimeStr = null; // Reset time tracking on new day
           }
 
           // 2. TIME SEPARATOR (ABOVE MIDDLE)
           if (timeStr !== lastTimeStr) {
-             const tSep = document.createElement("div");
-             tSep.className = "time-separator";
-             tSep.textContent = timeStr;
-             msgsDiv.appendChild(tSep);
-             lastTimeStr = timeStr;
+            const tSep = document.createElement("div");
+            tSep.className = "time-separator";
+            tSep.textContent = timeStr;
+            msgsDiv.appendChild(tSep);
+            lastTimeStr = timeStr;
           }
 
           if (m.type === 'system') {
@@ -1774,7 +2318,7 @@
           }
 
           let bubbleContent = "";
-          if (m.type === "text") bubbleContent = m.content;
+          if (m.type === "text") bubbleContent = decryptText(m.content);
           else if (m.type === "file") bubbleContent = `<img src="${m.url}">`;
           else if (m.type === "like") bubbleContent = "👍";
 
@@ -1818,38 +2362,39 @@
       const input = document.getElementById("msgInput");
       const txt = input.value.trim();
       const file = document.getElementById("fileInput").files[0];
-      
+
       if (!txt && !file) return;
 
       // Optimistic UI Clear
       input.value = "";
-      toggleSendBtn(); 
+      toggleSendBtn();
 
       let ref;
       if (currentChatType === 'direct') {
         // Ensure IDs are valid before joining
-        if(!currentUser.id || !currentChatEntity.id) {
-           alert("Error: Chat ID invalid. Please refresh.");
-           return;
+        if (!currentUser.id || !currentChatEntity.id) {
+          alert("Error: Chat ID invalid. Please refresh.");
+          return;
         }
         ref = db.collection("chats").doc([currentUser.id, currentChatEntity.id].sort().join("_")).collection("msgs");
       }
       else ref = db.collection("groups").doc(currentChatEntity.id).collection("msgs");
 
       const base = { sender: currentUser.id, time: firebase.firestore.FieldValue.serverTimestamp() };
-      
+
       try {
-          if (file) {
-            const url = await uploadToCloudinary(file);
-            await ref.add({ ...base, type: "file", url: url });
-            document.getElementById("fileInput").value = ""; document.getElementById("filePreviewName").textContent = "";
-          }
-          if (txt) { 
-              await ref.add({ ...base, type: "text", content: txt }); 
-          }
-      } catch(e) {
-          console.error("Send Error", e);
-          alert("Failed to send message.");
+        if (file) {
+          const url = await uploadToCloudinary(file);
+          await ref.add({ ...base, type: "file", url: url });
+          document.getElementById("fileInput").value = ""; document.getElementById("filePreviewName").textContent = "";
+        }
+        if (txt) {
+          const encryptedMsg = encryptText(txt);
+          await ref.add({ ...base, type: "text", content: encryptedMsg });
+        }
+      } catch (e) {
+        console.error("Send Error", e);
+        alert("Failed to send message.");
       }
     }
 
@@ -1875,6 +2420,8 @@
         menu.innerHTML = `
           <button class="dropdown-item" onclick="showFriendProfile();toggleChatMenu()">👤 Profile</button>
           <button class="dropdown-item" onclick="toggleSearch();toggleChatMenu()">🔍 Search</button>
+          <button class="dropdown-item" onclick="openCreateGroupModal();toggleChatMenu()">➕ Add/Create Group</button>
+          <button class="dropdown-item danger" onclick="unfriendCurrentChat();toggleChatMenu()">❌ Unfriend</button>
           <button class="dropdown-item" onclick="alert('🔒 Privacy: End-to-end encryption is enabled.');toggleChatMenu()">🔒 Privacy</button>
           <button class="dropdown-item danger" onclick="deleteConversation();toggleChatMenu()">🗑️ Delete</button>
         `;
@@ -2054,14 +2601,14 @@
       document.getElementById("likeBtn").style.display = v ? "none" : "flex";
     }
     function handleInput() { toggleSendBtn(); }
-    
+
     // TYPING INDICATOR (DIRECT ONLY)
     function setupTypingListener() {
-        if(currentChatType !== 'direct') return;
-        const chatId = [currentUser.id, currentChatEntity.id].sort().join("_");
-        // Simple typing logic using a subcollection or metadata. 
-        // For this demo, let's skip complex typing sync to keep it stable.
-        // If you want typing back, let me know!
+      if (currentChatType !== 'direct') return;
+      const chatId = [currentUser.id, currentChatEntity.id].sort().join("_");
+      // Simple typing logic using a subcollection or metadata. 
+      // For this demo, let's skip complex typing sync to keep it stable.
+      // If you want typing back, let me know!
     }
 
     async function uploadToCloudinary(file) {
@@ -2092,6 +2639,33 @@
       const ref = db.collection("chats").doc([currentUser.id, currentChatEntity.id].sort().join("_")).collection("msgs");
       const snap = await ref.get(); const batch = db.batch();
       snap.docs.forEach(d => batch.delete(d.ref)); await batch.commit(); alert("Deleted.");
+    }
+
+    async function unfriendCurrentChat() {
+      if (!confirm("Unfriend this user?")) return;
+      const newFs = currentUser.friends.filter(f => f !== currentChatEntity.id);
+      let myChats = [...new Set([...(currentUser.chats || []), ...(currentUser.friends || []), currentChatEntity.id])];
+      await db.collection("users").doc(currentUser.id).update({ friends: newFs, chats: myChats });
+
+      const theirDoc = await db.collection("users").doc(currentChatEntity.id).get();
+      if (theirDoc.exists) {
+        const theirData = theirDoc.data();
+        const theirFs = theirData.friends || [];
+        const newTheirFs = theirFs.filter(f => f !== currentUser.id);
+        let theirChats = [...new Set([...(theirData.chats || []), ...(theirData.friends || []), currentUser.id])];
+        await db.collection("users").doc(currentChatEntity.id).update({ friends: newTheirFs, chats: theirChats });
+      }
+
+      await db.collection("notifications").add({
+        to: currentChatEntity.id,
+        from: currentUser.id,
+        fromName: currentUser.username,
+        type: "friend_removed",
+        status: "unread",
+        time: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      backToFriends();
     }
   </script>
 </body>
