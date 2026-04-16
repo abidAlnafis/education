@@ -1725,12 +1725,13 @@
       }
     }
 
-    function showToast(title, body, icon = "🌸", duration = 5000) {
+    function showToast(title, body, icon = "🌸", duration = 5000, chatId = null) {
       const container = document.getElementById("toastContainer");
       if (!container) return;
 
       const toast = document.createElement("div");
       toast.className = "toast";
+      if (chatId) toast.dataset.chatId = chatId;
       toast.innerHTML = `
         <div class="toast-icon">${icon}</div>
         <div class="toast-content">
@@ -1755,11 +1756,11 @@
       }, duration);
     }
 
-    function showBrowserNotif(title, body, icon) {
+    function showBrowserNotif(title, body, icon, tag = null) {
       console.log(`Attempting Notification: ${title} - ${body}`);
 
       // Always show in-app toast
-      showToast(title, body, "🔔");
+      showToast(title, body, "🔔", 5000, tag);
 
       if (!('Notification' in window)) {
         console.warn("Notifications API not supported in this browser.");
@@ -2124,14 +2125,15 @@
             if (lastKnownNotifIds.has(n.id)) return; // already seen
             lastKnownNotifIds.add(n.id);
             const fromName = toTitleCase(n.fromName || 'Someone');
+            const tag = n.from; 
             if (n.type === 'friend_request') {
-              showBrowserNotif('New Friend Request 👋', `${fromName} sent you a friend request.`);
+              showBrowserNotif('New Friend Request 👋', `${fromName} sent you a friend request.`, null, tag);
             } else if (n.type === 'friend_accepted') {
-              showBrowserNotif('Friend Request Accepted 🎉', `${fromName} accepted your friend request!`);
+              showBrowserNotif('Friend Request Accepted 🎉', `${fromName} accepted your friend request!`, null, tag);
             } else if (n.type === 'friend_rejected') {
-              showBrowserNotif('Friend Request Declined 😔', `${fromName} declined your friend request.`);
+              showBrowserNotif('Friend Request Declined 😔', `${fromName} declined your friend request.`, null, tag);
             } else if (n.type === 'friend_removed') {
-              showBrowserNotif('Unfriended 💔', `${fromName} removed you as a friend.`);
+              showBrowserNotif('Unfriended 💔', `${fromName} removed you as a friend.`, null, tag);
             }
           });
         });
@@ -2208,6 +2210,13 @@
       currentChatEntity = entity;
       currentChatType = type;
       currentGroupMembersCache = {};
+
+      // Clear notifications for this chat immediately
+      const toasts = document.querySelectorAll(`.toast[data-chat-id="${entity.id}"]`);
+      toasts.forEach(t => {
+        t.classList.add("out");
+        setTimeout(() => t.remove(), 300);
+      });
 
       document.getElementById("chat").classList.remove("show-users");
       document.getElementById("chat").classList.add("show-chat");
@@ -2297,9 +2306,11 @@
                 showBrowserNotif(`${senderName} in ${chatName}`, preview || '📨 New message');
               } else {
                 // If we are looking at a DIFFERENT chat, show a toast. 
-                // If we are looking at the SAME chat, maybe skip? 
-                // For now, always show toast for other people's messages if we didn't just receive them in active view
-                showToast(senderName, preview || '📨 New message', "💬");
+                // If the tab is hidden, we show a toast for the current chat.
+                // If we are looking at the chat (visible), we skip the toast to avoid redundancy.
+                if (document.hidden) {
+                   showToast(senderName, preview || '📨 New message', "💬", 5000, currentChatEntity.id);
+                }
               }
             }
           });
