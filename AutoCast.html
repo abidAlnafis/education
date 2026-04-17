@@ -15,401 +15,463 @@
 
     <style>
         :root {
-            --primary: #818cf8;
-            --accent: #c084fc;
-            --bg: #000000;
-            --surface: rgba(255, 255, 255, 0.05);
-            --border: rgba(255, 255, 255, 0.1);
-            --text: #ffffff;
-            --text-muted: #94a3b8;
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.4);
+            --bg: #030712;
+            --card-bg: rgba(31, 41, 55, 0.5);
+            --text: #f9fafb;
+            --text-dim: #9ca3af;
+            --glass-border: rgba(255, 255, 255, 0.1);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            -webkit-font-smoothing: antialiased;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             background-color: var(--bg);
             color: var(--text);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            background: radial-gradient(circle at 50% 50%, #171717 0%, #000000 100%);
+            overflow-x: hidden;
+            background: radial-gradient(circle at top left, #1e1b4b, #030712);
         }
 
-        .app-shell {
-            width: 100%;
-            max-width: 440px;
-            padding: 2.5rem;
-            animation: fadeIn 1s ease;
-        }
-
+        /* Premium Animations */
         @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.98); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 4rem;
-        }
-
-        h1 {
-            font-weight: 800;
-            font-size: 2.5rem;
-            letter-spacing: -0.05em;
-            margin-bottom: 0.5rem;
-        }
-
-        .tagline {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-        }
-
-        /* Minimal Cards */
-        .option-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        .option-button {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            padding: 2.5rem 1.5rem;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            text-align: center;
-        }
-
-        .option-button:hover {
-            border-color: var(--primary);
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateY(-4px);
-        }
-
-        .option-button h2 {
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
-
-        /* Interface Layouts */
-        .view {
-            display: none;
-            flex-direction: column;
-            gap: 2.5rem;
-            animation: slideUp 0.6s ease;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .active { display: flex; }
-
-        /* Receiver View */
-        .pairing-area {
-            text-align: center;
-            padding: 2rem;
-            background: var(--surface);
-            border-radius: 24px;
-            border: 1px solid var(--border);
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px var(--primary-glow); }
+            50% { box-shadow: 0 0 20px var(--primary-glow); }
+            100% { box-shadow: 0 0 5px var(--primary-glow); }
         }
 
-        #pairing-code {
-            font-size: 3rem;
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+
+        header {
+            margin-bottom: 3rem;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        h1 {
+            font-size: 3.5rem;
             font-weight: 800;
-            margin: 1.5rem 0;
-            letter-spacing: 0.1em;
+            background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.05em;
+        }
+
+        header p {
+            color: var(--text-dim);
+            font-size: 1.1rem;
+        }
+
+        /* Mode Selection */
+        .mode-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            animation: fadeIn 1s ease-out 0.2s both;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 3rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            background: rgba(31, 41, 55, 0.7);
+            border-color: var(--primary);
+        }
+
+        .card h2 {
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .card p {
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+
+        .card .icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        /* Interface Sections */
+        .interface {
+            display: none;
+            width: 100%;
+            max-width: 600px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .active {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* TV Receiver UI */
+        #tv-ui .pairing-code {
+            font-size: 4rem;
+            font-weight: 800;
+            letter-spacing: 0.2em;
             color: var(--primary);
+            margin: 2rem 0;
+            text-shadow: 0 0 30px var(--primary-glow);
         }
 
         #qrcode {
-            background: #fff;
+            background: white;
             padding: 1rem;
-            border-radius: 12px;
+            border-radius: 16px;
             display: inline-block;
-            margin-bottom: 1.5rem;
+            margin: 0 auto;
         }
 
-        /* Sender View */
-        input {
+        /* Mobile Sender UI */
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
             width: 100%;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            padding: 1.5rem;
-            border-radius: 18px;
-            color: #fff;
+        }
+
+        input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            padding: 1.25rem;
+            border-radius: 12px;
+            color: white;
             font-size: 1.5rem;
             text-align: center;
             outline: none;
-            margin-bottom: 1.5rem;
             transition: border-color 0.3s;
         }
 
-        input:focus { border-color: var(--primary); }
+        input:focus {
+            border-color: var(--primary);
+        }
 
-        .cast-btn {
-            background: #fff;
-            color: #000;
-            padding: 1.5rem;
-            border-radius: 18px;
-            font-weight: 700;
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1.25rem;
+            border-radius: 12px;
             font-size: 1.1rem;
-            border: none;
-            cursor: pointer;
-            width: 100%;
-            transition: transform 0.2s, opacity 0.2s;
-        }
-
-        .cast-btn:active { transform: scale(0.98); }
-
-        .nearby-chip {
-            background: rgba(129, 140, 248, 0.1);
-            color: var(--primary);
-            padding: 1rem;
-            border-radius: 14px;
             font-weight: 600;
-            text-align: center;
-            margin-bottom: 2rem;
             cursor: pointer;
-            border: 1px solid rgba(129, 140, 248, 0.2);
-            display: none;
+            transition: all 0.3s;
+            animation: glow 3s infinite;
         }
 
-        .back-btn {
+        button:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button.secondary {
             background: transparent;
-            color: var(--text-muted);
-            border: none;
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 0.9rem;
-            margin-top: 1rem;
+            border: 1px solid var(--glass-border);
+            animation: none;
         }
 
-        /* Video Container */
-        #video-overlay {
+        /* Fullscreen Video */
+        #video-container {
             display: none;
             position: fixed;
-            inset: 0;
-            background: #000;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: black;
             z-index: 1000;
         }
 
-        video { width: 100%; height: 100%; object-fit: contain; }
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
 
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ef4444;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .status-online {
+            background: #10b981;
+        }
+
+        /* Branding Footer */
         footer {
-            position: fixed;
-            bottom: 2rem;
-            left: 0;
-            right: 0;
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            opacity: 0.5;
+            margin-top: auto;
+            padding: 2rem;
+            font-size: 0.9rem;
+            color: var(--text-dim);
+        }
+
+        .beta-tag {
+            background: #f59e0b;
+            color: black;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .card { padding: 2rem; }
         }
     </style>
 </head>
 <body>
 
-    <div class="app-shell">
+    <div class="container">
         <header id="main-header">
-            <h1>AutoCast</h1>
-            <p class="tagline">Screen Mirroring</p>
+            <h1>AutoCast<span class="beta-tag">BETA</span></h1>
+            <p>High-fidelity screen mirroring for any device</p>
         </header>
 
-        <!-- Selection View -->
-        <div id="view-selection" class="view active">
-            <div class="option-grid">
-                <div class="option-button" onclick="changeView('receiver')">
-                    <div style="font-size: 2rem; margin-bottom: 1rem;">📺</div>
-                    <h2>Receive Content</h2>
-                </div>
-                <div class="option-button" onclick="changeView('sender')">
-                    <div style="font-size: 2rem; margin-bottom: 1rem;">📱</div>
-                    <h2>Share Screen</h2>
-                </div>
+        <!-- Mode Selection -->
+        <div id="selection-ui" class="mode-selection active">
+            <div class="card" onclick="initMode('receiver')">
+                <span class="icon">📺</span>
+                <h2>TV Mode</h2>
+                <p>Open this on your Samsung Tizen TV to receive a stream.</p>
+            </div>
+            <div class="card" onclick="initMode('sender')">
+                <span class="icon">📱</span>
+                <h2>Phone / PC Mode</h2>
+                <p>Cast your screen and audio from your mobile or computer.</p>
             </div>
         </div>
 
-        <!-- TV View -->
-        <div id="view-receiver" class="view">
-            <div class="pairing-area">
-                <div id="qrcode"></div>
-                <p style="font-size: 0.9rem; color: var(--text-muted);">Pairing Code</p>
-                <div id="pairing-code">--- ---</div>
-            </div>
-            <button class="back-btn" onclick="location.reload()">Return Home</button>
+        <!-- TV Interface -->
+        <div id="tv-ui" class="interface">
+            <p>Connect your device using this code:</p>
+            <div class="pairing-code" id="pairing-code">--- ---</div>
+            <div id="qrcode"></div>
+            <p style="margin-top: 2rem; color: var(--text-dim);">
+                <span class="status-dot" id="receiver-status"></span>
+                <span id="receiver-status-text">Connecting to signaling server...</span>
+            </p>
+            <button class="secondary" onclick="resetUI()" style="margin-top: 2rem;">Go Back</button>
         </div>
 
-        <!-- Phone View -->
-        <div id="view-sender" class="view">
-            <div id="nearby-chip" class="nearby-chip" onclick="quickConnect()">
-                Found TV on network. Tap to cast.
+        <!-- Mobile Interface -->
+        <div id="sender-ui" class="interface">
+            <div class="control-group">
+                <p>Enter the code shown on your TV:</p>
+                <input type="text" id="target-id" placeholder="Code (e.g. 123456)" maxlength="6">
+                <button onclick="startCasting()">Start Casting</button>
+                <button class="secondary" onclick="resetUI()">Go Back</button>
             </div>
-            
-            <div style="width: 100%;">
-                <input type="text" id="target-id" placeholder="000000" maxlength="6">
-                <button class="cast-btn" onclick="startMirroring()">Connect</button>
-            </div>
-
-            <div id="recent-stack" style="display:none; text-align: left;">
-                <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1rem;">RECENT</p>
-                <div id="recent-devices" style="display:flex; flex-direction: column; gap: 0.5rem;"></div>
-            </div>
-
-            <button class="back-btn" onclick="location.reload()">Return Home</button>
+            <p style="margin-top: 2rem; color: var(--text-dim);">
+                <span class="status-dot" id="sender-status"></span>
+                <span id="sender-status-text">Ready to cast</span>
+            </p>
         </div>
 
-        <footer>Pro Version Beta</footer>
+        <footer>
+            Built for Tizen OS & Modern Web Browsers
+        </footer>
     </div>
 
-    <div id="video-overlay">
-        <video id="player" autoplay playsinline></video>
-        <button onclick="stopMirroring()" style="position: absolute; top: 2rem; right: 2rem; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 99px; cursor: pointer;">Stop Casting</button>
+    <div id="video-container">
+        <video id="receiver-video" autoplay playsinline></video>
+        <button onclick="stopCasting()" style="position: absolute; bottom: 20px; right: 20px; padding: 10px 20px; z-index: 1001;">Stop Casting</button>
     </div>
 
     <script>
         let peer = null;
-        let callInstance = null;
-        let mirrorStream = null;
-        let netId = null;
-        let detectedTvId = null;
+        let currentCall = null;
+        let localStream = null;
 
-        async function getNetHash() {
-            try {
-                const res = await fetch('https://api.ipify.org?format=json');
-                const data = await res.json();
-                let h = 0; for (let i = 0; i < data.ip.length; i++) h = ((h << 5) - h) + data.ip.charCodeAt(i);
-                return Math.abs(h).toString(16);
-            } catch (e) { return 'shared'; }
-        }
-
-        async function changeView(v) {
-            document.getElementById('view-selection').classList.remove('active');
-            netId = await getNetHash();
-            if (v === 'receiver') {
-                document.getElementById('view-receiver').classList.add('active');
-                initReceiver();
+        function initMode(mode) {
+            document.getElementById('selection-ui').classList.remove('active');
+            
+            if (mode === 'receiver') {
+                document.getElementById('tv-ui').classList.add('active');
+                setupReceiver();
             } else {
-                document.getElementById('view-sender').classList.add('active');
-                initSender();
+                document.getElementById('sender-ui').classList.add('active');
+                setupSender();
             }
         }
 
-        function initReceiver() {
-            const sid = Math.floor(100000 + Math.random() * 900000).toString();
-            peer = new Peer(`cast-${sid}-${netId}`);
-            peer.on('open', () => {
-                document.getElementById('pairing-code').innerText = sid;
-                const url = `${window.location.origin}${window.location.pathname}?id=${sid}&net=${netId}`;
-                new QRCode(document.getElementById("qrcode"), { text: url, width: 140, height: 140 });
-            });
-            peer.on('call', c => {
-                c.answer();
-                c.on('stream', s => {
-                    document.getElementById('video-overlay').style.display = 'block';
-                    document.getElementById('player').srcObject = s;
+        function resetUI() {
+            location.reload(); // Simplest way to cleanup PeerJS states
+        }
+
+        function generateShortId() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        // --- RECEIVER LOGIC ---
+        function setupReceiver() {
+            const shortId = generateShortId();
+            peer = new Peer('ac-' + shortId);
+
+            peer.on('open', (id) => {
+                const code = id.replace('ac-', '');
+                document.getElementById('pairing-code').innerText = code;
+                document.getElementById('receiver-status').classList.add('status-online');
+                document.getElementById('receiver-status-text').innerText = 'Ready for connection';
+                
+                // Generate QR Code
+                const qrVal = `${window.location.origin}${window.location.pathname}?id=${code}`;
+                new QRCode(document.getElementById("qrcode"), {
+                    text: qrVal,
+                    width: 180,
+                    height: 180,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
                 });
-                callInstance = c;
+            });
+
+            peer.on('call', (call) => {
+                call.answer(); // Auto answer
+                call.on('stream', (remoteStream) => {
+                    const video = document.getElementById('receiver-video');
+                    document.getElementById('video-container').style.display = 'block';
+                    video.srcObject = remoteStream;
+                    video.play().catch(e => console.error("Playback failed", e));
+                });
+                currentCall = call;
+            });
+
+            peer.on('error', (err) => {
+                console.error(err);
+                document.getElementById('receiver-status-text').innerText = 'Error: ' + err.type;
             });
         }
 
-        async function initSender() {
-            if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
-                alert("⚠️ IMPORTANT: Screen casting ONLY works over HTTPS. Please host this file on a secure server (like GitHub Pages) to use it on your phone.");
-            } else if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
-                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-                if (isIOS) {
-                    alert("❌ Browser Not Supported: On iPhone/iPad, you MUST use the Safari browser to cast.");
-                } else {
-                    alert("❌ Browser Not Supported: Your browser doesn't support screen capture. Please try using the latest version of Google Chrome.");
-                }
-            }
+        // --- SENDER LOGIC ---
+        function setupSender() {
             peer = new Peer();
-            loadRecents();
-            const p = new URLSearchParams(window.location.search);
-            const id = p.get('id'), n = p.get('net');
-            if (id && n === netId) {
-                detectedTvId = id;
-                document.getElementById('nearby-chip').style.display = 'block';
-                document.getElementById('target-id').value = id;
+            
+            // Auto-fill from URL if present
+            const urlParams = new URLSearchParams(window.location.search);
+            const target = urlParams.get('id');
+            if (target) {
+                document.getElementById('target-id').value = target;
             }
-        }
 
-        function loadRecents() {
-            const r = JSON.parse(localStorage.getItem('cast_history') || '[]');
-            if (r.length === 0) return;
-            const container = document.getElementById('recent-stack');
-            const list = document.getElementById('recent-devices');
-            container.style.display = 'block';
-            list.innerHTML = '';
-            r.forEach(id => {
-                const row = document.createElement('div');
-                row.style.background = 'var(--surface)';
-                row.style.padding = '1rem';
-                row.style.borderRadius = '12px';
-                row.style.cursor = 'pointer';
-                row.style.fontSize = '0.9rem';
-                row.innerText = 'Connected Device';
-                row.onclick = () => { document.getElementById('target-id').value = id; startMirroring(); };
-                list.appendChild(row);
+            peer.on('open', (id) => {
+                document.getElementById('sender-status').classList.add('status-online');
+                document.getElementById('sender-status-text').innerText = 'Server Connected';
             });
         }
 
-        function quickConnect() { startMirroring(); }
+        async function startCasting() {
+            const targetId = document.getElementById('target-id').value.trim();
+            if (!targetId) return alert('Please enter a pairing code');
 
-        async function startMirroring() {
-            const code = document.getElementById('target-id').value.trim();
-            if (!code) return;
             try {
-                // Request stream
-                mirrorStream = await navigator.mediaDevices.getDisplayMedia({ 
-                    video: true, 
-                    audio: true 
+                // Request Screen with Audio
+                localStream = await navigator.mediaDevices.getDisplayMedia({
+                    video: {
+                        cursor: "always",
+                        displaySurface: "monitor"
+                    },
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        sampleRate: 44100
+                    }
                 });
-                
-                const call = peer.call(`cast-${code}-${netId}`, mirrorStream);
-                
-                let r = JSON.parse(localStorage.getItem('cast_history') || '[]');
-                if (!r.includes(code)) { 
-                    r.unshift(code); 
-                    if(r.length > 3) r.pop(); 
-                    localStorage.setItem('cast_history', JSON.stringify(r)); 
-                }
-                
-                call.on('close', stopMirroring);
-                mirrorStream.getVideoTracks()[0].onended = stopMirroring;
 
-            } catch (e) { 
-                console.error("Casting Error:", e);
-                if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
-                    alert("⚠️ Security: Screen capture requires HTTPS. Please host this file on a secure server.");
-                } else if (e.name === 'NotAllowedError') {
-                    alert("⚠️ Permission Denied: You must grant permission and select a screen to share.");
-                } else if (e.name === 'NotFoundError') {
-                    alert("⚠️ Error: No screen source found. If you are on mobile, ensure your system allows screen recording.");
-                } else {
-                    alert("⚠️ Casting failed: " + e.message + "\n\nTip: On iOS, you must use Safari.");
-                }
+                // Mix in microphone if needed (Optional, but useful for voice-over)
+                // For now, we focus on system audio which is part of getDisplayMedia
+
+                const call = peer.call('ac-' + targetId, localStream);
+                
+                call.on('close', () => {
+                    stopCasting();
+                });
+
+                document.getElementById('sender-status-text').innerText = 'Streaming active...';
+                
+                // Listen for stop sharing button in browser
+                localStream.getVideoTracks()[0].onended = () => {
+                    stopCasting();
+                };
+
+            } catch (err) {
+                console.error("Casting error:", err);
+                alert("Failed to start casting: " + err.message);
             }
         }
 
-        function stopMirroring() {
-            if (mirrorStream) mirrorStream.getTracks().forEach(t => t.stop());
-            document.getElementById('video-overlay').style.display = 'none';
+        function stopCasting() {
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            if (currentCall) {
+                currentCall.close();
+            }
+            document.getElementById('video-container').style.display = 'none';
+            document.getElementById('sender-status-text').innerText = 'Streaming stopped';
         }
+
+        // Tizen Back Button Support
+        window.addEventListener('tizenhwkey', function(e) {
+            if (e.keyName === "back") {
+                if (document.getElementById('video-container').style.display === 'block') {
+                    stopCasting();
+                } else {
+                    try {
+                        tizen.application.getCurrentApplication().exit();
+                    } catch (ignore) {}
+                }
+            }
+        });
     </script>
 </body>
 </html>
-
