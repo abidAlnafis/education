@@ -326,8 +326,15 @@
         }
 
         async function initSender() {
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
-                alert("❌ Your browser doesn't support screen casting. If you are on iPhone/iPad, please use the Safari browser.");
+            if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+                alert("⚠️ IMPORTANT: Screen casting ONLY works over HTTPS. Please host this file on a secure server (like GitHub Pages) to use it on your phone.");
+            } else if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                if (isIOS) {
+                    alert("❌ Browser Not Supported: On iPhone/iPad, you MUST use the Safari browser to cast.");
+                } else {
+                    alert("❌ Browser Not Supported: Your browser doesn't support screen capture. Please try using the latest version of Google Chrome.");
+                }
             }
             peer = new Peer();
             loadRecents();
