@@ -55,13 +55,16 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 1.5rem;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
+            height: 100vh;
+            height: 100svh;
             text-align: center;
+            position: relative;
+            overflow: hidden;
         }
 
         header {
@@ -70,7 +73,7 @@
         }
 
         h1 {
-            font-size: 3.5rem;
+            font-size: clamp(2.5rem, 8vw, 3.5rem);
             font-weight: 800;
             background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
             -webkit-background-clip: text;
@@ -81,16 +84,24 @@
 
         header p {
             color: var(--text-dim);
-            font-size: 1.1rem;
+            font-size: clamp(0.9rem, 4vw, 1.1rem);
+            padding: 0 1rem;
         }
 
-        /* Mode Selection */
         .mode-selection {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 2rem;
             width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            justify-content: center;
+            align-items: stretch;
             animation: fadeIn 1s ease-out 0.2s both;
+        }
+
+        .mode-selection.active {
+            display: grid;
         }
 
         .card {
@@ -98,11 +109,14 @@
             backdrop-filter: blur(12px);
             border: 1px solid var(--glass-border);
             border-radius: 24px;
-            padding: 3rem;
+            padding: 2rem;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .card:hover {
@@ -128,11 +142,35 @@
             display: block;
         }
 
+        /* Mobile specific card sizing */
+        @media (max-width: 480px) {
+            .mode-selection {
+                gap: 1rem;
+            }
+            .card {
+                padding: 1.5rem;
+                border-radius: 16px;
+            }
+            .card .icon {
+                font-size: 2rem;
+                margin-bottom: 0.8rem;
+            }
+            .card h2 {
+                font-size: 1.4rem;
+                margin-bottom: 0.5rem;
+            }
+            .card p {
+                font-size: 0.85rem;
+                line-height: 1.4;
+            }
+        }
+
         /* Interface Sections */
         .interface {
             display: none;
             width: 100%;
             max-width: 600px;
+            margin: 0 auto;
             animation: fadeIn 0.5s ease-out;
         }
 
@@ -245,8 +283,10 @@
 
         /* Branding Footer */
         footer {
-            margin-top: auto;
-            padding: 2rem;
+            position: absolute;
+            bottom: 2rem;
+            width: 100%;
+            padding: 0 2rem;
             font-size: 0.9rem;
             color: var(--text-dim);
         }
@@ -262,25 +302,90 @@
             margin-left: 8px;
         }
 
-        /* Responsive adjustments */
-        /* Debug Console */
+        /* Premium Styles Refresh */
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 30px var(--primary-glow);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        input {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            letter-spacing: 0.1em;
+            font-weight: 600;
+        }
+
+        .control-overlay {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 15px 25px;
+            border-radius: 50px;
+            border: 1px solid var(--glass-border);
+            z-index: 2000;
+            transition: opacity 0.3s;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.1);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            animation: none;
+            padding: 0;
+            color: white;
+        }
+
+        .control-btn:hover {
+            background: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .control-btn.active {
+            background: #ef4444;
+        }
+
+        #receiver-video {
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Debug Console - Hidden by default */
         #debug-console {
             display: none;
             position: fixed;
-            bottom: 80px;
+            top: 20px;
             left: 20px;
             right: 20px;
-            height: 150px;
-            background: rgba(0, 0, 0, 0.8);
+            height: 120px;
+            background: rgba(0, 0, 0, 0.9);
             color: #10b981;
             font-family: monospace;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             padding: 10px;
             overflow-y: auto;
-            border-radius: 8px;
-            border: 1px solid var(--glass-border);
-            z-index: 2000;
+            border-radius: 12px;
+            z-index: 3000;
             pointer-events: none;
+            border: 1px solid var(--primary);
         }
     </style>
 </head>
@@ -339,21 +444,36 @@
 
         <footer>
             Built for Tizen OS & Modern Web Browsers
-            <br><button onclick="toggleDebug()" style="background:transparent; border:none; color:var(--text-dim); font-size: 0.7rem; margin-top: 10px; padding: 5px; animation: none;">Show Debug Logs</button>
         </footer>
+    </div>
+
+    <!-- Receiver Overlay Controls -->
+    <div id="receiver-controls" class="control-overlay" style="display: none;">
+        <button class="control-btn" onclick="rotateScreen()" title="Rotate Screen">🔄</button>
+        <button class="control-btn" id="btn-fullscreen" onclick="toggleFullscreen()" title="Fullscreen">📺</button>
+        <button class="control-btn active" onclick="stopCasting()" title="Stop">🛑</button>
+    </div>
+
+    <!-- Sender Overlay Controls -->
+    <div id="sender-controls" class="control-overlay" style="display: none;">
+        <button class="control-btn" id="btn-camera-toggle" onclick="switchCamera()" title="Switch Camera">📸</button>
+        <button class="control-btn" id="btn-mute" onclick="toggleMute()" title="Mute/Unmute">🔊</button>
+        <button class="control-btn active" onclick="stopCasting()" title="Stop Casting">🛑</button>
     </div>
 
     <div id="debug-console"></div>
 
     <div id="video-container">
         <video id="receiver-video" autoplay playsinline></video>
-        <button onclick="stopCasting()" style="position: absolute; bottom: 20px; right: 20px; padding: 10px 20px; z-index: 1001;">Stop Casting</button>
     </div>
 
     <script>
         let peer = null;
         let currentCall = null;
         let localStream = null;
+        let currentFacingMode = "environment";
+        let currentRotation = 0;
+        let isMuted = false;
 
         // Debug Logger
         const debugConsole = document.getElementById('debug-console');
@@ -366,19 +486,29 @@
             debugConsole.scrollTop = debugConsole.scrollHeight;
         }
 
+        // Secret toggle (5-tap header)
+        let tapCount = 0;
+        document.getElementById('main-header').onclick = () => {
+            tapCount++;
+            if (tapCount >= 5) {
+                toggleDebug();
+                tapCount = 0;
+            }
+            setTimeout(() => tapCount = 0, 2000);
+        };
+
         function toggleDebug() {
             debugConsole.style.display = debugConsole.style.display === 'block' ? 'none' : 'block';
         }
 
-        // Global Error Handler
-        window.onerror = function(msg, url, line) {
+        window.onerror = (msg, url, line) => {
             log(`${msg} (at ${line})`, 'error');
             return false;
         };
 
         function initMode(mode) {
             log(`Initializing mode: ${mode}`);
-            
+            document.getElementById('selection-ui').classList.remove('active');
             if (mode === 'receiver') {
                 document.getElementById('tv-ui').classList.add('active');
                 setupReceiver();
@@ -388,194 +518,162 @@
             }
         }
 
-        function resetUI() {
-            location.reload(); // Simplest way to cleanup PeerJS states
-        }
+        function resetUI() { location.reload(); }
+        function generateShortId() { return Math.floor(100000 + Math.random() * 900000).toString(); }
 
-        function generateShortId() {
-            return Math.floor(100000 + Math.random() * 900000).toString();
-        }
-
-        // --- RECEIVER LOGIC ---
         function setupReceiver() {
             log("Setting up receiver...");
             const shortId = generateShortId();
-            peer = new Peer('ac-' + shortId, {
-                debug: 3 // Enable PeerJS detailed logs
-            });
+            peer = new Peer('ac-' + shortId);
 
             peer.on('open', (id) => {
-                log(`Server connection open. Peer ID: ${id}`);
-                const code = id.replace('ac-', '');
-                document.getElementById('pairing-code').innerText = code;
+                log(`Server open. Code: ${id.replace('ac-', '')}`);
+                document.getElementById('pairing-code').innerText = id.replace('ac-', '');
                 document.getElementById('receiver-status').classList.add('status-online');
-                document.getElementById('receiver-status-text').innerText = 'Ready for connection';
+                document.getElementById('receiver-status-text').innerText = 'Ready';
                 
-                // Generate QR Code
-                const qrVal = `${window.location.origin}${window.location.pathname}?id=${code}`;
                 new QRCode(document.getElementById("qrcode"), {
-                    text: qrVal,
-                    width: 180,
-                    height: 180,
-                    colorDark : "#000000",
-                    colorLight : "#ffffff",
+                    text: `${window.location.origin}${window.location.pathname}?id=${id.replace('ac-', '')}`,
+                    width: 180, height: 180, colorDark : "#000000", colorLight : "#ffffff",
                     correctLevel : QRCode.CorrectLevel.H
                 });
             });
 
             peer.on('call', (call) => {
-                call.answer(); // Auto answer
+                log("Incoming stream...");
+                call.answer();
                 call.on('stream', (remoteStream) => {
+                    log("Streaming started.");
                     const video = document.getElementById('receiver-video');
                     document.getElementById('video-container').style.display = 'block';
+                    document.getElementById('receiver-controls').style.display = 'flex';
                     video.srcObject = remoteStream;
-                    video.play().catch(e => console.error("Playback failed", e));
+                    video.play().catch(e => log("Play failed: " + e.message, 'error'));
                 });
                 currentCall = call;
             });
-
-            peer.on('error', (err) => {
-                console.error(err);
-                document.getElementById('receiver-status-text').innerText = 'Error: ' + err.type;
-            });
         }
 
-        // --- SENDER LOGIC ---
         function setupSender() {
             log("Setting up sender...");
-            peer = new Peer(null, {
-                debug: 3
-            });
-            
-            // Auto-fill from URL if present
+            peer = new Peer();
             const urlParams = new URLSearchParams(window.location.search);
-            const target = urlParams.get('id');
-            if (target) {
-                log(`Auto-filling target ID: ${target}`);
-                document.getElementById('target-id').value = target;
-            }
+            if (urlParams.get('id')) document.getElementById('target-id').value = urlParams.get('id');
 
             peer.on('open', (id) => {
-                log(`Sender connected to signaling server. ID: ${id}`);
+                log(`Sender linked. ID: ${id}`);
                 document.getElementById('sender-status').classList.add('status-online');
-                document.getElementById('sender-status-text').innerText = 'Server Connected';
+                document.getElementById('sender-status-text').innerText = 'Connected';
                 checkCapabilities();
             });
-
-            peer.on('error', (err) => {
-                log(`Peer error: ${err.type}`, 'error');
-                console.error(err);
-                if (err.type === 'peer-unavailable') {
-                    alert('Could not find the TV. Please check the code.');
-                }
-            });
+            peer.on('error', (err) => log(`Error: ${err.type}`, 'error'));
         }
 
         function checkCapabilities() {
-            log("Checking browser capabilities...");
-            const hasDisplayMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
-            const hasUserMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+            const hasDisplayMedia = !!(navigator.mediaDevices?.getDisplayMedia);
+            const hasUserMedia = !!(navigator.mediaDevices?.getUserMedia);
             const isSecure = window.isSecureContext;
-            
-            log(`Secure: ${isSecure}, Screen: ${hasDisplayMedia}, Camera: ${hasUserMedia}`);
-
-            const screenBtn = document.getElementById('btn-screen-cast');
-            const cameraBtn = document.getElementById('btn-camera-cast');
             const warning = document.getElementById('context-warning');
 
             if (!isSecure && window.location.hostname !== 'localhost') {
-                warning.innerHTML = "⚠️ <b>Insecure Context detected.</b> Browsers often block camera/screen access on non-HTTPS sites. Please use HTTPS.";
-                warning.style.color = "#f59e0b";
+                warning.innerHTML = "⚠️ <b>Insecure Context.</b> Use HTTPS for casting.";
             }
-
             if (!hasDisplayMedia) {
-                screenBtn.disabled = true;
-                screenBtn.style.opacity = "0.5";
-                screenBtn.innerHTML = "Screen Mirroring (Desktop Only)";
-                screenBtn.title = "Screen mirroring is not supported on mobile browsers.";
+                const btn = document.getElementById('btn-screen-cast');
+                btn.disabled = true;
+                btn.style.opacity = "0.5";
+                btn.innerHTML = "Screen Mirroring (Desktop Only)";
             }
-
-            if (!hasUserMedia) {
-                cameraBtn.style.display = "none";
-            }
+            if (!hasUserMedia) document.getElementById('btn-camera-cast').style.display = "none";
         }
 
         async function startCasting(mode = 'screen') {
             const targetId = document.getElementById('target-id').value.trim();
-            if (!targetId) return alert('Please enter a pairing code');
+            if (!targetId) return alert('Enter pairing code');
 
-            log(`Starting ${mode} casting to: ac-${targetId}`);
-
+            log(`Starting ${mode} (4K Opt)...`);
             try {
-                if (mode === 'screen') {
-                    log("Requesting Screen Stream...");
-                    localStream = await navigator.mediaDevices.getDisplayMedia({
-                        video: { cursor: "always", displaySurface: "monitor" },
-                        audio: true
-                    });
-                } else {
-                    log("Requesting Camera Stream...");
-                    localStream = await navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: "environment" },
-                        audio: true
-                    });
-                }
-
-                log("Obtained local stream. Calling peer...");
-                const call = peer.call('ac-' + targetId, localStream);
-                
-                if (!call) {
-                    log("Call failed: Could not initiate connection.", "error");
-                    return;
-                }
-
-                call.on('stream', () => log("Call establishing..."));
-                
-                call.on('close', () => {
-                    log("Call closed by peer.");
-                    stopCasting();
-                });
-
-                document.getElementById('sender-status-text').innerText = 'Streaming active...';
-                
-                // Listen for stop sharing button in browser
-                localStream.getVideoTracks()[0].onended = () => {
-                    stopCasting();
+                const constraints = {
+                    video: {
+                        width: { ideal: 3840 },
+                        height: { ideal: 2160 },
+                        frameRate: { ideal: mode === 'screen' ? 60 : 30 },
+                        facingMode: mode === 'screen' ? undefined : currentFacingMode,
+                        displaySurface: mode === 'screen' ? 'monitor' : undefined
+                    },
+                    audio: { echoCancellation: true, noiseSuppression: true }
                 };
 
+                localStream = mode === 'screen' 
+                    ? await navigator.mediaDevices.getDisplayMedia(constraints)
+                    : await navigator.mediaDevices.getUserMedia(constraints);
+
+                log("Stream OK: " + localStream.getVideoTracks()[0].getSettings().width + "px");
+                
+                currentCall = peer.call('ac-' + targetId, localStream);
+                document.getElementById('sender-status-text').innerText = 'Live';
+                document.getElementById('sender-controls').style.display = 'flex';
+                document.getElementById('btn-camera-toggle').style.display = mode === 'camera' ? 'flex' : 'none';
+
+                localStream.getVideoTracks()[0].onended = () => stopCasting();
             } catch (err) {
-                console.error("Casting error:", err);
-                let msg = err.message;
-                if (err.name === 'NotAllowedError') msg = "Permission denied by user or browser.";
-                if (err.name === 'NotFoundError') msg = "No suitable media device found.";
-                if (err.name === 'TypeError' && !navigator.mediaDevices?.getDisplayMedia) {
-                    msg = "Screen mirroring is not supported on this device/browser.";
-                }
-                alert("Failed to start casting: " + msg);
+                log("Fail: " + err.name, 'error');
+                alert(err.message);
             }
+        }
+
+        async function switchCamera() {
+            if (!localStream) return;
+            log("Flipping camera...");
+            currentFacingMode = currentFacingMode === "environment" ? "user" : "environment";
+            
+            const newStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: currentFacingMode, width: { ideal: 3840 }, height: { ideal: 2160 } },
+                audio: !isMuted
+            });
+
+            const newTrack = newStream.getVideoTracks()[0];
+            const sender = currentCall.peerConnection.getSenders().find(s => s.track.kind === 'video');
+            if (sender) sender.replaceTrack(newTrack);
+            
+            localStream.getVideoTracks()[0].stop();
+            localStream = newStream;
+            log("Camera: " + currentFacingMode);
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            localStream.getAudioTracks().forEach(t => t.enabled = !isMuted);
+            document.getElementById('btn-mute').innerText = isMuted ? '🔇' : '🔊';
+            document.getElementById('btn-mute').classList.toggle('active', isMuted);
+            log("Mute: " + isMuted);
+        }
+
+        function rotateScreen() {
+            currentRotation = (currentRotation + 90) % 360;
+            document.getElementById('receiver-video').style.transform = `rotate(${currentRotation}deg)`;
+        }
+
+        function toggleFullscreen() {
+            const v = document.getElementById('video-container');
+            if (!document.fullscreenElement) v.requestFullscreen();
+            else document.exitFullscreen();
         }
 
         function stopCasting() {
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
-            }
-            if (currentCall) {
-                currentCall.close();
-            }
+            log("Stopping...");
+            if (localStream) localStream.getTracks().forEach(t => t.stop());
+            if (currentCall) currentCall.close();
             document.getElementById('video-container').style.display = 'none';
-            document.getElementById('sender-status-text').innerText = 'Streaming stopped';
+            document.getElementById('receiver-controls').style.display = 'none';
+            document.getElementById('sender-controls').style.display = 'none';
+            document.getElementById('sender-status-text').innerText = 'Ready';
         }
 
-        // Tizen Back Button Support
-        window.addEventListener('tizenhwkey', function(e) {
+        window.addEventListener('tizenhwkey', (e) => {
             if (e.keyName === "back") {
-                if (document.getElementById('video-container').style.display === 'block') {
-                    stopCasting();
-                } else {
-                    try {
-                        tizen.application.getCurrentApplication().exit();
-                    } catch (ignore) {}
-                }
+                if (document.getElementById('video-container').style.display === 'block') stopCasting();
+                else try { tizen.application.getCurrentApplication().exit(); } catch (i) {}
             }
         });
     </script>
