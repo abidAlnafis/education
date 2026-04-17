@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoCast | Premium Screen Mirroring</title>
+    <meta name="description" content="Cast your Android or iOS screen to any Samsung Tizen TV with audio instantly.">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <!-- Libraries -->
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #818cf8;
+            --accent: #c084fc;
+            --bg: #000000;
+            --surface: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #ffffff;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 50%, #171717 0%, #000000 100%);
+        }
+
+        .app-shell {
+            width: 100%;
+            max-width: 440px;
+            padding: 2.5rem;
+            animation: fadeIn 1s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        h1 {
+            font-weight: 800;
+            font-size: 2.5rem;
+            letter-spacing: -0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .tagline {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        /* Minimal Cards */
+        .option-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .option-button {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 2.5rem 1.5rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+        }
+
+        .option-button:hover {
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-4px);
+        }
+
+        .option-button h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        /* Interface Layouts */
+        .view {
+            display: none;
+            flex-direction: column;
+            gap: 2.5rem;
+            animation: slideUp 0.6s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .active { display: flex; }
+
+        /* Receiver View */
+        .pairing-area {
+            text-align: center;
+            padding: 2rem;
+            background: var(--surface);
+            border-radius: 24px;
+            border: 1px solid var(--border);
+        }
+
+        #pairing-code {
+            font-size: 3rem;
+            font-weight: 800;
+            margin: 1.5rem 0;
+            letter-spacing: 0.1em;
+            color: var(--primary);
+        }
+
+        #qrcode {
+            background: #fff;
+            padding: 1rem;
+            border-radius: 12px;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Sender View */
+        input {
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 18px;
+            color: #fff;
+            font-size: 1.5rem;
+            text-align: center;
+            outline: none;
+            margin-bottom: 1.5rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus { border-color: var(--primary); }
+
+        .cast-btn {
+            background: #fff;
+            color: #000;
+            padding: 1.5rem;
+            border-radius: 18px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        .cast-btn:active { transform: scale(0.98); }
+
+        .nearby-chip {
+            background: rgba(129, 140, 248, 0.1);
+            color: var(--primary);
+            padding: 1rem;
+            border-radius: 14px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 2rem;
+            cursor: pointer;
+            border: 1px solid rgba(129, 140, 248, 0.2);
+            display: none;
+        }
+
+        .back-btn {
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        /* Video Container */
+        #video-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 1000;
+        }
+
+        video { width: 100%; height: 100%; object-fit: contain; }
+
+        footer {
+            position: fixed;
+            bottom: 2rem;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-shell">
+        <header id="main-header">
+            <h1>AutoCast</h1>
+            <p class="tagline">Screen Mirroring</p>
+        </header>
+
+        <!-- Selection View -->
+        <div id="view-selection" class="view active">
+            <div class="option-grid">
+                <div class="option-button" onclick="changeView('receiver')">
+                    <div style="font-size: 2rem; margin-bottom: 1rem;">📺</div>
+                    <h2>Receive Content</h2>
+                </div>
+                <div class="option-button" onclick="changeView('sender')">
+                    <div style="font-size: 2rem; margin-bottom: 1rem;">📱</div>
+                    <h2>Share Screen</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- TV View -->
+        <div id="view-receiver" class="view">
+            <div class="pairing-area">
+                <div id="qrcode"></div>
+                <p style="font-size: 0.9rem; color: var(--text-muted);">Pairing Code</p>
+                <div id="pairing-code">--- ---</div>
+            </div>
+            <button class="back-btn" onclick="location.reload()">Return Home</button>
+        </div>
+
+        <!-- Phone View -->
+        <div id="view-sender" class="view">
+            <div id="nearby-chip" class="nearby-chip" onclick="quickConnect()">
+                Found TV on network. Tap to cast.
+            </div>
+            
+            <div style="width: 100%;">
+                <input type="text" id="target-id" placeholder="000000" maxlength="6">
+                <button class="cast-btn" onclick="startMirroring()">Connect</button>
+            </div>
+
+            <div id="recent-stack" style="display:none; text-align: left;">
+                <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1rem;">RECENT</p>
+                <div id="recent-devices" style="display:flex; flex-direction: column; gap: 0.5rem;"></div>
+            </div>
+
+            <button class="back-btn" onclick="location.reload()">Return Home</button>
+        </div>
+
+        <footer>Pro Version Beta</footer>
+    </div>
+
+    <div id="video-overlay">
+        <video id="player" autoplay playsinline></video>
+        <button onclick="stopMirroring()" style="position: absolute; top: 2rem; right: 2rem; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 99px; cursor: pointer;">Stop Casting</button>
+    </div>
+
+    <script>
+        let peer = null;
+        let callInstance = null;
+        let mirrorStream = null;
+        let netId = null;
+        let detectedTvId = null;
+
+        async function getNetHash() {
+            try {
+                const res = await fetch('https://api.ipify.org?format=json');
+                const data = await res.json();
+                let h = 0; for (let i = 0; i < data.ip.length; i++) h = ((h << 5) - h) + data.ip.charCodeAt(i);
+                return Math.abs(h).toString(16);
+            } catch (e) { return 'shared'; }
+        }
+
+        async function changeView(v) {
+            document.getElementById('view-selection').classList.remove('active');
+            netId = await getNetHash();
+            if (v === 'receiver') {
+                document.getElementById('view-receiver').classList.add('active');
+                initReceiver();
+            } else {
+                document.getElementById('view-sender').classList.add('active');
+                initSender();
+            }
+        }
+
+        function initReceiver() {
+            const sid = Math.floor(100000 + Math.random() * 900000).toString();
+            peer = new Peer(`cast-${sid}-${netId}`);
+            peer.on('open', () => {
+                document.getElementById('pairing-code').innerText = sid;
+                const url = `${window.location.origin}${window.location.pathname}?id=${sid}&net=${netId}`;
+                new QRCode(document.getElementById("qrcode"), { text: url, width: 140, height: 140 });
+            });
+            peer.on('call', c => {
+                c.answer();
+                c.on('stream', s => {
+                    document.getElementById('video-overlay').style.display = 'block';
+                    document.getElementById('player').srcObject = s;
+                });
+                callInstance = c;
+            });
+        }
+
+        function initSender() {
+            peer = new Peer();
+            loadRecents();
+            const p = new URLSearchParams(window.location.search);
+            const id = p.get('id'), n = p.get('net');
+            if (id && n === netId) {
+                detectedTvId = id;
+                document.getElementById('nearby-chip').style.display = 'block';
+                document.getElementById('target-id').value = id;
+            }
+        }
+
+        function loadRecents() {
+            const r = JSON.parse(localStorage.getItem('cast_history') || '[]');
+            if (r.length === 0) return;
+            const container = document.getElementById('recent-stack');
+            const list = document.getElementById('recent-devices');
+            container.style.display = 'block';
+            list.innerHTML = '';
+            r.forEach(id => {
+                const row = document.createElement('div');
+                row.style.background = 'var(--surface)';
+                row.style.padding = '1rem';
+                row.style.borderRadius = '12px';
+                row.style.cursor = 'pointer';
+                row.style.fontSize = '0.9rem';
+                row.innerText = 'Connected Device';
+                row.onclick = () => { document.getElementById('target-id').value = id; startMirroring(); };
+                list.appendChild(row);
+            });
+        }
+
+        function quickConnect() { startMirroring(); }
+
+        async function startMirroring() {
+            const code = document.getElementById('target-id').value.trim();
+            if (!code) return;
+            try {
+                mirrorStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+                const call = peer.call(`cast-${code}-${netId}`, mirrorStream);
+                let r = JSON.parse(localStorage.getItem('cast_history') || '[]');
+                if (!r.includes(code)) { r.unshift(code); if(r.length > 3) r.pop(); localStorage.setItem('cast_history', JSON.stringify(r)); }
+                call.on('close', stopMirroring);
+                mirrorStream.getVideoTracks()[0].onended = stopMirroring;
+            } catch (e) { alert("Enable camera/screen access via HTTPS."); }
+        }
+
+        function stopMirroring() {
+            if (mirrorStream) mirrorStream.getTracks().forEach(t => t.stop());
+            document.getElementById('video-overlay').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
+
