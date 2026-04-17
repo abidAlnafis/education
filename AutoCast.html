@@ -518,6 +518,16 @@
             }
         }
 
+        // Auto-detect ID on Load
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const target = urlParams.get('id');
+            if (target) {
+                log(`Direct link detected for ID: ${target}`);
+                initMode('sender');
+            }
+        });
+
         function resetUI() { location.reload(); }
         function generateShortId() { return Math.floor(100000 + Math.random() * 900000).toString(); }
 
