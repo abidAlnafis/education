@@ -369,7 +369,13 @@
                 if (!r.includes(code)) { r.unshift(code); if(r.length > 3) r.pop(); localStorage.setItem('cast_history', JSON.stringify(r)); }
                 call.on('close', stopMirroring);
                 mirrorStream.getVideoTracks()[0].onended = stopMirroring;
-            } catch (e) { alert("Enable camera/screen access via HTTPS."); }
+            } catch (e) { 
+                if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+                    alert("⚠️ Security Restriction: Screen capture requires an HTTPS connection. Please host this file on a secure server (like GitHub Pages or Netlify) to use it on your mobile device.");
+                } else {
+                    alert("Casting error: Please ensure you have granted permission to share your screen.");
+                }
+            }
         }
 
         function stopMirroring() {
