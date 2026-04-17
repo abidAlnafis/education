@@ -303,17 +303,22 @@
             <button class="secondary" onclick="resetUI()" style="margin-top: 2rem;">Go Back</button>
         </div>
 
-        <!-- Mobile Interface -->
+        <!-- Mobile/Sender Interface -->
         <div id="sender-ui" class="interface">
             <div class="control-group">
                 <p>Enter the code shown on your TV:</p>
                 <input type="text" id="target-id" placeholder="Code (e.g. 123456)" maxlength="6">
-                <button onclick="startCasting()">Start Casting</button>
-                <button class="secondary" onclick="resetUI()">Go Back</button>
+                
+                <div id="casting-options" style="display: flex; flex-direction: column; gap: 0.8rem;">
+                    <button id="btn-screen-cast" onclick="startCasting('screen')">Start Screen Mirroring</button>
+                    <button id="btn-camera-cast" onclick="startCasting('camera')" class="secondary">Start Camera Cast</button>
+                    <button class="secondary" onclick="resetUI()">Go Back</button>
+                </div>
             </div>
-            <p style="margin-top: 2rem; color: var(--text-dim);">
+            <p style="margin-top: 1.5rem; color: var(--text-dim); font-size: 0.9rem;" id="context-warning"></p>
+            <p style="margin-top: 1rem; color: var(--text-dim);">
                 <span class="status-dot" id="sender-status"></span>
-                <span id="sender-status-text">Ready to cast</span>
+                <span id="sender-status-text">Connecting to server...</span>
             </p>
         </div>
 
@@ -406,26 +411,63 @@
             peer.on('open', (id) => {
                 document.getElementById('sender-status').classList.add('status-online');
                 document.getElementById('sender-status-text').innerText = 'Server Connected';
+                checkCapabilities();
             });
         }
 
-        async function startCasting() {
+        function checkCapabilities() {
+            const hasDisplayMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
+            const hasUserMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+            const isSecure = window.isSecureContext;
+
+            const screenBtn = document.getElementById('btn-screen-cast');
+            const cameraBtn = document.getElementById('btn-camera-cast');
+            const warning = document.getElementById('context-warning');
+
+            if (!isSecure && window.location.hostname !== 'localhost') {
+                warning.innerHTML = "⚠️ <b>Insecure Context detected.</b> Browsers often block camera/screen access on non-HTTPS sites. Please use HTTPS.";
+                warning.style.color = "#f59e0b";
+            }
+
+            if (!hasDisplayMedia) {
+                screenBtn.disabled = true;
+                screenBtn.style.opacity = "0.5";
+                screenBtn.innerHTML = "Screen Mirroring (Desktop Only)";
+                screenBtn.title = "Screen mirroring is not supported on mobile browsers.";
+            }
+
+            if (!hasUserMedia) {
+                cameraBtn.style.display = "none";
+            }
+        }
+
+        async function startCasting(mode = 'screen') {
             const targetId = document.getElementById('target-id').value.trim();
             if (!targetId) return alert('Please enter a pairing code');
 
             try {
-                // Request Screen with Audio
-                localStream = await navigator.mediaDevices.getDisplayMedia({
-                    video: {
-                        cursor: "always",
-                        displaySurface: "monitor"
-                    },
-                    audio: {
-                        echoCancellation: true,
-                        noiseSuppression: true,
-                        sampleRate: 44100
-                    }
-                });
+                if (mode === 'screen') {
+                    // Request Screen with Audio
+                    localStream = await navigator.mediaDevices.getDisplayMedia({
+                        video: {
+                            cursor: "always",
+                            displaySurface: "monitor"
+                        },
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            sampleRate: 44100
+                        }
+                    });
+                } else {
+                    // Request Camera with Audio (Mobile Fallback)
+                    localStream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            facingMode: "environment" // Prefer back camera
+                        },
+                        audio: true
+                    });
+                }
 
                 // Mix in microphone if needed (Optional, but useful for voice-over)
                 // For now, we focus on system audio which is part of getDisplayMedia
@@ -445,7 +487,13 @@
 
             } catch (err) {
                 console.error("Casting error:", err);
-                alert("Failed to start casting: " + err.message);
+                let msg = err.message;
+                if (err.name === 'NotAllowedError') msg = "Permission denied by user or browser.";
+                if (err.name === 'NotFoundError') msg = "No suitable media device found.";
+                if (err.name === 'TypeError' && !navigator.mediaDevices?.getDisplayMedia) {
+                    msg = "Screen mirroring is not supported on this device/browser.";
+                }
+                alert("Failed to start casting: " + msg);
             }
         }
 
