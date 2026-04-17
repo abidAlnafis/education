@@ -325,7 +325,10 @@
             });
         }
 
-        function initSender() {
+        async function initSender() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+                alert("❌ Your browser doesn't support screen casting. If you are on iPhone/iPad, please use the Safari browser.");
+            }
             peer = new Peer();
             loadRecents();
             const p = new URLSearchParams(window.location.search);
@@ -363,17 +366,34 @@
             const code = document.getElementById('target-id').value.trim();
             if (!code) return;
             try {
-                mirrorStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+                // Request stream
+                mirrorStream = await navigator.mediaDevices.getDisplayMedia({ 
+                    video: true, 
+                    audio: true 
+                });
+                
                 const call = peer.call(`cast-${code}-${netId}`, mirrorStream);
+                
                 let r = JSON.parse(localStorage.getItem('cast_history') || '[]');
-                if (!r.includes(code)) { r.unshift(code); if(r.length > 3) r.pop(); localStorage.setItem('cast_history', JSON.stringify(r)); }
+                if (!r.includes(code)) { 
+                    r.unshift(code); 
+                    if(r.length > 3) r.pop(); 
+                    localStorage.setItem('cast_history', JSON.stringify(r)); 
+                }
+                
                 call.on('close', stopMirroring);
                 mirrorStream.getVideoTracks()[0].onended = stopMirroring;
+
             } catch (e) { 
+                console.error("Casting Error:", e);
                 if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
-                    alert("⚠️ Security Restriction: Screen capture requires an HTTPS connection. Please host this file on a secure server (like GitHub Pages or Netlify) to use it on your mobile device.");
+                    alert("⚠️ Security: Screen capture requires HTTPS. Please host this file on a secure server.");
+                } else if (e.name === 'NotAllowedError') {
+                    alert("⚠️ Permission Denied: You must grant permission and select a screen to share.");
+                } else if (e.name === 'NotFoundError') {
+                    alert("⚠️ Error: No screen source found. If you are on mobile, ensure your system allows screen recording.");
                 } else {
-                    alert("Casting error: Please ensure you have granted permission to share your screen.");
+                    alert("⚠️ Casting failed: " + e.message + "\n\nTip: On iOS, you must use Safari.");
                 }
             }
         }
