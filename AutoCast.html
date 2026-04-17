@@ -263,9 +263,24 @@
         }
 
         /* Responsive adjustments */
-        @media (max-width: 768px) {
-            h1 { font-size: 2.5rem; }
-            .card { padding: 2rem; }
+        /* Debug Console */
+        #debug-console {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            left: 20px;
+            right: 20px;
+            height: 150px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #10b981;
+            font-family: monospace;
+            font-size: 0.75rem;
+            padding: 10px;
+            overflow-y: auto;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            z-index: 2000;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -324,8 +339,11 @@
 
         <footer>
             Built for Tizen OS & Modern Web Browsers
+            <br><button onclick="toggleDebug()" style="background:transparent; border:none; color:var(--text-dim); font-size: 0.7rem; margin-top: 10px; padding: 5px; animation: none;">Show Debug Logs</button>
         </footer>
     </div>
+
+    <div id="debug-console"></div>
 
     <div id="video-container">
         <video id="receiver-video" autoplay playsinline></video>
@@ -337,8 +355,29 @@
         let currentCall = null;
         let localStream = null;
 
+        // Debug Logger
+        const debugConsole = document.getElementById('debug-console');
+        function log(msg, type = 'info') {
+            console.log(`[${type}] ${msg}`);
+            const div = document.createElement('div');
+            div.style.color = type === 'error' ? '#ef4444' : (type === 'warn' ? '#f59e0b' : '#10b981');
+            div.innerText = `> ${msg}`;
+            debugConsole.appendChild(div);
+            debugConsole.scrollTop = debugConsole.scrollHeight;
+        }
+
+        function toggleDebug() {
+            debugConsole.style.display = debugConsole.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // Global Error Handler
+        window.onerror = function(msg, url, line) {
+            log(`${msg} (at ${line})`, 'error');
+            return false;
+        };
+
         function initMode(mode) {
-            document.getElementById('selection-ui').classList.remove('active');
+            log(`Initializing mode: ${mode}`);
             
             if (mode === 'receiver') {
                 document.getElementById('tv-ui').classList.add('active');
@@ -359,10 +398,14 @@
 
         // --- RECEIVER LOGIC ---
         function setupReceiver() {
+            log("Setting up receiver...");
             const shortId = generateShortId();
-            peer = new Peer('ac-' + shortId);
+            peer = new Peer('ac-' + shortId, {
+                debug: 3 // Enable PeerJS detailed logs
+            });
 
             peer.on('open', (id) => {
+                log(`Server connection open. Peer ID: ${id}`);
                 const code = id.replace('ac-', '');
                 document.getElementById('pairing-code').innerText = code;
                 document.getElementById('receiver-status').classList.add('status-online');
@@ -399,26 +442,42 @@
 
         // --- SENDER LOGIC ---
         function setupSender() {
-            peer = new Peer();
+            log("Setting up sender...");
+            peer = new Peer(null, {
+                debug: 3
+            });
             
             // Auto-fill from URL if present
             const urlParams = new URLSearchParams(window.location.search);
             const target = urlParams.get('id');
             if (target) {
+                log(`Auto-filling target ID: ${target}`);
                 document.getElementById('target-id').value = target;
             }
 
             peer.on('open', (id) => {
+                log(`Sender connected to signaling server. ID: ${id}`);
                 document.getElementById('sender-status').classList.add('status-online');
                 document.getElementById('sender-status-text').innerText = 'Server Connected';
                 checkCapabilities();
             });
+
+            peer.on('error', (err) => {
+                log(`Peer error: ${err.type}`, 'error');
+                console.error(err);
+                if (err.type === 'peer-unavailable') {
+                    alert('Could not find the TV. Please check the code.');
+                }
+            });
         }
 
         function checkCapabilities() {
+            log("Checking browser capabilities...");
             const hasDisplayMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
             const hasUserMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
             const isSecure = window.isSecureContext;
+            
+            log(`Secure: ${isSecure}, Screen: ${hasDisplayMedia}, Camera: ${hasUserMedia}`);
 
             const screenBtn = document.getElementById('btn-screen-cast');
             const cameraBtn = document.getElementById('btn-camera-cast');
@@ -445,36 +504,35 @@
             const targetId = document.getElementById('target-id').value.trim();
             if (!targetId) return alert('Please enter a pairing code');
 
+            log(`Starting ${mode} casting to: ac-${targetId}`);
+
             try {
                 if (mode === 'screen') {
-                    // Request Screen with Audio
+                    log("Requesting Screen Stream...");
                     localStream = await navigator.mediaDevices.getDisplayMedia({
-                        video: {
-                            cursor: "always",
-                            displaySurface: "monitor"
-                        },
-                        audio: {
-                            echoCancellation: true,
-                            noiseSuppression: true,
-                            sampleRate: 44100
-                        }
+                        video: { cursor: "always", displaySurface: "monitor" },
+                        audio: true
                     });
                 } else {
-                    // Request Camera with Audio (Mobile Fallback)
+                    log("Requesting Camera Stream...");
                     localStream = await navigator.mediaDevices.getUserMedia({
-                        video: {
-                            facingMode: "environment" // Prefer back camera
-                        },
+                        video: { facingMode: "environment" },
                         audio: true
                     });
                 }
 
-                // Mix in microphone if needed (Optional, but useful for voice-over)
-                // For now, we focus on system audio which is part of getDisplayMedia
-
+                log("Obtained local stream. Calling peer...");
                 const call = peer.call('ac-' + targetId, localStream);
                 
+                if (!call) {
+                    log("Call failed: Could not initiate connection.", "error");
+                    return;
+                }
+
+                call.on('stream', () => log("Call establishing..."));
+                
                 call.on('close', () => {
+                    log("Call closed by peer.");
                     stopCasting();
                 });
 
