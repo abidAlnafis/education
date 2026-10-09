@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BUTEX Cover Page Generator</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        butexBlue: '#1e3a8a',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Libraries for Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background-color 0.5s ease;
+        }
+
+        /* Animated Mesh Gradient - adapts to light/dark mode */
+        .mesh-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -1;
+            transition: all 0.5s ease;
+            filter: blur(60px);
+            animation: meshAnimation 20s ease-in-out infinite alternate;
+        }
+
+        /* Dark Mode Mesh */
+        .dark .mesh-bg {
+            background-color: #0f172a;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(79, 70, 229, 0.4), transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(236, 72, 153, 0.3), transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(14, 165, 233, 0.4), transparent 50%);
+        }
+
+        /* Light Mode Mesh */
+        html:not(.dark) .mesh-bg {
+            background-color: #f1f5f9;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(79, 70, 229, 0.2), transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(236, 72, 153, 0.2), transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(14, 165, 233, 0.2), transparent 50%);
+        }
+
+        @keyframes meshAnimation {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1) translate(2%, 2%); }
+            100% { transform: scale(1) translate(-2%, -2%); }
+        }
+
+        .glass-panel {
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .dark .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        html:not(.dark) .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+
+        .glass-input {
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .dark .glass-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .dark .glass-input:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(99, 102, 241, 0.5);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25);
+        }
+
+        html:not(.dark) .glass-input {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #1e293b;
+        }
+
+        html:not(.dark) .glass-input:focus {
+            background: #fff;
+            border-color: rgba(99, 102, 241, 0.5);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Select Options Coloring */
+        .dark select option { background-color: #1e293b; color: white; }
+        html:not(.dark) select option { background-color: white; color: #1e293b; }
+
+        /* Preview Wrapper handles centering and scrolling */
+        .preview-wrapper {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: auto;
+            position: relative;
+            padding: 20px;
+        }
+
+        /* Scale Wrapper acts as a sizing dummy for the absolutely scaled container */
+        .scale-wrapper {
+            position: relative;
+            /* Dimensions set by JS */
+        }
+
+        .page-container {
+            background: white;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transform-origin: top left;
+            position: absolute;
+            top: 0; left: 0;
+            color: #1a1a1a; /* Always dark text for print */
+        }
+
+        /* Fixed Print Dimensions */
+        .size-a4 { width: 794px; height: 1123px; }
+        .size-letter { width: 816px; height: 1056px; }
+
+        /* Inner Content Styling */
+        .page-content {
+            padding: 60px 80px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+        }
+        
+        .uni-title {
+            font-family: 'Playfair Display', serif;
+            color: #1e3a8a;
+            text-align: center;
+            font-size: 42px;
+            font-weight: 700;
+            margin-top: 15px;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            line-height: 1.2;
+        }
+
+        .logo-placeholder {
+            width: 130px;
+            height: 130px;
+            margin: 0 auto 15px auto;
+            border-radius: 50%;
+            border: 4px solid #1e3a8a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1e3a8a;
+            font-weight: 700;
+            font-size: 26px;
+            background: #eff6ff;
+            letter-spacing: 2px;
+        }
+
+        .assignment-block {
+            text-align: center;
+            margin: 40px 0;
+            padding: 35px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background-color: #f8fafc;
+        }
+
+        .submission-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            margin-top: auto;
+            margin-bottom: 40px;
+        }
+
+        .submission-title {
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #334155;
+            text-transform: uppercase;
+            border-bottom: 2px solid #1e3a8a;
+            padding-bottom: 5px;
+            display: inline-block;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.5); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(156, 163, 175, 0.8); }
+    </style>
+</head>
+<body class="text-slate-800 dark:text-slate-100 antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-300">
+
+    <div class="mesh-bg"></div>
+
+    <div class="container mx-auto px-4 py-8 min-h-screen flex flex-col lg:flex-row gap-6 relative z-10">
+        
+        <div class="w-full lg:w-[45%] flex flex-col gap-6 h-fit">
+            
+            <!-- Header & Theme Toggle -->
+            <div class="glass-panel p-6 flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-bold mb-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-indigo-500 dark:from-blue-400 dark:to-emerald-400">
+                        BUTEX Generator
+                    </h1>
+                    <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">Create pristine assignment cover pages instantly.</p>
+                </div>
+                
+                <button id="theme-toggle" class="p-3 rounded-full bg-white/20 dark:bg-white/10 hover:bg-white/40 dark:hover:bg-white/20 transition-colors border border-slate-200 dark:border-white/10 shadow-sm" aria-label="Toggle Theme">
+                    <!-- Sun Icon (shows in dark mode) -->
+                    <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 4.22a1 1 0 011.415 0l.884.884a1 1 0 01-1.414 1.415l-.884-.884a1 1 0 010-1.415zM1 10a1 1 0 011-1h1a1 1 0 110 2H2a1 1 0 01-1-1zm15 0a1 1 0 011-1h1a1 1 0 110 2h-1a1 1 0 01-1-1zM5.636 15.757a1 1 0 010 1.414l-.884.884a1 1 0 01-1.414-1.414l.884-.884a1 1 0 011.414 0zM14.364 15.757a1 1 0 011.414 0l.884.884a1 1 0 11-1.414 1.414l-.884-.884a1 1 0 010-1.414zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM10 5a5 5 0 100 10 5 5 0 000-10z" clip-rule="evenodd"></path></svg>
+                    <!-- Moon Icon (shows in light mode) -->
+                    <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-slate-700" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                </button>
+            </div>
+
+            <!-- Form Details -->
+            <div class="glass-panel p-6">
+                <div class="space-y-6">
+                    
+                    <div>
+                        <h2 class="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-300 mb-3 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-indigo-500"></span> Assignment Info
+                        </h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Assignment Topic/Name</label>
+                                <input type="text" id="inp-assignment-name" class="glass-input px-4 py-2.5 rounded-lg text-sm" placeholder="e.g. Modern Textile Wet Processing">
+                            </div>
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <div class="flex-1">
+                                    <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Assignment No.</label>
+                                    <input type="text" id="inp-assignment-no" class="glass-input px-4 py-2.5 rounded-lg text-sm" placeholder="e.g. 01">
+                                </div>
+                                <div class="flex-1">
+                                    <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Date of Submission</label>
+                                    <input type="date" id="inp-date" class="glass-input px-4 py-2.5 rounded-lg text-sm">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="h-px w-full bg-slate-200 dark:bg-white/10"></div>
+
+                    <div>
+                        <h2 class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-300 mb-3 flex items-center justify-between">
+                            <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Student Info</span>
+                            <span class="text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 px-2 py-0.5 rounded-full lowercase normal-case">auto-saved</span>
+                        </h2>
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <div class="flex-[3]">
+                                <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Your Name</label>
+                                <input type="text" id="inp-student-name" class="glass-input px-4 py-2.5 rounded-lg text-sm" placeholder="e.g. Rakib Hasan">
+                            </div>
+                            <div class="flex-[2]">
+                                <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Student ID</label>
+                                <input type="text" id="inp-student-id" class="glass-input px-4 py-2.5 rounded-lg text-sm" placeholder="e.g. 2020-1-1-XXX">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="h-px w-full bg-slate-200 dark:bg-white/10"></div>
+
+                    <div>
+                        <h2 class="text-xs font-bold uppercase tracking-wider text-pink-600 dark:text-pink-300 mb-3 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-pink-500"></span> Teacher Info
+                        </h2>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Teacher's Name & Designation</label>
+                            <textarea id="inp-teacher-name" rows="2" class="glass-input px-4 py-2.5 rounded-lg text-sm resize-none" placeholder="e.g. Dr. Jane Doe&#10;Professor, Dept. of Yarn Engineering"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel p-6 mt-auto border-t-[3px] border-t-indigo-500">
+                <div class="flex flex-col sm:flex-row items-end gap-3">
+                    <div class="flex-1 w-full">
+                        <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Size</label>
+                        <select id="sel-page-size" class="glass-input px-3 py-2.5 rounded-lg text-sm cursor-pointer outline-none border-none ring-1 ring-slate-200 dark:ring-white/10">
+                            <option value="a4" selected>A4</option>
+                            <option value="letter">Letter</option>
+                        </select>
+                    </div>
+                    <div class="flex-1 w-full">
+                        <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Format</label>
+                        <select id="sel-format" class="glass-input px-3 py-2.5 rounded-lg text-sm cursor-pointer outline-none border-none ring-1 ring-slate-200 dark:ring-white/10">
+                            <option value="pdf" selected>PDF</option>
+                            <option value="png">PNG</option>
+                            <option value="jpg">JPG</option>
+                        </select>
+                    </div>
+                    <button id="btn-download" class="w-full sm:w-auto px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg shadow-lg hover:shadow-indigo-500/30 transition-all active:scale-95 flex items-center justify-center gap-2 flex-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Export
+                    </button>
+                </div>
+                <div id="loading-indicator" class="hidden mt-3 text-xs text-center text-indigo-600 dark:text-indigo-400 animate-pulse font-medium">
+                    Rendering high-quality document...
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full lg:w-[55%] glass-panel flex flex-col h-[600px] lg:h-auto overflow-hidden">
+            <!-- Header for preview -->
+            <div class="px-5 py-3 border-b border-slate-200 dark:border-white/10 flex justify-between items-center bg-white/40 dark:bg-black/20 z-10 backdrop-blur-md">
+                <span class="text-sm font-semibold flex items-center gap-2">
+                    <span class="relative flex h-2.5 w-2.5">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                    </span>
+                    Live Preview
+                </span>
+            </div>
+
+            <!-- The Fixed Alignment Preview Area -->
+            <div class="preview-wrapper" id="preview-scroll-area">
+                
+                <!-- This wrapper forces the scroll area to recognize the scaled content size -->
+                <div id="scale-wrapper" class="scale-wrapper">
+                    
+                    <!-- The actual Page element -->
+                    <div id="preview-page" class="page-container size-a4">
+                        <div class="page-content">
+                            
+                            <!-- Header -->
+                            <div class="logo-placeholder">BUTEX</div>
+                            <h1 class="uni-title">Bangladesh University<br>Of Textiles</h1>
+                            
+                            <!-- Topic -->
+                            <div class="assignment-block">
+                                <p class="text-lg text-slate-500 font-bold mb-2 uppercase tracking-widest">Assignment On</p>
+                                <h2 id="out-assignment-name" class="text-4xl font-bold text-slate-800 leading-tight">[Assignment Name]</h2>
+                            </div>
+
+                            <!-- Assignment Number -->
+                            <div class="text-center mb-10">
+                                <p class="text-xl text-slate-700 font-medium">
+                                    Assignment No: <span id="out-assignment-no" class="font-bold text-slate-900 border-b-2 border-slate-900 pb-1 px-2 inline-block min-w-[60px] text-center">[No]</span>
+                                </p>
+                            </div>
+
+                            <!-- Submission Grid -->
+                            <div class="submission-grid">
+                                <!-- Submitted To -->
+                                <div>
+                                    <h3 class="submission-title">Submitted To</h3>
+                                    <div id="out-teacher-name" class="text-lg text-slate-700 font-medium whitespace-pre-wrap mt-3 leading-relaxed">[Teacher Name & Designation]</div>
+                                </div>
+                                
+                                <!-- Submitted By -->
+                                <div class="text-right">
+                                    <h3 class="submission-title">Submitted By</h3>
+                                    <div class="mt-3">
+                                        <div class="font-bold text-slate-800 text-2xl mb-2" id="out-student-name">[Student Name]</div>
+                                        <div class="text-slate-600 text-lg font-medium flex justify-end gap-2 items-center">
+                                            <span class="text-slate-400">ID:</span>
+                                            <span id="out-student-id" class="text-slate-800">[Student ID]</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Date Footer -->
+                            <div class="text-center mt-auto pt-8 border-t border-slate-200">
+                                <p class="text-xl text-slate-600 font-medium">
+                                    Date of Submission: <span id="out-date" class="font-bold text-slate-800">[Date]</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // Elements
+            const inputs = {
+                assignmentName: document.getElementById('inp-assignment-name'),
+                assignmentNo: document.getElementById('inp-assignment-no'),
+                date: document.getElementById('inp-date'),
+                studentName: document.getElementById('inp-student-name'),
+                studentId: document.getElementById('inp-student-id'),
+                teacherName: document.getElementById('inp-teacher-name')
+            };
+
+            const outputs = {
+                assignmentName: document.getElementById('out-assignment-name'),
+                assignmentNo: document.getElementById('out-assignment-no'),
+                date: document.getElementById('out-date'),
+                studentName: document.getElementById('out-student-name'),
+                studentId: document.getElementById('out-student-id'),
+                teacherName: document.getElementById('out-teacher-name')
+            };
+
+            const pagePreview = document.getElementById('preview-page');
+            const scaleWrapper = document.getElementById('scale-wrapper');
+            const scrollArea = document.getElementById('preview-scroll-area');
+            const pageSizeSelect = document.getElementById('sel-page-size');
+            
+            // Set Today's Date
+            inputs.date.value = new Date().toISOString().split('T')[0];
+
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const darkIcon = document.getElementById('theme-toggle-dark-icon');
+            const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+            // Set initial theme based on system or local storage
+            if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                lightIcon.classList.remove('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                darkIcon.classList.remove('hidden');
+            }
+
+            themeToggleBtn.addEventListener('click', function() {
+                darkIcon.classList.toggle('hidden');
+                lightIcon.classList.toggle('hidden');
+
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                }
+            });
+
+            // Load from Cache
+            if (localStorage.getItem('butex_name')) inputs.studentName.value = localStorage.getItem('butex_name');
+            if (localStorage.getItem('butex_id')) inputs.studentId.value = localStorage.getItem('butex_id');
+
+            // Binding Function
+            function bindInput(inputEl, outputEl, fallbackText, isDate = false) {
+                const update = () => {
+                    let val = inputEl.value.trim();
+                    if (isDate && val) {
+                        const dateObj = new Date(val);
+                        val = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                    }
+                    outputEl.textContent = val || fallbackText;
+                };
+                inputEl.addEventListener('input', update);
+                update();
+            }
+
+            bindInput(inputs.assignmentName, outputs.assignmentName, '[Assignment Name]');
+            bindInput(inputs.assignmentNo, outputs.assignmentNo, '[No]');
+            bindInput(inputs.date, outputs.date, '[Date]', true);
+            bindInput(inputs.studentName, outputs.studentName, '[Student Name]');
+            bindInput(inputs.studentId, outputs.studentId, '[Student ID]');
+            bindInput(inputs.teacherName, outputs.teacherName, '[Teacher Name & Designation]');
+
+            // Cache Student Info on change
+            inputs.studentName.addEventListener('input', e => localStorage.setItem('butex_name', e.target.value));
+            inputs.studentId.addEventListener('input', e => localStorage.setItem('butex_id', e.target.value));
+
+            function updatePreviewScale() {
+                // Padding inside the scroll area to make it look nice
+                const PADDING = 40; 
+                const availableWidth = scrollArea.clientWidth - PADDING;
+                const availableHeight = scrollArea.clientHeight - PADDING;
+                
+                // Get the actual unscaled dimensions of the page
+                const pageWidth = pagePreview.offsetWidth;
+                const pageHeight = pagePreview.offsetHeight;
+
+                // Calculate ratio to fit entirely within view
+                const scaleX = availableWidth / pageWidth;
+                const scaleY = availableHeight / pageHeight;
+                
+                // Use the smallest scale to ensure it fits both width and height, cap at 1
+                let scale = Math.min(scaleX, scaleY);
+                if (scale > 1) scale = 1;
+
+                // Apply CSS Transform
+                pagePreview.style.transform = `scale(${scale})`;
+                
+                // **CRITICAL FIX**: Set the wrapper size to the scaled dimensions
+                // This ensures flexbox centering and scrolling work perfectly.
+                scaleWrapper.style.width = `${pageWidth * scale}px`;
+                scaleWrapper.style.height = `${pageHeight * scale}px`;
+            }
+
+            // Handle Page Size Change
+            pageSizeSelect.addEventListener('change', (e) => {
+                pagePreview.className = `page-container size-${e.target.value}`;
+                // Allow DOM to update dimensions before scaling
+                setTimeout(updatePreviewScale, 10); 
+            });
+
+            // Initial scale & listen to resize
+            setTimeout(updatePreviewScale, 50);
+            window.addEventListener('resize', updatePreviewScale);
+
+            const downloadBtn = document.getElementById('btn-download');
+            const formatSelect = document.getElementById('sel-format');
+            const loadingInd = document.getElementById('loading-indicator');
+
+            downloadBtn.addEventListener('click', async () => {
+                downloadBtn.disabled = true;
+                downloadBtn.style.opacity = '0.5';
+                loadingInd.classList.remove('hidden');
+
+                try {
+                    // Temporarily remove transform for clean capture
+                    const currentScale = pagePreview.style.transform;
+                    pagePreview.style.transform = 'scale(1)';
+                    
+                    // html2canvas config for High Quality
+                    const canvas = await html2canvas(pagePreview, {
+                        scale: 3, // 3x resolution
+                        useCORS: true,
+                        backgroundColor: '#ffffff',
+                        logging: false
+                    });
+
+                    // Restore scale
+                    pagePreview.style.transform = currentScale;
+
+                    const format = formatSelect.value;
+                    const filename = `BUTEX_Assignment_${inputs.assignmentNo.value || 'Cover'}`;
+
+                    if (format === 'pdf') {
+                        const { jsPDF } = window.jspdf;
+                        const orientation = 'portrait';
+                        const unit = 'px';
+                        // Map our CSS class sizes to PDF formats
+                        const pdfFormat = pageSizeSelect.value === 'letter' ? 'letter' : 'a4'; 
+                        
+                        const pdf = new jsPDF({ orientation, unit, format: pdfFormat });
+                        
+                        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                        const pdfWidth = pdf.internal.pageSize.getWidth();
+                        const pdfHeight = pdf.internal.pageSize.getHeight();
+                        
+                        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+                        pdf.save(`${filename}.pdf`);
+                        
+                    } else {
+                        const mimeType = format === 'jpg' ? 'image/jpeg' : 'image/png';
+                        const imgData = canvas.toDataURL(mimeType, 1.0);
+                        const link = document.createElement('a');
+                        link.download = `${filename}.${format}`;
+                        link.href = imgData;
+                        link.click();
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert("Failed to export. Please try again.");
+                } finally {
+                    downloadBtn.disabled = false;
+                    downloadBtn.style.opacity = '1';
+                    loadingInd.classList.add('hidden');
+                }
+            });
+            
+            // Prevent form submit on enter
+            document.querySelectorAll('input').forEach(input => {
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') e.preventDefault();
+                });
+            });
+        });
+    </script>
+</body>
+</html>
