@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="bn" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>চিরকুমার-কুমারী সংগঠন</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Hind Siliguri"', 'sans-serif'],
+                    },
+                    colors: {
+                        bdgreen: '#006a4e',
+                        bdred: '#f42a41',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Hind Siliguri', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .bg-animated {
+            background: linear-gradient(-45deg, #0f172a, #006a4e, #064e3b, #020617);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: -1;
+            transition: all 0.5s ease;
+        }
+
+        html:not(.dark) .bg-animated {
+            background: linear-gradient(-45deg, #f0fdf4, #dcfce7, #bbf7d0, #ffffff);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        
+        html:not(.dark) .glass-panel {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .certificate-bg {
+            background-color: #fdfdf5;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 25v10M25 30h10' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+            border: 24px solid #115e59;
+        }
+
+        canvas {
+            touch-action: none;
+        }
+        
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        @keyframes pulse-text {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .animate-pulse-text {
+            animation: pulse-text 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            #certificate-modal { 
+                display: flex !important; 
+                opacity: 1 !important; 
+                background: transparent !important; 
+                position: absolute; left:0; top:0;
+            }
+            #certificate-content, #certificate-content * { visibility: visible; }
+            #certificate-content {
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 100vw;
+                height: 100vh;
+                margin: 0;
+                padding: 0;
+                box-shadow: none !important;
+                transform: scale(1) !important;
+                border: none !important;
+            }
+            .print-hidden { display: none !important; }
+            @page { size: landscape; margin: 0; }
+        }
+    </style>
+</head>
+<body class="text-gray-800 dark:text-gray-100 transition-colors duration-300">
+    <div class="bg-animated"></div>
+
+    <header class="w-full p-4 md:p-6 flex justify-between items-center z-10">
+        <h1 class="text-2xl md:text-4xl font-bold text-bdgreen dark:text-green-400 drop-shadow-md">
+            চিরকুমার-কুমারী সংগঠন
+        </h1>
+        <button id="theme-toggle" class="glass-panel p-2 md:p-3 rounded-full hover:scale-110 transition-transform focus:outline-none">
+            <svg id="theme-icon-dark" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+            </svg>
+            <svg id="theme-icon-light" class="w-6 h-6 hidden text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 2.32a1 1 0 011.415 0l.707.707a1 1 0 01-1.414 1.415l-.707-.707a1 1 0 010-1.415zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zm-2.32 4.22a1 1 0 010 1.415l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.415 0zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm-4.22-2.32a1 1 0 01-1.415 0l-.707-.707a1 1 0 011.414-1.415l.707.707a1 1 0 010 1.415zM4 10a1 1 0 01-1 1H2a1 1 0 110-2h1a1 1 0 011 1zm2.32-4.22a1 1 0 010-1.415l.707-.707a1 1 0 011.414 1.415l-.707.707a1 1 0 01-1.415 0zM10 5a5 5 0 100 10 5 5 0 000-10z" clip-rule="evenodd"></path>
+            </svg>
+        </button>
+    </header>
+
+    <main class="flex-grow container mx-auto px-4 md:px-6 py-8 flex flex-col lg:flex-row gap-8 z-10">
+        
+        <!-- Form/Profile Section -->
+        <div class="lg:w-1/3 glass-panel rounded-2xl p-6 md:p-8 self-start w-full relative min-h-[400px]">
+            
+            <!-- Registration Form -->
+            <div id="form-container">
+                <h2 class="text-xl md:text-2xl font-bold mb-6 border-b border-gray-300 dark:border-gray-600 pb-2">সদস্যপদ ফরম</h2>
+                <form id="registration-form" class="space-y-5">
+                    <div>
+                        <label for="name" class="block text-sm font-semibold mb-1">আপনার পূর্ণ নাম</label>
+                        <input type="text" id="name" required placeholder="নাম লিখুন..." 
+                               class="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-black/50 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-bdgreen transition">
+                    </div>
+
+                    <div>
+                        <label for="gender" class="block text-sm font-semibold mb-1">পদবি / লিঙ্গ</label>
+                        <select id="gender" required 
+                                class="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-black/50 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-bdgreen transition appearance-none">
+                            <option value="" disabled selected>নির্বাচন করুন...</option>
+                            <option value="চিরকুমার">চিরকুমার (পুরুষ)</option>
+                            <option value="চিরকুমারী">চিরকুমারী (নারী)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">স্বাক্ষর (এখানে আঁকুন)</label>
+                        <div class="border-2 border-dashed border-gray-400 dark:border-gray-500 rounded-lg bg-white dark:bg-gray-100 overflow-hidden relative">
+                            <canvas id="signature-pad" width="400" height="150" class="w-full cursor-crosshair"></canvas>
+                        </div>
+                        <div class="flex justify-end mt-2">
+                            <button type="button" id="clear-signature" class="text-xs text-bdred hover:text-red-700 font-semibold underline">মুছে ফেলুন</button>
+                        </div>
+                    </div>
+
+                    <div id="status-message" class="text-sm hidden p-2 rounded"></div>
+
+                    <button type="submit" id="submit-btn" 
+                            class="w-full bg-bdgreen hover:bg-green-800 text-white font-bold py-3 px-4 rounded-lg shadow-lg transform transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                        শপথ গ্রহণ করুন
+                    </button>
+                </form>
+            </div>
+
+            <!-- Profile View (Hidden by default) -->
+            <div id="profile-container" class="hidden flex-col items-center space-y-6 w-full">
+                <h2 class="text-xl md:text-2xl font-bold mb-2 border-b w-full text-center border-gray-300 dark:border-gray-600 pb-2 text-bdgreen">আপনার প্রোফাইল</h2>
+                
+                <div class="w-24 h-24 rounded-full bg-bdgreen text-white flex items-center justify-center text-4xl font-bold shadow-lg" id="profile-avatar">
+                    ?
+                </div>
+                
+                <div class="text-center w-full">
+                    <h3 id="profile-name" class="text-2xl font-bold text-gray-800 dark:text-gray-100">নাম</h3>
+                    <p id="profile-gender" class="text-lg text-bdred font-semibold mt-1">পদবি</p>
+                </div>
+                
+                <div class="w-full bg-white/40 dark:bg-black/40 p-4 rounded-xl text-center border border-gray-200 dark:border-gray-700">
+                    <p class="text-sm font-semibold mb-2 text-gray-600 dark:text-gray-400">আপনার সংরক্ষিত স্বাক্ষর</p>
+                    <img id="profile-signature" src="" alt="স্বাক্ষর" class="h-16 mx-auto object-contain dark:invert filter mix-blend-multiply dark:mix-blend-normal">
+                </div>
+
+                <div class="flex flex-col w-full gap-3 mt-4">
+                    <button id="view-my-cert-btn" class="w-full bg-bdgreen hover:bg-green-800 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition flex justify-center items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        সনদপত্র ডাউনলোড
+                    </button>
+                    <button id="edit-profile-btn" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition flex justify-center items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        তথ্য সংশোধন করুন
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div class="lg:w-2/3 glass-panel rounded-2xl p-6 md:p-8 flex flex-col w-full min-h-[400px] justify-center items-center text-center relative overflow-hidden">
+            <div id="loading-members" class="absolute inset-0 flex justify-center items-center bg-white/50 dark:bg-black/50 z-20">
+                <svg class="animate-spin h-8 w-8 text-bdgreen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </div>
+
+            <h2 class="text-2xl md:text-4xl font-bold mb-4 text-bdgreen dark:text-green-400">আমাদের মূলমন্ত্র</h2>
+            <p class="text-xl md:text-3xl font-semibold italic text-gray-700 dark:text-gray-300 mb-10 border-b border-gray-300 dark:border-gray-600 pb-6 w-full px-4">
+                "প্রেম নয়, বিয়ে নয়, একাকীত্বই পরম জয়!"
+            </p>
+            
+            <div class="glass-panel p-8 rounded-full w-48 h-48 md:w-64 md:h-64 flex flex-col justify-center items-center border-4 border-bdgreen shadow-2xl relative">
+                <span class="text-lg md:text-2xl font-bold text-gray-600 dark:text-gray-400 mb-2">মোট সদস্য</span>
+                <span id="total-members-count" class="text-6xl md:text-8xl font-bold text-bdred drop-shadow-md">০</span>
+            </div>
+        </div>
+    </main>
+
+    <footer class="w-full p-4 mt-auto text-center z-10 glass-panel border-x-0 border-b-0">
+        <p class="text-sm md:text-base font-semibold">
+            ⚠️ এটি সম্পূর্ণ একটি মজার প্রজেক্ট, দয়া করে কেউ সিরিয়াসলি নেবেন না। ⚠️
+        </p>
+    </footer>
+
+    <div id="certificate-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div class="relative w-full h-full flex flex-col items-center justify-center">
+            
+            <!-- Wrapper for dynamic visual scaling (keeps the inner box strictly 800x565 for perfect exports) -->
+            <div id="cert-wrapper" class="flex items-center justify-center relative w-full" style="height: 65vh; max-height: 600px;">
+                
+                <!-- Certificate Container (Fixed Dimensions) -->
+                <div class="certificate-bg w-[800px] h-[565px] rounded shadow-2xl relative flex flex-col p-12 text-gray-900 bg-white origin-center transition-transform duration-300 scale-95 shrink-0" id="certificate-content">
+                    
+                    <!-- Watermark Logo -->
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-0 opacity-[0.08]">
+                        <svg viewBox="0 0 200 200" width="400" height="400" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="100" cy="100" r="90" fill="none" stroke="#115e59" stroke-width="6" stroke-dasharray="15, 10"/>
+                            <circle cx="100" cy="100" r="78" fill="none" stroke="#115e59" stroke-width="2"/>
+                            <text x="100" y="118" font-family="'Hind Siliguri', sans-serif" font-size="52" font-weight="bold" fill="#115e59" text-anchor="middle">চি-কু</text>
+                            <path d="M 40 140 Q 100 180 160 140" fill="none" stroke="#115e59" stroke-width="3" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+
+                    <!-- Title -->
+                    <div class="text-center z-10 shrink-0 w-full mb-6 pt-4">
+                        <div class="inline-flex items-center justify-center border-b-[3px] border-[#115e59] pb-2 px-10">
+                            <h1 class="text-[38px] font-bold text-[#115e59] tracking-wide" style="font-family: 'Hind Siliguri', sans-serif;">চিরকুমার-কুমারী সংগঠন</h1>
+                        </div>
+                    </div>
+
+                    <!-- Body Text -->
+                    <div class="flex-grow flex items-center justify-center z-10 px-12 mb-28">
+                        <p class="text-[#115e59] text-[26px] leading-[2.1] text-justify font-medium">
+                            আমি, <span id="cert-name" class="font-bold text-[32px] text-black px-2">নাম</span> সজ্ঞানে ও সম্পূর্ণ স্বেচ্ছায় অঙ্গীকার করিতেছি যে, মায়ার সকল প্রকার মরীচিকা ও দাম্পত্যের বিড়ম্বনা হইতে নিরাপদ দূরত্ব বজায় রাখবো। এবং চিরকুমার-কুমারী সংগঠনের সব নিয়ম মেনে চলবো।
+                        </p>
+                    </div>
+
+                    <!-- Signature - Now absolutely positioned at the bottom right -->
+                    <div class="absolute bottom-8 right-12 z-10 w-[180px]">
+                        <!-- absolute positioning inside relative div prevents pushing the line down -->
+                        <div class="h-[90px] relative w-full mb-1">
+                            <img id="cert-signature" src="" alt="স্বাক্ষর" class="absolute bottom-0 left-1/2 transform -translate-x-1/2 max-h-[100%] max-w-[100%] object-contain mix-blend-multiply pointer-events-none">
+                        </div>
+                        <!-- Using a solid div for the line ensures html2canvas renders it reliably -->
+                        <div class="h-[3px] w-full bg-[#115e59] rounded-full"></div>
+                        <div class="text-center text-[20px] font-bold text-[#115e59] mt-1">স্বাক্ষর</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Controls -->
+            <div class="mt-8 flex gap-4 print-hidden z-10">
+                <button id="download-cert-btn" class="bg-bdgreen hover:bg-green-700 text-white px-6 py-3 rounded-full shadow-lg font-bold transition flex items-center gap-2 text-lg">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    ডাউনলোড করুন
+                </button>
+                <button id="close-modal" class="bg-gray-800 hover:bg-gray-900 text-white px-6 py-3 rounded-full shadow-lg font-bold transition text-lg">বন্ধ করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, updateDoc, doc, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // ==========================================
+        // 1. Theme Setup
+        // ==========================================
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const darkIcon = document.getElementById('theme-icon-dark');
+        const lightIcon = document.getElementById('theme-icon-light');
+
+        function updateThemeUI() {
+            if (document.documentElement.classList.contains('dark')) {
+                lightIcon.classList.remove('hidden');
+                darkIcon.classList.add('hidden');
+            } else {
+                darkIcon.classList.remove('hidden');
+                lightIcon.classList.add('hidden');
+            }
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            updateThemeUI();
+        });
+        updateThemeUI(); // Initial check
+
+        // ==========================================
+        // 2. Signature Pad Logic
+        // ==========================================
+        const canvas = document.getElementById('signature-pad');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        let isEmpty = true;
+
+        // Make canvas scale properly but keep internal resolution for smooth lines
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            // We keep internal logic at 400x150 but css scales it to width: 100%
+            // So we need to calculate scale factors for mouse events.
+        }
+        
+        // Initialize style
+        ctx.strokeStyle = "#000000"; // Always dark ink
+        ctx.lineWidth = 3;
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+
+        function getCoordinates(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            let clientX, clientY;
+
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
+        function drawStart(e) {
+            e.preventDefault();
+            isDrawing = true;
+            const coords = getCoordinates(e);
+            lastX = coords.x;
+            lastY = coords.y;
+        }
+
+        function drawMove(e) {
+            if (!isDrawing) return;
+            e.preventDefault();
+            const coords = getCoordinates(e);
+            
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(coords.x, coords.y);
+            ctx.stroke();
+            
+            lastX = coords.x;
+            lastY = coords.y;
+            isEmpty = false;
+        }
+
+        function drawEnd(e) {
+            if(e) e.preventDefault();
+            isDrawing = false;
+        }
+
+        canvas.addEventListener('mousedown', drawStart);
+        canvas.addEventListener('mousemove', drawMove);
+        canvas.addEventListener('mouseup', drawEnd);
+        canvas.addEventListener('mouseout', drawEnd);
+
+        canvas.addEventListener('touchstart', drawStart, { passive: false });
+        canvas.addEventListener('touchmove', drawMove, { passive: false });
+        canvas.addEventListener('touchend', drawEnd);
+
+        document.getElementById('clear-signature').addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            isEmpty = true;
+        });
+
+        // ==========================================
+        // 3. Firebase Initialization & Auth
+        // ==========================================
+        
+        // PASTE YOUR REAL CONFIG HERE:
+        const firebaseConfig = {
+            apiKey: "AIzaSyBtR-vao8sj4XI-mDYMRxXWE9bZ3CWF9tA",
+            authDomain: "chirokumar.firebaseapp.com",
+            projectId: "chirokumar",
+            storageBucket: "chirokumar.firebasestorage.app",
+            messagingSenderId: "443167217507",
+            appId: "1:443167217507:web:699c630828af17a33c6556"
+        };
+        
+        const appId = 'cirokumar-app';
+
+        // Mock mode automatically turns off when you put in your real projectId
+        const isMockMode = !firebaseConfig.projectId || firebaseConfig.projectId === "YOUR_PROJECT_ID";
+        let app, db, auth;
+
+        if (!isMockMode) {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+        }
+
+        let currentUser = null;
+        let currentProfileId = null; // Store document ID for current user's profile
+
+        async function initAuth() {
+            try {
+                // Fix: Force Anonymous login since you are using your own custom Firebase project
+                const userCred = await signInAnonymously(auth);
+                currentUser = userCred.user;
+                loadMembers();
+            } catch (error) {
+                console.error("Auth error:", error);
+                loadingEl.classList.add('hidden');
+                if (error.code === 'auth/operation-not-allowed') {
+                    showStatus("⚠️ Firebase-এ 'Anonymous Sign-in' চালু করা নেই! Firebase Console-এ যান।", "error");
+                } else {
+                    showStatus("সংযোগ স্থাপনে সমস্যা: " + error.message, "error");
+                }
+            }
+        }
+
+        // ==========================================
+        // 4. Database Operations
+        // ==========================================
+        const loadingEl = document.getElementById('loading-members');
+        const statusEl = document.getElementById('status-message');
+        const formContainer = document.getElementById('form-container');
+        const profileContainer = document.getElementById('profile-container');
+        
+        let allMembers = []; // Cache for certificate generation
+        let myProfileData = null; // Store current user profile data
+        
+        function showStatus(msg, type) {
+            statusEl.textContent = msg;
+            statusEl.className = `text-sm p-3 rounded font-semibold mb-4 block ${type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`;
+            statusEl.classList.remove('hidden');
+            setTimeout(() => { statusEl.classList.add('hidden'); }, 4000);
+        }
+
+        function toggleProfileView(show) {
+            if(show) {
+                formContainer.classList.add('hidden');
+                profileContainer.classList.remove('hidden');
+                profileContainer.classList.add('flex');
+            } else {
+                formContainer.classList.remove('hidden');
+                profileContainer.classList.add('hidden');
+                profileContainer.classList.remove('flex');
+            }
+        }
+
+        function convertToBanglaNumber(num) {
+            const banglaDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+            return num.toString().replace(/\d/g, x => banglaDigits[x]);
+        }
+
+        document.getElementById('edit-profile-btn').addEventListener('click', () => {
+            toggleProfileView(false);
+            if(myProfileData) {
+                document.getElementById('name').value = myProfileData.name;
+                document.getElementById('gender').value = myProfileData.gender;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                isEmpty = true;
+                document.getElementById('submit-btn').innerText = "তথ্য হালনাগাদ করুন";
+            }
+        });
+
+        document.getElementById('view-my-cert-btn').addEventListener('click', () => {
+            if(myProfileData) {
+                showCertificate(myProfileData);
+            }
+        });
+
+        document.getElementById('registration-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value.trim();
+            const gender = document.getElementById('gender').value;
+            const submitBtn = document.getElementById('submit-btn');
+
+            if (!name || !gender) {
+                showStatus("দয়া করে নাম ও পদবি নির্বাচন করুন।", "error");
+                return;
+            }
+
+            if (isEmpty) {
+                showStatus("দয়া করে স্বাক্ষর প্রদান করুন।", "error");
+                return;
+            }
+
+            const signatureData = canvas.toDataURL("image/png");
+            
+            submitBtn.disabled = true;
+            submitBtn.innerText = "সংরক্ষণ করা হচ্ছে...";
+
+            const newMember = {
+                uid: currentUser.uid,
+                name: name,
+                gender: gender,
+                signature: signatureData,
+                timestamp: isMockMode ? new Date() : serverTimestamp()
+            };
+
+            try {
+                if (isMockMode) {
+                    newMember.id = currentProfileId || 'mock-' + Date.now();
+                    
+                    if(currentProfileId) {
+                        const idx = allMembers.findIndex(m => m.id === currentProfileId);
+                        if(idx > -1) allMembers[idx] = newMember;
+                    } else {
+                        allMembers.unshift(newMember);
+                    }
+                    
+                    updateDashboard(allMembers);
+                    showCertificate(newMember);
+                } else {
+                    if (!currentUser) throw new Error("Not authenticated");
+                    const membersRef = collection(db, 'artifacts', appId, 'public', 'data', 'members');
+                    
+                    if (currentProfileId) {
+                        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'members', currentProfileId);
+                        await updateDoc(docRef, {
+                            name: name,
+                            gender: gender,
+                            signature: signatureData
+                        });
+                        showCertificate({...newMember, id: currentProfileId}); 
+                    } else {
+                        const docRef = await addDoc(membersRef, newMember);
+                        currentProfileId = docRef.id;
+                        showCertificate({...newMember, id: docRef.id}); 
+                    }
+                }
+
+                showStatus("অভিনন্দন! তথ্য সফলভাবে সংরক্ষিত হয়েছে।", "success");
+            } catch (error) {
+                console.error("Save error:", error);
+                if (error.code === 'permission-denied') {
+                    showStatus("⚠️ Firestore Database-এর Rules 'Test Mode'-এ নেই!", "error");
+                } else {
+                    showStatus("তথ্য সংরক্ষণে ত্রুটি: " + error.message, "error");
+                }
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "শপথ গ্রহণ করুন";
+            }
+        });
+
+        function loadMembers() {
+            if (isMockMode) {
+                loadingEl.classList.add('hidden');
+                updateDashboard(allMembers);
+                return;
+            }
+
+            if (!currentUser) return;
+
+            const membersRef = collection(db, 'artifacts', appId, 'public', 'data', 'members');
+            const q = query(membersRef);
+
+            onSnapshot(q, (snapshot) => {
+                const members = [];
+                snapshot.forEach((doc) => {
+                    members.push({ id: doc.id, ...doc.data() });
+                });
+                
+                allMembers = members;
+                loadingEl.classList.add('hidden');
+                updateDashboard(allMembers);
+            }, (error) => {
+                console.error("Fetch error:", error);
+                loadingEl.classList.add('hidden');
+                if (error.code === 'permission-denied') {
+                     document.getElementById('total-members-count').innerText = "DB Error";
+                     showStatus("⚠️ Firestore Rules ঠিক করুন!", "error");
+                } else {
+                     document.getElementById('total-members-count').innerText = "!";
+                }
+            });
+        }
+
+        function updateDashboard(members) {
+            document.getElementById('total-members-count').innerText = convertToBanglaNumber(members.length);
+            
+            if(currentUser) {
+                myProfileData = members.find(m => m.uid === currentUser.uid);
+                
+                if(myProfileData) {
+                    currentProfileId = myProfileData.id;
+                    
+                    document.getElementById('profile-name').textContent = myProfileData.name;
+                    document.getElementById('profile-gender').textContent = myProfileData.gender;
+                    document.getElementById('profile-avatar').textContent = myProfileData.name.charAt(0);
+                    
+                    const isMale = myProfileData.gender === 'চিরকুমার';
+                    const avatarEl = document.getElementById('profile-avatar');
+                    avatarEl.className = `w-24 h-24 rounded-full flex items-center justify-center text-4xl font-bold shadow-lg ${isMale ? 'bg-blue-600 text-white' : 'bg-pink-600 text-white'}`;
+                    
+                    if(myProfileData.signature) {
+                        document.getElementById('profile-signature').src = myProfileData.signature;
+                    }
+                    
+                    toggleProfileView(true);
+                } else {
+                    currentProfileId = null;
+                    toggleProfileView(false);
+                }
+            }
+        }
+
+        // ==========================================
+        // 5. Certificate Generator Logic
+        // ==========================================
+        const modal = document.getElementById('certificate-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const certContent = document.getElementById('certificate-content');
+
+        function adjustCertificateScale() {
+            const wrapper = document.getElementById('cert-wrapper');
+            if(!wrapper || !certContent) return;
+            
+            const padding = 40;
+            const maxWidth = wrapper.clientWidth - padding;
+            const maxHeight = wrapper.clientHeight;
+            
+            const origWidth = 800;
+            const origHeight = 565;
+            
+            const scaleX = maxWidth / origWidth;
+            const scaleY = maxHeight / origHeight;
+            const scale = Math.min(scaleX, scaleY, 1); 
+            
+            certContent.style.transform = `scale(${scale})`;
+        }
+
+        window.addEventListener('resize', () => {
+            if (!modal.classList.contains('hidden')) {
+                adjustCertificateScale();
+            }
+        });
+
+        function showCertificate(member) {
+            // Populate Data
+            document.getElementById('cert-name').textContent = member.name;
+            
+            const signatureImg = document.getElementById('cert-signature');
+            if (member.signature) {
+                signatureImg.src = member.signature;
+                signatureImg.style.display = 'block';
+            } else {
+                signatureImg.style.display = 'none';
+            }
+
+            // Show Modal with Animation
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                adjustCertificateScale(); // Apply visual scaling
+            }, 50);
+        }
+
+        function closeCertificate() {
+            modal.classList.add('opacity-0');
+            certContent.style.transform = 'scale(0.95)';
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300); // match transition duration
+        }
+
+        closeModalBtn.addEventListener('click', closeCertificate);
+        
+        document.getElementById('download-cert-btn').addEventListener('click', async () => {
+            const btn = document.getElementById('download-cert-btn');
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = "ডাউনলোড হচ্ছে...";
+            btn.disabled = true;
+            
+            const certElement = document.getElementById('certificate-content');
+            
+            // Remove scaling right before download to capture the true 800x565 resolution
+            const currentTransform = certElement.style.transform;
+            certElement.style.transform = 'scale(1)';
+
+            try {
+                // html2canvas direct generation
+                const canvas = await html2canvas(certElement, {
+                    scale: 3, // Multiplier for high resolution output
+                    useCORS: true,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    windowWidth: 1200 // Force desktop rendering mode
+                });
+                
+                // Create a temporary link to trigger the download
+                const link = document.createElement('a');
+                const memberName = document.getElementById('cert-name').textContent || 'member';
+                link.download = `চিরকুমার-সনদপত্র-${memberName}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } catch (error) {
+                console.error("Certificate generation failed:", error);
+                alert("ডাউনলোড করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।");
+            } finally {
+                // Restore visual scaling for the user
+                certElement.style.transform = currentTransform;
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+            }
+        });
+        
+        // Close on clicking outside
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeCertificate();
+        });
+
+        // Initialize Application
+        initAuth();
+
+    </script>
+</body>
+</html>
