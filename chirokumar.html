@@ -4,11 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>চিরকুমার-কুমারী সংগঠন</title>
-    
+
+    <!-- Speed: open connections early & preload Firebase modules in parallel -->
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js">
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js">
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js">
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -27,51 +37,111 @@
     </script>
 
     <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.07);
+            --glass-border: rgba(255, 255, 255, 0.14);
+            --glass-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.55);
+            --accent: #34d399;
+        }
+        html:not(.dark) {
+            --glass-bg: rgba(255, 255, 255, 0.72);
+            --glass-border: rgba(255, 255, 255, 0.9);
+            --glass-shadow: 0 10px 40px -12px rgba(0, 106, 78, 0.25);
+            --accent: #006a4e;
+        }
+
+        * { -webkit-tap-highlight-color: transparent; }
+
         body {
             font-family: 'Hind Siliguri', sans-serif;
             margin: 0;
             padding: 0;
             min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
             flex-direction: column;
             overflow-x: hidden;
         }
 
+        /* ---------- Animated background ---------- */
         .bg-animated {
-            background: linear-gradient(-45deg, #0f172a, #006a4e, #064e3b, #020617);
+            background: linear-gradient(-45deg, #020617, #052e2b, #064e3b, #0b1220);
             background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
+            animation: gradientBG 18s ease infinite;
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            z-index: -1;
+            inset: 0;
+            z-index: -2;
             transition: all 0.5s ease;
         }
-
         html:not(.dark) .bg-animated {
-            background: linear-gradient(-45deg, #f0fdf4, #dcfce7, #bbf7d0, #ffffff);
+            background: linear-gradient(-45deg, #f0fdf4, #dcfce7, #ecfdf5, #ffffff);
             background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
+            animation: gradientBG 18s ease infinite;
         }
-
         @keyframes gradientBG {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
 
+        .blob {
+            position: fixed;
+            border-radius: 9999px;
+            filter: blur(80px);
+            opacity: 0.35;
+            z-index: -1;
+            pointer-events: none;
+            will-change: transform;
+            animation: floaty 14s ease-in-out infinite;
+        }
+        .blob-1 { width: 340px; height: 340px; background: #10b981; top: -80px; left: -80px; }
+        .blob-2 { width: 300px; height: 300px; background: #f42a41; bottom: -90px; right: -60px; opacity: 0.22; animation-delay: -6s; }
+        .blob-3 { width: 240px; height: 240px; background: #38bdf8; top: 45%; left: 55%; opacity: 0.15; animation-delay: -3s; }
+        html:not(.dark) .blob { opacity: 0.45; }
+        html:not(.dark) .blob-2 { opacity: 0.25; }
+        html:not(.dark) .blob-3 { opacity: 0.2; }
+        @keyframes floaty {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, -30px) scale(1.08); }
+        }
+
+        /* ---------- Glass ---------- */
         .glass-panel {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            background: var(--glass-bg);
+            backdrop-filter: blur(18px) saturate(140%);
+            -webkit-backdrop-filter: blur(18px) saturate(140%);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
         }
-        
-        html:not(.dark) .glass-panel {
-            background: rgba(255, 255, 255, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+
+        /* ---------- Inputs ---------- */
+        .field {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border-radius: 0.9rem;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--glass-border);
+            color: inherit;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s, background .2s;
+            font-size: 1rem;
         }
+        html:not(.dark) .field { background: rgba(255, 255, 255, 0.9); border-color: #d1d5db; }
+        .field::placeholder { color: rgba(148, 163, 184, .8); }
+        .field:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.18);
+        }
+        select.field option { color: #111827; background: #fff; }
+
+        /* ---------- Buttons ---------- */
+        .btn-primary {
+            background: linear-gradient(135deg, #00875f, #006a4e);
+            box-shadow: 0 10px 25px -8px rgba(0, 106, 78, 0.7);
+            transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
+        }
+        .btn-primary:hover { filter: brightness(1.1); box-shadow: 0 14px 30px -8px rgba(0, 135, 95, 0.85); }
+        .btn-primary:active { transform: scale(0.97); }
 
         .certificate-bg {
             background-color: #fdfdf5;
@@ -79,32 +149,60 @@
             border: 24px solid #115e59;
         }
 
-        canvas {
-            touch-action: none;
-        }
-        
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
+        canvas { touch-action: none; }
+
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         @keyframes pulse-text {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
-        .animate-pulse-text {
-            animation: pulse-text 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        .animate-pulse-text { animation: pulse-text 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+        /* ---------- Entrance animation ---------- */
+        @keyframes riseIn {
+            from { opacity: 0; transform: translateY(18px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .rise { animation: riseIn .6s cubic-bezier(.2,.8,.2,1) both; }
+        .rise-2 { animation-delay: .1s; }
+        .rise-3 { animation-delay: .2s; }
+
+        /* ---------- Counter ring ---------- */
+        .count-ring {
+            position: relative;
+            background:
+                radial-gradient(closest-side, var(--ring-inner, #0b1b17) 82%, transparent 83%),
+                conic-gradient(from 0deg, #00875f, #34d399, #f42a41, #00875f);
+            animation: spin-ring 8s linear infinite;
+        }
+        html:not(.dark) .count-ring { --ring-inner: #ffffff; }
+        .count-ring-inner { animation: spin-ring-rev 8s linear infinite; }
+        @keyframes spin-ring { to { transform: rotate(360deg); } }
+        @keyframes spin-ring-rev { to { transform: rotate(-360deg); } }
+        @media (prefers-reduced-motion: reduce) {
+            .count-ring, .count-ring-inner, .blob, .bg-animated { animation: none !important; }
         }
 
+        .quote-mark {
+            font-size: 5rem;
+            line-height: 1;
+            font-family: Georgia, serif;
+            background: linear-gradient(135deg, #34d399, #f42a41);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            opacity: .55;
+        }
+
+        /* ---------- Print ---------- */
         @media print {
             body * { visibility: hidden; }
-            #certificate-modal { 
-                display: flex !important; 
-                opacity: 1 !important; 
-                background: transparent !important; 
+            #certificate-modal {
+                display: flex !important;
+                opacity: 1 !important;
+                background: transparent !important;
                 position: absolute; left:0; top:0;
             }
             #certificate-content, #certificate-content * { visibility: visible; }
@@ -127,60 +225,73 @@
 </head>
 <body class="text-gray-800 dark:text-gray-100 transition-colors duration-300">
     <div class="bg-animated"></div>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
 
-    <header class="w-full p-4 md:p-6 flex justify-between items-center z-10">
-        <h1 class="text-2xl md:text-4xl font-bold text-bdgreen dark:text-green-400 drop-shadow-md">
-            চিরকুমার-কুমারী সংগঠন
-        </h1>
-        <button id="theme-toggle" class="glass-panel p-2 md:p-3 rounded-full hover:scale-110 transition-transform focus:outline-none">
-            <svg id="theme-icon-dark" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
-            </svg>
-            <svg id="theme-icon-light" class="w-6 h-6 hidden text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 2.32a1 1 0 011.415 0l.707.707a1 1 0 01-1.414 1.415l-.707-.707a1 1 0 010-1.415zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zm-2.32 4.22a1 1 0 010 1.415l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.415 0zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm-4.22-2.32a1 1 0 01-1.415 0l-.707-.707a1 1 0 011.414-1.415l.707.707a1 1 0 010 1.415zM4 10a1 1 0 01-1 1H2a1 1 0 110-2h1a1 1 0 011 1zm2.32-4.22a1 1 0 010-1.415l.707-.707a1 1 0 011.414 1.415l-.707.707a1 1 0 01-1.415 0zM10 5a5 5 0 100 10 5 5 0 000-10z" clip-rule="evenodd"></path>
-            </svg>
-        </button>
+    <header class="w-full px-4 pt-4 md:px-8 md:pt-6 z-10">
+        <div class="glass-panel max-w-7xl mx-auto rounded-2xl px-4 py-3 md:px-6 md:py-4 flex justify-between items-center gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-bdgreen flex items-center justify-center text-white font-bold text-sm md:text-base shadow-lg">চি-কু</div>
+                <h1 class="text-lg sm:text-2xl md:text-3xl font-bold text-bdgreen dark:text-emerald-300 truncate leading-tight">
+                    চিরকুমার-কুমারী সংগঠন
+                </h1>
+            </div>
+            <button id="theme-toggle" aria-label="থিম পরিবর্তন" class="glass-panel shrink-0 w-11 h-11 flex items-center justify-center rounded-full hover:scale-110 active:scale-95 transition-transform focus:outline-none">
+                <svg id="theme-icon-dark" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                </svg>
+                <svg id="theme-icon-light" class="w-5 h-5 hidden text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 2.32a1 1 0 011.415 0l.707.707a1 1 0 01-1.414 1.415l-.707-.707a1 1 0 010-1.415zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zm-2.32 4.22a1 1 0 010 1.415l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.415 0zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm-4.22-2.32a1 1 0 01-1.415 0l-.707-.707a1 1 0 011.414-1.415l.707.707a1 1 0 010 1.415zM4 10a1 1 0 01-1 1H2a1 1 0 110-2h1a1 1 0 011 1zm2.32-4.22a1 1 0 010-1.415l.707-.707a1 1 0 011.414 1.415l-.707.707a1 1 0 01-1.415 0zM10 5a5 5 0 100 10 5 5 0 000-10z" clip-rule="evenodd"></path>
+                </svg>
+            </button>
+        </div>
     </header>
 
-    <main class="flex-grow container mx-auto px-4 md:px-6 py-8 flex flex-col lg:flex-row gap-8 z-10">
-        
+    <main class="flex-grow w-full max-w-7xl mx-auto px-4 md:px-8 py-6 md:py-10 flex flex-col-reverse lg:flex-row gap-6 lg:gap-8 z-10">
+
         <!-- Form/Profile Section -->
-        <div class="lg:w-1/3 glass-panel rounded-2xl p-6 md:p-8 self-start w-full relative min-h-[400px]">
-            
+        <div class="lg:w-[38%] glass-panel rounded-3xl p-5 sm:p-7 md:p-8 lg:self-start w-full relative rise rise-2">
+
             <!-- Registration Form -->
             <div id="form-container">
-                <h2 class="text-xl md:text-2xl font-bold mb-6 border-b border-gray-300 dark:border-gray-600 pb-2">সদস্যপদ ফরম</h2>
+                <div class="mb-6">
+                    <h2 class="text-xl md:text-2xl font-bold">সদস্যপদ ফরম</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">নাম, পদবি ও স্বাক্ষর দিয়ে শপথ নিন</p>
+                    <div class="h-1 w-14 rounded-full bg-gradient-to-r from-emerald-400 to-bdred mt-3"></div>
+                </div>
                 <form id="registration-form" class="space-y-5">
                     <div>
-                        <label for="name" class="block text-sm font-semibold mb-1">আপনার পূর্ণ নাম</label>
-                        <input type="text" id="name" required placeholder="নাম লিখুন..." 
-                               class="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-black/50 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-bdgreen transition">
+                        <label for="name" class="block text-sm font-semibold mb-2">আপনার পূর্ণ নাম</label>
+                        <input type="text" id="name" required placeholder="নাম লিখুন..." class="field">
                     </div>
 
                     <div>
-                        <label for="gender" class="block text-sm font-semibold mb-1">পদবি / লিঙ্গ</label>
-                        <select id="gender" required 
-                                class="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-black/50 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-bdgreen transition appearance-none">
-                            <option value="" disabled selected>নির্বাচন করুন...</option>
-                            <option value="চিরকুমার">চিরকুমার (পুরুষ)</option>
-                            <option value="চিরকুমারী">চিরকুমারী (নারী)</option>
-                        </select>
+                        <label for="gender" class="block text-sm font-semibold mb-2">পদবি / লিঙ্গ</label>
+                        <div class="relative">
+                            <select id="gender" required class="field appearance-none pr-10">
+                                <option value="" disabled selected>নির্বাচন করুন...</option>
+                                <option value="চিরকুমার">চিরকুমার (পুরুষ)</option>
+                                <option value="চিরকুমারী">চিরকুমারী (নারী)</option>
+                            </select>
+                            <svg class="w-5 h-5 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold mb-1">স্বাক্ষর (এখানে আঁকুন)</label>
-                        <div class="border-2 border-dashed border-gray-400 dark:border-gray-500 rounded-lg bg-white dark:bg-gray-100 overflow-hidden relative">
-                            <canvas id="signature-pad" width="400" height="150" class="w-full cursor-crosshair"></canvas>
+                        <label class="block text-sm font-semibold mb-2">স্বাক্ষর (এখানে আঁকুন)</label>
+                        <div class="border-2 border-dashed border-emerald-500/40 hover:border-emerald-400 transition rounded-2xl bg-white overflow-hidden relative">
+                            <canvas id="signature-pad" width="400" height="150" class="w-full cursor-crosshair block"></canvas>
                         </div>
                         <div class="flex justify-end mt-2">
-                            <button type="button" id="clear-signature" class="text-xs text-bdred hover:text-red-700 font-semibold underline">মুছে ফেলুন</button>
+                            <button type="button" id="clear-signature" class="text-xs text-bdred hover:text-red-400 font-semibold px-3 py-1.5 rounded-full hover:bg-red-500/10 transition">✕ মুছে ফেলুন</button>
                         </div>
                     </div>
 
                     <div id="status-message" class="text-sm hidden p-2 rounded"></div>
 
-                    <button type="submit" id="submit-btn" 
-                            class="w-full bg-bdgreen hover:bg-green-800 text-white font-bold py-3 px-4 rounded-lg shadow-lg transform transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <button type="submit" id="submit-btn"
+                            class="btn-primary w-full text-white font-bold py-3.5 px-4 rounded-2xl text-lg disabled:opacity-50 disabled:cursor-not-allowed">
                         শপথ গ্রহণ করুন
                     </button>
                 </form>
@@ -188,28 +299,28 @@
 
             <!-- Profile View (Hidden by default) -->
             <div id="profile-container" class="hidden flex-col items-center space-y-6 w-full">
-                <h2 class="text-xl md:text-2xl font-bold mb-2 border-b w-full text-center border-gray-300 dark:border-gray-600 pb-2 text-bdgreen">আপনার প্রোফাইল</h2>
-                
-                <div class="w-24 h-24 rounded-full bg-bdgreen text-white flex items-center justify-center text-4xl font-bold shadow-lg" id="profile-avatar">
+                <h2 class="text-xl md:text-2xl font-bold mb-2 w-full text-center text-bdgreen dark:text-emerald-300 pb-2">আপনার প্রোফাইল</h2>
+
+                <div class="w-24 h-24 rounded-full bg-bdgreen text-white flex items-center justify-center text-4xl font-bold shadow-lg ring-4 ring-white/20" id="profile-avatar">
                     ?
                 </div>
-                
+
                 <div class="text-center w-full">
-                    <h3 id="profile-name" class="text-2xl font-bold text-gray-800 dark:text-gray-100">নাম</h3>
-                    <p id="profile-gender" class="text-lg text-bdred font-semibold mt-1">পদবি</p>
+                    <h3 id="profile-name" class="text-2xl font-bold text-gray-800 dark:text-gray-100 break-words">নাম</h3>
+                    <p id="profile-gender" class="inline-block text-sm text-bdred font-semibold mt-2 px-4 py-1 rounded-full bg-bdred/10 border border-bdred/30">পদবি</p>
                 </div>
-                
-                <div class="w-full bg-white/40 dark:bg-black/40 p-4 rounded-xl text-center border border-gray-200 dark:border-gray-700">
+
+                <div class="w-full bg-white/60 dark:bg-white/5 p-4 rounded-2xl text-center border border-gray-200 dark:border-white/10">
                     <p class="text-sm font-semibold mb-2 text-gray-600 dark:text-gray-400">আপনার সংরক্ষিত স্বাক্ষর</p>
                     <img id="profile-signature" src="" alt="স্বাক্ষর" class="h-16 mx-auto object-contain dark:invert filter mix-blend-multiply dark:mix-blend-normal">
                 </div>
 
-                <div class="flex flex-col w-full gap-3 mt-4">
-                    <button id="view-my-cert-btn" class="w-full bg-bdgreen hover:bg-green-800 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition flex justify-center items-center gap-2">
+                <div class="flex flex-col w-full gap-3 mt-2">
+                    <button id="view-my-cert-btn" class="btn-primary w-full text-white font-bold py-3.5 px-4 rounded-2xl flex justify-center items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                         সনদপত্র ডাউনলোড
                     </button>
-                    <button id="edit-profile-btn" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition flex justify-center items-center gap-2">
+                    <button id="edit-profile-btn" class="w-full bg-white/10 hover:bg-white/20 border border-gray-300 dark:border-white/15 font-bold py-3.5 px-4 rounded-2xl transition active:scale-95 flex justify-center items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                         তথ্য সংশোধন করুন
                     </button>
@@ -218,41 +329,49 @@
         </div>
 
         <!-- Dashboard Section -->
-        <div class="lg:w-2/3 glass-panel rounded-2xl p-6 md:p-8 flex flex-col w-full min-h-[400px] justify-center items-center text-center relative overflow-hidden">
-            <div id="loading-members" class="absolute inset-0 flex justify-center items-center bg-white/50 dark:bg-black/50 z-20">
-                <svg class="animate-spin h-8 w-8 text-bdgreen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <div class="lg:w-[62%] glass-panel rounded-3xl p-6 sm:p-8 md:p-10 flex flex-col w-full min-h-[380px] justify-center items-center text-center relative overflow-hidden rise">
+            <div id="loading-members" class="absolute inset-0 flex justify-center items-center bg-white/40 dark:bg-black/40 backdrop-blur-sm z-20">
+                <svg class="animate-spin h-9 w-9 text-bdgreen dark:text-emerald-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
             </div>
 
-            <h2 class="text-2xl md:text-4xl font-bold mb-4 text-bdgreen dark:text-green-400">আমাদের মূলমন্ত্র</h2>
-            <p class="text-xl md:text-3xl font-semibold italic text-gray-700 dark:text-gray-300 mb-10 border-b border-gray-300 dark:border-gray-600 pb-6 w-full px-4">
-                "প্রেম নয়, বিয়ে নয়, একাকীত্বই পরম জয়!"
+            <span class="text-xs md:text-sm font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-bdgreen dark:text-emerald-300 mb-5">আমাদের মূলমন্ত্র</span>
+
+            <div class="quote-mark -mb-4">“</div>
+            <p class="text-2xl sm:text-3xl md:text-4xl font-bold leading-snug text-gray-800 dark:text-gray-100 mb-8 md:mb-10 px-2 max-w-2xl">
+                "প্রেম নয়, বিয়ে নয়, একাকীত্বই পরম জয়!"
             </p>
-            
-            <div class="glass-panel p-8 rounded-full w-48 h-48 md:w-64 md:h-64 flex flex-col justify-center items-center border-4 border-bdgreen shadow-2xl relative">
-                <span class="text-lg md:text-2xl font-bold text-gray-600 dark:text-gray-400 mb-2">মোট সদস্য</span>
-                <span id="total-members-count" class="text-6xl md:text-8xl font-bold text-bdred drop-shadow-md">০</span>
+
+            <div class="w-full max-w-sm h-px bg-gradient-to-r from-transparent via-gray-400/50 to-transparent mb-8 md:mb-10"></div>
+
+            <div class="count-ring rounded-full w-44 h-44 sm:w-52 sm:h-52 md:w-64 md:h-64 p-[6px] shadow-2xl">
+                <div class="count-ring-inner w-full h-full rounded-full flex flex-col justify-center items-center">
+                    <span class="text-base md:text-xl font-bold text-gray-500 dark:text-gray-400 mb-1">মোট সদস্য</span>
+                    <span id="total-members-count" class="text-6xl md:text-8xl font-bold text-bdred drop-shadow-md leading-none">০</span>
+                </div>
             </div>
         </div>
     </main>
 
-    <footer class="w-full p-4 mt-auto text-center z-10 glass-panel border-x-0 border-b-0">
-        <p class="text-sm md:text-base font-semibold">
-            ⚠️ এটি সম্পূর্ণ একটি মজার প্রজেক্ট, দয়া করে কেউ সিরিয়াসলি নেবেন না। ⚠️
-        </p>
+    <footer class="w-full px-4 pb-4 md:px-8 md:pb-6 mt-auto z-10">
+        <div class="glass-panel max-w-7xl mx-auto rounded-2xl px-4 py-3 text-center">
+            <p class="text-xs sm:text-sm md:text-base font-semibold">
+                ⚠️ এটি সম্পূর্ণ একটি মজার প্রজেক্ট, দয়া করে কেউ সিরিয়াসলি নেবেন না। ⚠️
+            </p>
+        </div>
     </footer>
 
-    <div id="certificate-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+    <div id="certificate-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
         <div class="relative w-full h-full flex flex-col items-center justify-center">
-            
+
             <!-- Wrapper for dynamic visual scaling (keeps the inner box strictly 800x565 for perfect exports) -->
             <div id="cert-wrapper" class="flex items-center justify-center relative w-full" style="height: 65vh; max-height: 600px;">
-                
+
                 <!-- Certificate Container (Fixed Dimensions) -->
                 <div class="certificate-bg w-[800px] h-[565px] rounded shadow-2xl relative flex flex-col p-12 text-gray-900 bg-white origin-center transition-transform duration-300 scale-95 shrink-0" id="certificate-content">
-                    
+
                     <!-- Watermark Logo -->
                     <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-0 opacity-[0.08]">
                         <svg viewBox="0 0 200 200" width="400" height="400" xmlns="http://www.w3.org/2000/svg">
@@ -273,7 +392,7 @@
                     <!-- Body Text -->
                     <div class="flex-grow flex items-center justify-center z-10 px-12 mb-28">
                         <p class="text-[#115e59] text-[26px] leading-[2.1] text-justify font-medium">
-                            আমি, <span id="cert-name" class="font-bold text-[32px] text-black px-2">নাম</span> সজ্ঞানে ও সম্পূর্ণ স্বেচ্ছায় অঙ্গীকার করিতেছি যে, মায়ার সকল প্রকার মরীচিকা ও দাম্পত্যের বিড়ম্বনা হইতে নিরাপদ দূরত্ব বজায় রাখবো। এবং চিরকুমার-কুমারী সংগঠনের সব নিয়ম মেনে চলবো।
+                            আমি, <span id="cert-name" class="font-bold text-[32px] text-black px-2">নাম</span> সজ্ঞানে ও সম্পূর্ণ স্বেচ্ছায় অঙ্গীকার করিতেছি যে, মায়ার সকল প্রকার মরীচিকা ও দাম্পত্যের বিড়ম্বনা হইতে নিরাপদ দূরত্ব বজায় রাখবো। এবং চিরকুমার-কুমারী সংগঠনের সব নিয়ম মেনে চলবো।
                         </p>
                     </div>
 
@@ -291,12 +410,12 @@
             </div>
 
             <!-- Modal Controls -->
-            <div class="mt-8 flex gap-4 print-hidden z-10">
-                <button id="download-cert-btn" class="bg-bdgreen hover:bg-green-700 text-white px-6 py-3 rounded-full shadow-lg font-bold transition flex items-center gap-2 text-lg">
+            <div class="mt-6 md:mt-8 flex flex-wrap justify-center gap-3 md:gap-4 print-hidden z-10">
+                <button id="download-cert-btn" class="btn-primary text-white px-6 py-3 rounded-full font-bold flex items-center gap-2 text-base md:text-lg">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                     ডাউনলোড করুন
                 </button>
-                <button id="close-modal" class="bg-gray-800 hover:bg-gray-900 text-white px-6 py-3 rounded-full shadow-lg font-bold transition text-lg">বন্ধ করুন</button>
+                <button id="close-modal" class="bg-white/10 hover:bg-white/20 border border-white/20 text-white px-6 py-3 rounded-full font-bold transition active:scale-95 text-base md:text-lg">বন্ধ করুন</button>
             </div>
         </div>
     </div>
@@ -304,7 +423,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, updateDoc, doc, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, updateDoc, doc, onSnapshot, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==========================================
         // 1. Theme Setup
@@ -436,9 +555,26 @@
 
         if (!isMockMode) {
             app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
+            // SPEED: persistent local cache => repeat visits show data instantly from IndexedDB
+            // while Firestore syncs in the background. Falls back to the default if unsupported.
+            try {
+                db = initializeFirestore(app, {
+                    localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+                });
+            } catch (e) {
+                db = getFirestore(app);
+            }
             auth = getAuth(app);
         }
+
+        // SPEED: show last known member count immediately (before network responds)
+        try {
+            const cachedCount = localStorage.getItem('ck_member_count');
+            if (cachedCount !== null) {
+                document.getElementById('total-members-count').innerText = cachedCount;
+                document.getElementById('loading-members').classList.add('hidden');
+            }
+        } catch (e) {}
 
         let currentUser = null;
         let currentProfileId = null; // Store document ID for current user's profile
@@ -473,7 +609,7 @@
         
         function showStatus(msg, type) {
             statusEl.textContent = msg;
-            statusEl.className = `text-sm p-3 rounded font-semibold mb-4 block ${type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`;
+            statusEl.className = `text-sm p-3 rounded-xl font-semibold mb-4 block ${type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`;
             statusEl.classList.remove('hidden');
             setTimeout(() => { statusEl.classList.add('hidden'); }, 4000);
         }
@@ -520,12 +656,12 @@
             const submitBtn = document.getElementById('submit-btn');
 
             if (!name || !gender) {
-                showStatus("দয়া করে নাম ও পদবি নির্বাচন করুন।", "error");
+                showStatus("দয়া করে নাম ও পদবি নির্বাচন করুন।", "error");
                 return;
             }
 
             if (isEmpty) {
-                showStatus("দয়া করে স্বাক্ষর প্রদান করুন।", "error");
+                showStatus("দয়া করে স্বাক্ষর প্রদান করুন।", "error");
                 return;
             }
 
@@ -574,7 +710,7 @@
                     }
                 }
 
-                showStatus("অভিনন্দন! তথ্য সফলভাবে সংরক্ষিত হয়েছে।", "success");
+                showStatus("অভিনন্দন! তথ্য সফলভাবে সংরক্ষিত হয়েছে।", "success");
             } catch (error) {
                 console.error("Save error:", error);
                 if (error.code === 'permission-denied') {
@@ -623,6 +759,7 @@
 
         function updateDashboard(members) {
             document.getElementById('total-members-count').innerText = convertToBanglaNumber(members.length);
+            try { localStorage.setItem('ck_member_count', convertToBanglaNumber(members.length)); } catch (e) {}
             
             if(currentUser) {
                 myProfileData = members.find(m => m.uid === currentUser.uid);
@@ -636,7 +773,7 @@
                     
                     const isMale = myProfileData.gender === 'চিরকুমার';
                     const avatarEl = document.getElementById('profile-avatar');
-                    avatarEl.className = `w-24 h-24 rounded-full flex items-center justify-center text-4xl font-bold shadow-lg ${isMale ? 'bg-blue-600 text-white' : 'bg-pink-600 text-white'}`;
+                    avatarEl.className = `w-24 h-24 rounded-full flex items-center justify-center text-4xl font-bold shadow-lg ring-4 ring-white/20 ${isMale ? 'bg-blue-600 text-white' : 'bg-pink-600 text-white'}`;
                     
                     if(myProfileData.signature) {
                         document.getElementById('profile-signature').src = myProfileData.signature;
@@ -742,7 +879,7 @@
                 link.click();
             } catch (error) {
                 console.error("Certificate generation failed:", error);
-                alert("ডাউনলোড করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।");
+                alert("ডাউনলোড করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।");
             } finally {
                 // Restore visual scaling for the user
                 certElement.style.transform = currentTransform;
