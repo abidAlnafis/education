@@ -1,0 +1,3067 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HisabKhatā (হিসাবখাতা) — Student Personal Finance Manager</title>
+
+    <!-- Google Fonts: Inter & Noto Sans Bengali -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans Bengali', 'sans-serif'],
+                        bengali: ['Noto Sans Bengali', 'Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        bdgreen: {
+                            DEFAULT: '#006A4E',
+                            light: '#10B981',
+                            dark: '#004D38',
+                            soft: '#ECFDF5',
+                        },
+                        bdred: {
+                            DEFAULT: '#F42A41',
+                            light: '#EF4444',
+                            dark: '#C81E32',
+                            soft: '#FEF2F2',
+                        },
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 30px -10px rgba(0, 106, 78, 0.08)',
+                        'glow-green': '0 8px 24px -4px rgba(16, 185, 129, 0.35)',
+                        'glow-red': '0 8px 24px -4px rgba(244, 42, 65, 0.35)',
+                    }
+                },
+            },
+        };
+    </script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <style>
+        /* Custom Scrollbar & Smooth Transitions */
+        * {
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans Bengali', sans-serif;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.4);
+            border-radius: 9999px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(107, 114, 128, 0.6);
+        }
+
+        /* Glassmorphism & Card Micro-interactions */
+        .glass-card {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .hover-lift {
+            transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-3px);
+        }
+
+        /* Sidebar width helpers (Tailwind has no w-68 by default) */
+        .w-68 {
+            width: 17rem;
+        }
+
+        /* Animated Gradient Hero Banner */
+        .bd-gradient-banner {
+            background: linear-gradient(135deg, #006A4E 0%, #059669 55%, #0D9488 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bd-gradient-banner::after {
+            content: '';
+            position: absolute;
+            right: -30px;
+            top: -30px;
+            width: 170px;
+            height: 170px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(244, 42, 65, 0.85) 0%, rgba(244, 42, 65, 0.25) 70%, transparent 100%);
+            pointer-events: none;
+        }
+
+        /* Print Styling for Reports */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            body {
+                background: #fff !important;
+                color: #000 !important;
+            }
+
+            #main-scroll-area {
+                overflow: visible !important;
+                height: auto !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-20 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+    </div>
+
+    <!-- Main App Wrapper -->
+    <div class="flex flex-1 min-h-screen">
+
+        <!-- Desktop Sidebar (Collapsible) -->
+        <aside id="desktop-sidebar"
+            class="no-print hidden lg:flex flex-col w-68 bg-white dark:bg-slate-900 border-r border-slate-200/80 dark:border-slate-800 transition-all duration-300 shrink-0 sticky top-0 h-screen z-30">
+            <!-- Brand Header -->
+            <div class="p-5 flex items-center justify-between border-b border-slate-100 dark:border-slate-800">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#006A4E] to-emerald-500 flex items-center justify-center text-white shadow-glow-green relative">
+                        <span class="font-extrabold text-xl">৳</span>
+                        <span
+                            class="w-3 h-3 rounded-full bg-[#F42A41] border-2 border-white dark:border-slate-900 absolute -top-1 -right-1"></span>
+                    </div>
+                    <div class="sidebar-label">
+                        <h1 class="font-extrabold text-lg tracking-tight leading-none text-slate-900 dark:text-white">
+                            HisabKhatā
+                        </h1>
+                        <p class="text-xs font-semibold text-[#006A4E] dark:text-emerald-400 mt-0.5">হিসাবখাতা • Student
+                        </p>
+                    </div>
+                </div>
+                <button onclick="toggleSidebar()"
+                    class="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+                    title="Collapse Sidebar">
+                    <i class="fa-solid fa-bars-staggered"></i>
+                </button>
+            </div>
+
+            <!-- Student Mini Card -->
+            <div class="p-4 sidebar-label">
+                <div
+                    class="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-rose-500/10 border border-emerald-500/20 flex items-center gap-3">
+                    <div id="sidebar-avatar"
+                        class="w-10 h-10 rounded-full bg-gradient-to-tr from-[#006A4E] to-teal-400 text-white font-bold flex items-center justify-center text-sm shrink-0">
+                        AR
+                    </div>
+                    <div class="min-w-0">
+                        <p id="sidebar-user-name" class="text-sm font-bold truncate">Student User</p>
+                        <p id="sidebar-user-tag" class="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                            Personal Finance • ৳ BDT</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav id="desktop-nav" class="flex-1 overflow-y-auto px-3 py-2 space-y-1">
+                <!-- Populated dynamically by JS -->
+            </nav>
+
+            <!-- Sidebar Footer Local Storage Status Pill -->
+            <div class="p-4 border-t border-slate-100 dark:border-slate-800 sidebar-label">
+                <div
+                    class="p-3 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 text-xs">
+                    <div class="flex items-center justify-between font-bold text-[#006A4E] dark:text-emerald-300 mb-1">
+                        <span><i class="fa-solid fa-database mr-1"></i> <span data-i18n="storageLabel">Local
+                                Storage</span></span>
+                        <span class="px-1.5 py-0.5 rounded-md bg-emerald-200/70 dark:bg-emerald-800 text-[10px]">BDT
+                            ৳</span>
+                    </div>
+                    <p class="text-[11px] text-emerald-800/80 dark:text-emerald-400/80 mb-2" data-i18n="storageHint">
+                        Saved privately in this browser.</p>
+                    <div class="flex gap-1.5">
+                        <button onclick="downloadJSONBackup()"
+                            class="flex-1 py-1.5 px-2 rounded-lg bg-[#006A4E] text-white font-semibold hover:bg-emerald-700 text-[11px]"
+                            data-i18n="backupShortBtn">Backup</button>
+                        <button onclick="openConfirmModal('resetDemo')"
+                            class="flex-1 py-1.5 px-2 rounded-lg bg-white dark:bg-slate-800 text-rose-600 dark:text-rose-400 font-semibold border border-rose-200 dark:border-rose-800 hover:bg-rose-50 text-[11px]"
+                            data-i18n="resetBtn">Reset</button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Column -->
+        <div class="flex-1 flex flex-col min-w-0 pb-20 lg:pb-6">
+
+            <!-- Sticky Top Bar -->
+            <header
+                class="no-print sticky top-0 z-20 bg-white/85 dark:bg-slate-900/85 glass-card border-b border-slate-200/80 dark:border-slate-800 px-4 sm:px-6 py-3">
+                <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+                    <!-- Mobile Logo + Page Title -->
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div
+                            class="lg:hidden w-9 h-9 rounded-xl bg-gradient-to-br from-[#006A4E] to-emerald-500 flex items-center justify-center text-white font-extrabold shadow-sm relative shrink-0">
+                            ৳
+                            <span
+                                class="w-2.5 h-2.5 rounded-full bg-[#F42A41] border border-white absolute -top-0.5 -right-0.5"></span>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2">
+                                <h2 id="page-title"
+                                    class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white truncate">
+                                    Dashboard</h2>
+                                <span
+                                    class="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-[#006A4E] dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                    <span data-i18n="freshBadge">Fresh Local Storage</span>
+                                </span>
+                            </div>
+                            <p id="header-date-display"
+                                class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block"></p>
+                        </div>
+                    </div>
+
+                    <!-- Top Bar Controls -->
+                    <div class="flex items-center gap-2 sm:gap-2.5 shrink-0">
+                        <!-- Quick Add Expense Button -->
+                        <button onclick="openTransactionModal('expense')"
+                            class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#F42A41] hover:bg-rose-600 text-white text-xs font-bold shadow-glow-red active:scale-95 transition">
+                            <i class="fa-solid fa-minus-circle"></i>
+                            <span data-i18n="addExpenseShort">+ Expense</span>
+                        </button>
+
+                        <!-- Quick Add Income Button -->
+                        <button onclick="openTransactionModal('income')"
+                            class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#006A4E] hover:bg-emerald-700 text-white text-xs font-bold shadow-glow-green active:scale-95 transition">
+                            <i class="fa-solid fa-plus-circle"></i>
+                            <span data-i18n="addIncomeShort">+ Income</span>
+                        </button>
+
+                        <!-- Bangla Digits Toggle -->
+                        <button id="digit-toggle-btn" onclick="toggleBanglaDigits()"
+                            class="px-2.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100/80 dark:bg-slate-800 hover:bg-slate-200/70 dark:hover:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200"
+                            title="Switch English / Bangla Digits">
+                            ১২৩ / 123
+                        </button>
+
+                        <!-- Language Instant Switch (EN / বাংলা) -->
+                        <button id="lang-toggle-btn" onclick="toggleLanguage()"
+                            class="px-3 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-extrabold shadow-sm flex items-center gap-1.5 active:scale-95 transition">
+                            <i class="fa-solid fa-language text-sm"></i>
+                            <span id="lang-toggle-label">বাংলা</span>
+                        </button>
+
+                        <!-- Notifications Bell -->
+                        <button onclick="navigateTo('notifications')"
+                            class="relative p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300">
+                            <i class="fa-solid fa-bell"></i>
+                            <span id="notif-badge-count"
+                                class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#F42A41] text-white text-[10px] font-bold flex items-center justify-center">3</span>
+                        </button>
+
+                        <!-- Theme Toggle -->
+                        <button onclick="toggleTheme()"
+                            class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-amber-400"
+                            title="Toggle Dark/Light Theme">
+                            <i id="theme-icon" class="fa-solid fa-moon"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Dynamic View Container -->
+            <main id="main-scroll-area" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-5">
+                <!-- Active Section View Injected Here -->
+                <div id="view-container" class="space-y-6"></div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav
+        class="no-print lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 dark:bg-slate-900/95 glass-card border-t border-slate-200 dark:border-slate-800 px-2 py-1.5 flex items-center justify-around">
+        <button onclick="navigateTo('dashboard')" data-mobile-nav="dashboard"
+            class="mobile-nav-btn flex flex-col items-center py-1 px-2 rounded-xl text-[#006A4E] dark:text-emerald-400">
+            <i class="fa-solid fa-house text-base"></i>
+            <span class="text-[10px] font-bold mt-0.5" data-i18n="navDashboard">Home</span>
+        </button>
+        <button onclick="navigateTo('transactions')" data-mobile-nav="transactions"
+            class="mobile-nav-btn flex flex-col items-center py-1 px-2 rounded-xl text-slate-500 dark:text-slate-400">
+            <i class="fa-solid fa-receipt text-base"></i>
+            <span class="text-[10px] font-bold mt-0.5" data-i18n="navTransactions">History</span>
+        </button>
+        <!-- Center Floating Add Button -->
+        <button onclick="openTransactionModal('expense')"
+            class="w-12 h-12 -mt-5 rounded-2xl bg-gradient-to-tr from-[#006A4E] via-emerald-500 to-[#F42A41] text-white shadow-lg flex items-center justify-center text-xl active:scale-90 transition">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+        <button onclick="navigateTo('budgets')" data-mobile-nav="budgets"
+            class="mobile-nav-btn flex flex-col items-center py-1 px-2 rounded-xl text-slate-500 dark:text-slate-400">
+            <i class="fa-solid fa-chart-pie text-base"></i>
+            <span class="text-[10px] font-bold mt-0.5" data-i18n="navBudgets">Budgets</span>
+        </button>
+        <button onclick="toggleMobileDrawer()"
+            class="mobile-nav-btn flex flex-col items-center py-1 px-2 rounded-xl text-slate-500 dark:text-slate-400">
+            <i class="fa-solid fa-border-all text-base"></i>
+            <span class="text-[10px] font-bold mt-0.5" data-i18n="navMore">More</span>
+        </button>
+    </nav>
+
+    <!-- Mobile "More" Drawer -->
+    <div id="mobile-drawer" class="fixed inset-0 z-50 hidden">
+        <div onclick="toggleMobileDrawer()" class="absolute inset-0 bg-slate-950/60 backdrop-blur-xs"></div>
+        <div
+            class="absolute bottom-0 inset-x-0 bg-white dark:bg-slate-900 rounded-t-3xl p-5 max-h-[82vh] overflow-y-auto border-t border-slate-200 dark:border-slate-800 shadow-2xl">
+            <div class="w-12 h-1.5 rounded-full bg-slate-300 dark:bg-slate-700 mx-auto mb-4"></div>
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-extrabold text-base" data-i18n="allModules">All HisabKhatā Modules</h3>
+                <button onclick="toggleMobileDrawer()"
+                    class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="mobile-drawer-grid" class="grid grid-cols-3 gap-2.5 mb-4">
+                <!-- Populated by JS -->
+            </div>
+            <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex gap-2">
+                <button onclick="toggleMobileDrawer(); downloadJSONBackup()"
+                    class="flex-1 py-2.5 rounded-xl bg-[#006A4E] text-white text-xs font-bold"
+                    data-i18n="backupJSON">Download JSON Backup</button>
+                <button onclick="toggleMobileDrawer(); openConfirmModal('resetDemo')"
+                    class="flex-1 py-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 text-xs font-bold border border-rose-200 dark:border-rose-800"
+                    data-i18n="clearDemoBtn">Reset All Data</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL 1: ADD / EDIT TRANSACTION (INCOME & EXPENSE)                    -->
+    <!-- ===================================================================== -->
+    <div id="transaction-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+        <div onclick="closeTransactionModal()" class="absolute inset-0 bg-slate-950/60 backdrop-blur-xs"></div>
+        <div
+            class="relative bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[92vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-4">
+                <h3 id="tx-modal-title" class="text-lg font-extrabold">Add Transaction</h3>
+                <button onclick="closeTransactionModal()"
+                    class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-800">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Type Switcher Tabs -->
+            <div class="grid grid-cols-2 gap-2 p-1 rounded-2xl bg-slate-100 dark:bg-slate-800 mb-5">
+                <button type="button" id="tx-tab-expense" onclick="setTxModalType('expense')"
+                    class="py-2.5 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-2 bg-[#F42A41] text-white shadow-sm">
+                    <i class="fa-solid fa-arrow-trend-down"></i>
+                    <span data-i18n="expenseLabel">Expense (খরচ)</span>
+                </button>
+                <button type="button" id="tx-tab-income" onclick="setTxModalType('income')"
+                    class="py-2.5 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-2 text-slate-600 dark:text-slate-300">
+                    <i class="fa-solid fa-arrow-trend-up"></i>
+                    <span data-i18n="incomeLabel">Income (আয়)</span>
+                </button>
+            </div>
+
+            <form id="tx-form" onsubmit="handleTransactionSubmit(event)" class="space-y-4">
+                <input type="hidden" id="tx-edit-id" value="" />
+                <input type="hidden" id="tx-type" value="expense" />
+
+                <!-- Amount Input -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1"
+                        data-i18n="amountBDT">Amount (৳ BDT) *</label>
+                    <div class="relative">
+                        <span
+                            class="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-extrabold text-[#006A4E] dark:text-emerald-400">৳</span>
+                        <input type="number" id="tx-amount" step="0.01" min="1" required placeholder="0.00"
+                            class="w-full pl-10 pr-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-lg font-extrabold focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                    </div>
+                </div>
+
+                <!-- Title / Source -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1"
+                        data-i18n="titleSource">Title / Source *</label>
+                    <input type="text" id="tx-title" required placeholder="e.g., Canteen Lunch / HSC Tuition"
+                        class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                </div>
+
+                <!-- Category & Payment Method -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1"
+                            data-i18n="categoryLabel">Category *</label>
+                        <select id="tx-category" required
+                            class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1"
+                            data-i18n="paymentMethodLabel">Payment Method *</label>
+                        <select id="tx-method" required
+                            class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"></select>
+                    </div>
+                </div>
+
+                <!-- Date -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1"
+                        data-i18n="dateLabel">Date *</label>
+                    <input type="date" id="tx-date" required
+                        class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                </div>
+
+                <!-- Notes -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1"
+                        data-i18n="notesOptional">Notes (Optional)</label>
+                    <input type="text" id="tx-notes" placeholder="e.g., Paid via bKash merchant, shared with friends..."
+                        class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                </div>
+
+                <div class="pt-2 flex gap-2.5">
+                    <button type="button" onclick="closeTransactionModal()"
+                        class="flex-1 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 font-bold text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-200"
+                        data-i18n="cancelBtn">Cancel</button>
+                    <button type="submit" id="tx-submit-btn"
+                        class="flex-1 py-3 rounded-2xl bg-[#006A4E] hover:bg-emerald-700 text-white font-extrabold text-xs shadow-glow-green"
+                        data-i18n="saveTxBtn">Save Entry</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL 2: CONFIRMATION DIALOG (NO alert/confirm USED)                  -->
+    <!-- ===================================================================== -->
+    <div id="confirm-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+        <div onclick="closeConfirmModal()" class="absolute inset-0 bg-slate-950/60 backdrop-blur-xs"></div>
+        <div
+            class="relative bg-white dark:bg-slate-900 rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 text-center">
+            <div
+                class="w-14 h-14 rounded-2xl bg-rose-100 dark:bg-rose-950/60 text-[#F42A41] flex items-center justify-center text-2xl mx-auto mb-4">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 id="confirm-title" class="text-lg font-extrabold mb-2">Are you sure?</h3>
+            <p id="confirm-message" class="text-xs text-slate-500 dark:text-slate-400 mb-6">This action cannot be
+                undone.</p>
+            <div class="flex gap-2.5">
+                <button onclick="closeConfirmModal()"
+                    class="flex-1 py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 font-bold text-xs"
+                    data-i18n="cancelBtn">Cancel</button>
+                <button id="confirm-action-btn"
+                    class="flex-1 py-2.5 rounded-2xl bg-[#F42A41] hover:bg-rose-600 text-white font-extrabold text-xs"
+                    data-i18n="confirmBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL 3: TRANSACTION DETAILS VIEWER                                   -->
+    <!-- ===================================================================== -->
+    <div id="detail-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+        <div onclick="closeDetailModal()" class="absolute inset-0 bg-slate-950/60 backdrop-blur-xs"></div>
+        <div
+            class="relative bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-xs font-extrabold uppercase tracking-wider text-slate-400"
+                    data-i18n="txReceiptTitle">Transaction Details</span>
+                <button onclick="closeDetailModal()"
+                    class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="detail-modal-body" class="space-y-4"></div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- APPLICATION JAVASCRIPT                                                -->
+    <!-- ===================================================================== -->
+    <script>
+        // =========================================================================
+        // 1. CONSTANTS, CATEGORIES, PAYMENT METHODS & BILINGUAL DICTIONARY
+        // =========================================================================
+        const DEFAULT_EXPENSE_CATEGORIES = [
+            { id: 'food', en: 'Food', bn: 'খাবার', icon: 'fa-utensils', color: '#F97316', bg: 'bg-orange-100 text-orange-700 dark:bg-orange-950/60 dark:text-orange-300' },
+            { id: 'grocery', en: 'Grocery', bn: 'বাজার', icon: 'fa-basket-shopping', color: '#84CC16', bg: 'bg-lime-100 text-lime-700 dark:bg-lime-950/60 dark:text-lime-300' },
+            { id: 'transport', en: 'Transport', bn: 'যাতায়াত', icon: 'fa-bus', color: '#06B6D4', bg: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300' },
+            { id: 'rent', en: 'House / Mess Rent', bn: 'বাসা / মেস ভাড়া', icon: 'fa-house-chimney', color: '#8B5CF6', bg: 'bg-violet-100 text-violet-700 dark:bg-violet-950/60 dark:text-violet-300' },
+            { id: 'electricity', en: 'Electricity', bn: 'বিদ্যুৎ বিল', icon: 'fa-bolt', color: '#EAB308', bg: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950/60 dark:text-yellow-300' },
+            { id: 'water', en: 'Water Bill', bn: 'পানির বিল', icon: 'fa-droplet', color: '#3B82F6', bg: 'bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300' },
+            { id: 'internet', en: 'Internet / Wi-Fi', bn: 'ইন্টারনেট', icon: 'fa-wifi', color: '#6366F1', bg: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300' },
+            { id: 'recharge', en: 'Mobile Recharge', bn: 'মোবাইল রিচার্জ', icon: 'fa-mobile-screen-button', color: '#EC4899', bg: 'bg-pink-100 text-pink-700 dark:bg-pink-950/60 dark:text-pink-300' },
+            { id: 'education', en: 'Education', bn: 'শিক্ষা', icon: 'fa-graduation-cap', color: '#10B981', bg: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300' },
+            { id: 'shopping', en: 'Shopping', bn: 'কেনাকাটা', icon: 'fa-bag-shopping', color: '#F43F5E', bg: 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300' },
+            { id: 'medical', en: 'Medical', bn: 'চিকিৎসা', icon: 'fa-kit-medical', color: '#EF4444', bg: 'bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-300' },
+            { id: 'entertainment', en: 'Entertainment', bn: 'বিনোদন', icon: 'fa-film', color: '#A855F7', bg: 'bg-purple-100 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300' },
+            { id: 'family', en: 'Family', bn: 'পরিবার', icon: 'fa-people-roof', color: '#14B8A6', bg: 'bg-teal-100 text-teal-700 dark:bg-teal-950/60 dark:text-teal-300' },
+            { id: 'travel', en: 'Travel', bn: 'ভ্রমণ', icon: 'fa-plane-departure', color: '#0EA5E9', bg: 'bg-sky-100 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300' },
+            { id: 'others', en: 'Others', bn: 'অন্যান্য', icon: 'fa-shapes', color: '#64748B', bg: 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300' },
+        ];
+
+        const DEFAULT_INCOME_CATEGORIES = [
+            { id: 'tuition', en: 'Tuition', bn: 'টিউশনি', icon: 'fa-chalkboard-user', color: '#10B981', bg: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300' },
+            { id: 'allowance', en: 'Pocket Money', bn: 'হাতখরচ / বাসা থেকে', icon: 'fa-hand-holding-dollar', color: '#0D9488', bg: 'bg-teal-100 text-teal-700 dark:bg-teal-950/60 dark:text-teal-300' },
+            { id: 'freelance', en: 'Freelancing', bn: 'ফ্রিল্যান্সিং', icon: 'fa-laptop-code', color: '#6366F1', bg: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300' },
+            { id: 'parttime', en: 'Part-time Job', bn: 'পার্ট-টাইম চাকরি', icon: 'fa-briefcase', color: '#3B82F6', bg: 'bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300' },
+            { id: 'salary', en: 'Salary', bn: 'বেতন', icon: 'fa-money-check-dollar', color: '#059669', bg: 'bg-green-100 text-green-700 dark:bg-green-950/60 dark:text-green-300' },
+            { id: 'gift', en: 'Gift / Eidi', bn: 'উপহার / সালামি', icon: 'fa-gift', color: '#EC4899', bg: 'bg-pink-100 text-pink-700 dark:bg-pink-950/60 dark:text-pink-300' },
+            { id: 'bonus', en: 'Scholarship / Bonus', bn: 'বৃত্তি / বোনাস', icon: 'fa-award', color: '#F59E0B', bg: 'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300' },
+            { id: 'other_inc', en: 'Other Income', bn: 'অন্যান্য আয়', icon: 'fa-coins', color: '#64748B', bg: 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300' },
+        ];
+
+        const PAYMENT_METHODS = [
+            { id: 'cash', en: 'Cash', bn: 'নগদ', badge: 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950/70 dark:text-emerald-300 dark:border-emerald-800', icon: 'fa-money-bill-wave' },
+            { id: 'bkash', en: 'bKash', bn: 'বিকাশ', badge: 'bg-pink-100 text-pink-700 border-pink-300 dark:bg-pink-950/70 dark:text-pink-300 dark:border-pink-800', icon: 'fa-paper-plane' },
+            { id: 'nagad', en: 'Nagad', bn: 'নগদ (Nagad)', badge: 'bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-950/70 dark:text-orange-300 dark:border-orange-800', icon: 'fa-fire' },
+            { id: 'rocket', en: 'Rocket', bn: 'রকেট', badge: 'bg-purple-100 text-purple-700 border-purple-300 dark:bg-purple-950/70 dark:text-purple-300 dark:border-purple-800', icon: 'fa-rocket' },
+            { id: 'upay', en: 'Upay', bn: 'উপায়', badge: 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950/70 dark:text-amber-300 dark:border-amber-800', icon: 'fa-wallet' },
+            { id: 'bank', en: 'Bank Transfer', bn: 'ব্যাংক ট্রান্সফার', badge: 'bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-950/70 dark:text-blue-300 dark:border-blue-800', icon: 'fa-building-columns' },
+            { id: 'debit_card', en: 'Debit Card', bn: 'ডেবিট কার্ড', badge: 'bg-indigo-100 text-indigo-700 border-indigo-300 dark:bg-indigo-950/70 dark:text-indigo-300 dark:border-indigo-800', icon: 'fa-credit-card' },
+            { id: 'credit_card', en: 'Credit Card', bn: 'ক্রেডিট কার্ড', badge: 'bg-violet-100 text-violet-700 border-violet-300 dark:bg-violet-950/70 dark:text-violet-300 dark:border-violet-800', icon: 'fa-credit-card' },
+            { id: 'other_pay', en: 'Other', bn: 'অন্যান্য', badge: 'bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700', icon: 'fa-circle-dot' },
+        ];
+
+        const NAV_ITEMS = [
+            { id: 'dashboard', en: 'Dashboard', bn: 'ড্যাশবোর্ড', icon: 'fa-chart-line' },
+            { id: 'transactions', en: 'Transactions', bn: 'লেনদেন', icon: 'fa-receipt' },
+            { id: 'budgets', en: 'Budgets', bn: 'বাজেট', icon: 'fa-chart-pie' },
+            { id: 'savings', en: 'Savings Goals', bn: 'সঞ্চয়', icon: 'fa-piggy-bank' },
+            { id: 'debts', en: 'Debts (Dhar-Dena)', bn: 'ধার ও দেনা', icon: 'fa-handshake' },
+            { id: 'recurring', en: 'Recurring', bn: 'নিয়মিত লেনদেন', icon: 'fa-rotate' },
+            { id: 'calendar', en: 'Calendar', bn: 'ক্যালেন্ডার', icon: 'fa-calendar-days' },
+            { id: 'reports', en: 'Reports & Export', bn: 'রিপোর্ট', icon: 'fa-file-invoice-dollar' },
+            { id: 'notifications', en: 'Notifications', bn: 'নোটিফিকেশন', icon: 'fa-bell' },
+            { id: 'settings', en: 'Settings', bn: 'সেটিংস', icon: 'fa-gear' },
+        ];
+
+        const I18N = {
+            en: {
+                storageLabel: 'Local Storage',
+                storageHint: 'Saved privately in this browser.',
+                freshBadge: 'Fresh Local Storage',
+                backupShortBtn: 'Backup',
+                resetBtn: 'Reset',
+                clearDemoBtn: 'Reset All Data',
+                addExpenseShort: '+ Expense',
+                addIncomeShort: '+ Income',
+                navDashboard: 'Home',
+                navTransactions: 'History',
+                navBudgets: 'Budgets',
+                navMore: 'More',
+                allModules: 'All HisabKhatā Modules',
+                expenseLabel: 'Expense (খরচ)',
+                incomeLabel: 'Income (আয়)',
+                amountBDT: 'Amount (৳ BDT) *',
+                titleSource: 'Title / Source *',
+                categoryLabel: 'Category *',
+                paymentMethodLabel: 'Payment Method *',
+                dateLabel: 'Date *',
+                notesOptional: 'Notes (Optional)',
+                cancelBtn: 'Cancel',
+                saveTxBtn: 'Save Entry',
+                confirmBtn: 'Confirm',
+                txReceiptTitle: 'Transaction Details',
+                totalBalance: 'Total Balance',
+                totalIncome: 'Total Income',
+                totalExpenses: 'Total Expenses',
+                totalSavings: 'Total Savings',
+                todaysSpending: "Today's Spending",
+                monthlyBudget: 'Monthly Budget Status',
+                quickAddIncome: 'Add First Income',
+                quickAddExpense: 'Add First Expense',
+                incomeVsExpense: 'Income vs Expense (Last 6 Months)',
+                expenseBreakdown: 'Expense Category Breakdown',
+                recentTransactions: 'Recent Transactions',
+                viewAll: 'View All',
+                smartStudentTips: 'Quick Start & Alerts',
+                searchPlaceholder: 'Search by title, amount, or notes...',
+                allTypes: 'All Types',
+                allCategories: 'All Categories',
+                allMethods: 'All Payment Methods',
+                sortNewest: 'Newest First',
+                sortOldest: 'Oldest First',
+                sortHighest: 'Highest Amount',
+                sortLowest: 'Lowest Amount',
+                resetFilters: 'Reset Filters',
+                noTransactionsFound: 'No transactions yet. Add your first income or expense!',
+                overallMonthlyBudget: 'Overall Monthly Budget',
+                categoryBudgets: 'Category-wise Budgets',
+                addBudgetGoal: 'Set / Update Budget',
+                spent: 'Spent',
+                remaining: 'Remaining',
+                exceeded: 'Exceeded!',
+                warning80: '80%+ Warning',
+                onTrack: 'On Track',
+                createSavingsGoal: 'New Savings Goal',
+                addSavingsBtn: '+ Save',
+                withdrawBtn: '- Withdraw',
+                target: 'Target',
+                saved: 'Saved',
+                borrowed: 'Money Borrowed (ধার নেওয়া)',
+                lent: 'Money Lent (ধার দেওয়া)',
+                addDebtRecord: 'Add Debt / Loan Record',
+                recordRepayment: 'Record Repayment',
+                settled: 'Paid / Settled',
+                unpaid: 'Active / Due',
+                addRecurring: 'Add Recurring Schedule',
+                postNow: 'Post Now',
+                exportCSV: 'Export CSV',
+                printPDF: 'Print / Save PDF',
+                backupJSON: 'Download JSON Backup',
+                restoreJSON: 'Restore JSON Backup',
+                profileSettings: 'Student Profile & Preferences',
+                customCategories: 'Custom Expense Categories',
+                dangerZone: 'Backup, Restore & Data Reset',
+                welcomeBack: 'Assalamu Alaikum,',
+                studentBannerSub: 'Your fresh digital HisabKhatā is ready! Start adding your tuition, pocket money, daily expenses & savings.',
+            },
+            bn: {
+                storageLabel: 'লোকাল স্টোরেজ',
+                storageHint: 'আপনার ব্রাউজারে নিরাপদে সংরক্ষিত।',
+                freshBadge: 'ফ্রেশ লোকাল স্টোরেজ',
+                backupShortBtn: 'ব্যাকআপ',
+                resetBtn: 'রিসেট',
+                clearDemoBtn: 'সব ডেটা রিসেট করুন',
+                addExpenseShort: '+ খরচ যোগ',
+                addIncomeShort: '+ আয় যোগ',
+                navDashboard: 'হোম',
+                navTransactions: 'লেনদেন',
+                navBudgets: 'বাজেট',
+                navMore: 'আরও',
+                allModules: 'হিসাবখাতার সকল মডিউল',
+                expenseLabel: 'খরচ (Expense)',
+                incomeLabel: 'আয় (Income)',
+                amountBDT: 'পরিমাণ (৳ টাকা) *',
+                titleSource: 'বিবরণ / উৎস *',
+                categoryLabel: 'বিভাগ (Category) *',
+                paymentMethodLabel: 'পেমেন্ট মাধ্যম *',
+                dateLabel: 'তারিখ *',
+                notesOptional: 'নোট (ঐচ্ছিক)',
+                cancelBtn: 'বাতিল',
+                saveTxBtn: 'সংরক্ষণ করুন',
+                confirmBtn: 'নিশ্চিত করুন',
+                txReceiptTitle: 'লেনদেনের বিস্তারিত',
+                totalBalance: 'মোট ব্যালেন্স',
+                totalIncome: 'মোট আয়',
+                totalExpenses: 'মোট খরচ',
+                totalSavings: 'মোট সঞ্চয়',
+                todaysSpending: 'আজকের খরচ',
+                monthlyBudget: 'মাসিক বাজেটের অবস্থা',
+                quickAddIncome: '+ প্রথম আয় যোগ করুন',
+                quickAddExpense: '+ প্রথম খরচ যোগ করুন',
+                incomeVsExpense: 'আয় বনাম খরচ (গত ৬ মাস)',
+                expenseBreakdown: 'বিভাগ অনুযায়ী খরচের চিত্র',
+                recentTransactions: 'সাম্প্রতিক লেনদেন',
+                viewAll: 'সব দেখুন',
+                smartStudentTips: 'শুরু করার নির্দেশনা ও সতর্কবার্তা',
+                searchPlaceholder: 'নাম, পরিমাণ বা নোট দিয়ে খুঁজুন...',
+                allTypes: 'সব ধরন',
+                allCategories: 'সব বিভাগ',
+                allMethods: 'সব পেমেন্ট মাধ্যম',
+                sortNewest: 'নতুন আগে',
+                sortOldest: 'পুরাতন আগে',
+                sortHighest: 'বেশি পরিমাণ',
+                sortLowest: 'কম পরিমাণ',
+                resetFilters: 'ফিল্টার রিসেট',
+                noTransactionsFound: 'এখনো কোনো লেনদেন যোগ করা হয়নি। প্রথম আয় বা খরচ যোগ করুন!',
+                overallMonthlyBudget: 'সামগ্রিক মাসিক বাজেট',
+                categoryBudgets: 'বিভাগভিত্তিক বাজেট',
+                addBudgetGoal: 'বাজেট সেট / আপডেট করুন',
+                spent: 'খরচ হয়েছে',
+                remaining: 'অবশিষ্ট',
+                exceeded: 'বাজেট অতিক্রম!',
+                warning80: '৮০%+ সতর্কতা',
+                onTrack: 'নিয়ন্ত্রণে আছে',
+                createSavingsGoal: 'নতুন সঞ্চয় লক্ষ্য',
+                addSavingsBtn: '+ জমা দিন',
+                withdrawBtn: '- উত্তোলন',
+                target: 'লক্ষ্যমাত্রা',
+                saved: 'জমা হয়েছে',
+                borrowed: 'ধার নেওয়া (Borrowed)',
+                lent: 'ধার দেওয়া (Lent)',
+                addDebtRecord: 'নতুন ধার/দেনার হিসাব',
+                recordRepayment: 'পরিশোধ যোগ করুন',
+                settled: 'পরিশোধিত',
+                unpaid: 'বাকি আছে',
+                addRecurring: 'নিয়মিত লেনদেন যোগ করুন',
+                postNow: 'এখনই যুক্ত করুন',
+                exportCSV: 'CSV ডাউনলোড',
+                printPDF: 'প্রিন্ট / PDF সংরক্ষণ',
+                backupJSON: 'JSON ব্যাকআপ ডাউনলোড',
+                restoreJSON: 'JSON ব্যাকআপ রিস্টোর',
+                profileSettings: 'শিক্ষার্থী প্রোফাইল ও সেটিংস',
+                customCategories: 'কাস্টম খরচের বিভাগ',
+                dangerZone: 'ব্যাকআপ, রিস্টোর ও ডেটা রিসেট',
+                welcomeBack: 'আসসালামু আলাইকুম,',
+                studentBannerSub: 'আপনার নতুন হিসাবখাতা প্রস্তুত! টিউশনি, হাতখরচ, দৈনন্দিন খরচ ও সঞ্চয়ের হিসাব শুরু করুন।',
+            }
+        };
+
+        // =========================================================================
+        // 2. APPLICATION STATE (100% FRESH EMPTY INITIAL STATE)
+        // =========================================================================
+        const STORAGE_KEY_FRESH = 'hisabkhata_fresh_v1';
+
+        function getDefaultFreshState() {
+            return {
+                settings: {
+                    lang: 'en',
+                    banglaDigits: false,
+                    theme: 'light',
+                    userName: 'Student',
+                    userTagline: 'My Personal HisabKhatā • ৳ BDT',
+                    sidebarCollapsed: false,
+                },
+                customExpenseCategories: [],
+                transactions: [],
+                budgets: {
+                    overallMonthly: 0,
+                    categories: {},
+                },
+                savings: [],
+                debts: [],
+                recurring: [],
+            };
+        }
+
+        let appState = getDefaultFreshState();
+
+        let currentRoute = 'dashboard';
+        let calendarViewDate = new Date();
+        let selectedCalendarDate = toISODate(new Date());
+        let txFilters = {
+            search: '',
+            type: 'all',
+            category: 'all',
+            method: 'all',
+            dateFrom: '',
+            dateTo: '',
+            sort: 'newest',
+        };
+        let chartInstances = {
+            barChart: null,
+            doughnutChart: null,
+            reportMethodChart: null,
+        };
+
+        function toISODate(dateObj) {
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        function getRelativeDate(daysOffset) {
+            const d = new Date();
+            d.setDate(d.getDate() + daysOffset);
+            return toISODate(d);
+        }
+
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY_FRESH);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    const fresh = getDefaultFreshState();
+                    appState = {
+                        ...fresh,
+                        ...parsed,
+                        settings: { ...fresh.settings, ...(parsed.settings || {}) },
+                        budgets: { ...fresh.budgets, ...(parsed.budgets || {}) },
+                    };
+                } else {
+                    appState = getDefaultFreshState();
+                    saveState();
+                }
+            } catch (e) {
+                console.error('Failed to load state:', e);
+                appState = getDefaultFreshState();
+            }
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY_FRESH, JSON.stringify(appState));
+            } catch (e) {
+                console.error('Failed to save state:', e);
+            }
+        }
+
+        // =========================================================================
+        // 3. LOCALIZATION, BDT FORMATTING & BANGLA NUMERAL HELPERS
+        // =========================================================================
+        function t(key) {
+            const lang = appState.settings.lang || 'en';
+            return (I18N[lang] && I18N[lang][key]) || I18N.en[key] || key;
+        }
+
+        function toBanglaDigits(str) {
+            if (!appState.settings.banglaDigits) return String(str);
+            const map = { '0': '০', '1': '১', '2': '২', '3': '৩', '4': '৪', '5': '৫', '6': '৬', '7': '৭', '8': '৮', '9': '৯' };
+            return String(str).replace(/[0-9]/g, (d) => map[d]);
+        }
+
+        function formatNum(num) {
+            const formatted = Number(num || 0).toLocaleString('en-IN', {
+                maximumFractionDigits: 2,
+                minimumFractionDigits: Number(num) % 1 !== 0 ? 2 : 0,
+            });
+            return toBanglaDigits(formatted);
+        }
+
+        function formatBDT(amount) {
+            return `৳${formatNum(amount)}`;
+        }
+
+        function formatDateDisplay(isoStr) {
+            if (!isoStr) return '';
+            const d = new Date(isoStr + 'T00:00:00');
+            if (isNaN(d.getTime())) return isoStr;
+            const options = { day: 'numeric', month: 'short', year: 'numeric' };
+            const str = d.toLocaleDateString(appState.settings.lang === 'bn' ? 'bn-BD' : 'en-GB', options);
+            return toBanglaDigits(str);
+        }
+
+        function getAllExpenseCategories() {
+            return [...DEFAULT_EXPENSE_CATEGORIES, ...(appState.customExpenseCategories || [])];
+        }
+
+        function getCategoryObj(id, type = 'expense') {
+            const pool = type === 'income' ? DEFAULT_INCOME_CATEGORIES : getAllExpenseCategories();
+            return pool.find((c) => c.id === id) || {
+                id,
+                en: id,
+                bn: id,
+                icon: 'fa-tag',
+                color: '#64748B',
+                bg: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+            };
+        }
+
+        function getCatLabel(catObj) {
+            return appState.settings.lang === 'bn' ? catObj.bn : catObj.en;
+        }
+
+        function getMethodObj(id) {
+            return PAYMENT_METHODS.find((m) => m.id === id) || PAYMENT_METHODS[0];
+        }
+
+        function getMethodLabel(methodObj) {
+            return appState.settings.lang === 'bn' ? methodObj.bn : methodObj.en;
+        }
+
+        // =========================================================================
+        // 4. UI THEME, LANGUAGE, TOASTS & NAVIGATION
+        // =========================================================================
+        function applyTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            if (appState.settings.theme === 'dark') {
+                html.classList.add('dark');
+                if (icon) icon.className = 'fa-solid fa-sun';
+            } else {
+                html.classList.remove('dark');
+                if (icon) icon.className = 'fa-solid fa-moon';
+            }
+        }
+
+        function toggleTheme() {
+            appState.settings.theme = appState.settings.theme === 'dark' ? 'light' : 'dark';
+            saveState();
+            applyTheme();
+            renderCurrentView();
+        }
+
+        function toggleLanguage() {
+            appState.settings.lang = appState.settings.lang === 'en' ? 'bn' : 'en';
+            saveState();
+            updateStaticTranslations();
+            renderNavigation();
+            renderCurrentView();
+            showToast(
+                appState.settings.lang === 'bn' ? 'ভাষা বাংলায় পরিবর্তন করা হয়েছে 🇧🇩' : 'Switched interface to English 🇬🇧',
+                'success'
+            );
+        }
+
+        function toggleBanglaDigits() {
+            appState.settings.banglaDigits = !appState.settings.banglaDigits;
+            saveState();
+            updateStaticTranslations();
+            renderCurrentView();
+            showToast(
+                appState.settings.banglaDigits ? 'বাংলা সংখ্যা (১২৩) চালু হয়েছে' : 'English digits (123) enabled',
+                'info'
+            );
+        }
+
+        function applySidebarState() {
+            const sidebar = document.getElementById('desktop-sidebar');
+            if (!sidebar) return;
+            if (appState.settings.sidebarCollapsed) {
+                sidebar.classList.remove('w-68');
+                sidebar.classList.add('w-20');
+                document.querySelectorAll('.sidebar-label').forEach((el) => el.classList.add('hidden'));
+            } else {
+                sidebar.classList.remove('w-20');
+                sidebar.classList.add('w-68');
+                document.querySelectorAll('.sidebar-label').forEach((el) => el.classList.remove('hidden'));
+            }
+        }
+
+        function toggleSidebar() {
+            appState.settings.sidebarCollapsed = !appState.settings.sidebarCollapsed;
+            applySidebarState();
+            saveState();
+        }
+
+        function toggleMobileDrawer() {
+            const drawer = document.getElementById('mobile-drawer');
+            drawer.classList.toggle('hidden');
+        }
+
+        function updateStaticTranslations() {
+            const lang = appState.settings.lang;
+            document.getElementById('lang-toggle-label').textContent = lang === 'en' ? 'বাংলা' : 'English';
+            document.getElementById('digit-toggle-btn').textContent = appState.settings.banglaDigits ? '123' : '১২৩';
+
+            document.querySelectorAll('[data-i18n]').forEach((el) => {
+                const key = el.getAttribute('data-i18n');
+                if (key) el.textContent = t(key);
+            });
+
+            // Header Date
+            const now = new Date();
+            const dateStr = now.toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+            });
+            document.getElementById('header-date-display').textContent = toBanglaDigits(dateStr);
+
+            // Profile info in sidebar
+            document.getElementById('sidebar-user-name').textContent = appState.settings.userName || 'Student';
+            document.getElementById('sidebar-user-tag').textContent = appState.settings.userTagline || 'Personal Finance • ৳ BDT';
+            const initials = (appState.settings.userName || 'ST')
+                .split(' ')
+                .map((n) => n[0])
+                .join('')
+                .slice(0, 2)
+                .toUpperCase();
+            document.getElementById('sidebar-avatar').textContent = initials;
+
+            // Update Notification Badge Count
+            const alerts = generateNotifications();
+            const badge = document.getElementById('notif-badge-count');
+            badge.textContent = toBanglaDigits(alerts.length);
+            badge.style.display = alerts.length > 0 ? 'flex' : 'none';
+        }
+
+        function renderNavigation() {
+            const lang = appState.settings.lang;
+            const desktopNav = document.getElementById('desktop-nav');
+            const mobileGrid = document.getElementById('mobile-drawer-grid');
+
+            desktopNav.innerHTML = NAV_ITEMS.map((item) => {
+                const isActive = currentRoute === item.id;
+                const label = lang === 'bn' ? item.bn : item.en;
+                return `
+          <button onclick="navigateTo('${item.id}')" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-sm font-bold transition ${isActive
+                        ? 'bg-gradient-to-r from-[#006A4E] to-emerald-600 text-white shadow-glow-green'
+                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80'
+                    }">
+            <i class="fa-solid ${item.icon} w-5 text-center"></i>
+            <span class="sidebar-label truncate">${label}</span>
+          </button>
+        `;
+            }).join('');
+
+            mobileGrid.innerHTML = NAV_ITEMS.map((item) => {
+                const isActive = currentRoute === item.id;
+                const label = lang === 'bn' ? item.bn : item.en;
+                return `
+          <button onclick="navigateTo('${item.id}'); toggleMobileDrawer();" class="flex flex-col items-center justify-center p-3 rounded-2xl border text-center transition ${isActive
+                        ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-500 text-[#006A4E] dark:text-emerald-300'
+                        : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'
+                    }">
+            <i class="fa-solid ${item.icon} text-lg mb-1.5"></i>
+            <span class="text-[11px] font-bold leading-tight">${label}</span>
+          </button>
+        `;
+            }).join('');
+
+            // Re-apply collapsed state to the freshly rendered labels
+            applySidebarState();
+
+            // Update Page Title
+            const activeItem = NAV_ITEMS.find((n) => n.id === currentRoute) || NAV_ITEMS[0];
+            document.getElementById('page-title').textContent = lang === 'bn' ? activeItem.bn : activeItem.en;
+
+            // Update Mobile Bottom Nav Active Colors
+            document.querySelectorAll('.mobile-nav-btn').forEach((btn) => {
+                const target = btn.getAttribute('data-mobile-nav');
+                if (target === currentRoute) {
+                    btn.classList.remove('text-slate-500', 'dark:text-slate-400');
+                    btn.classList.add('text-[#006A4E]', 'dark:text-emerald-400');
+                } else if (target) {
+                    btn.classList.add('text-slate-500', 'dark:text-slate-400');
+                    btn.classList.remove('text-[#006A4E]', 'dark:text-emerald-400');
+                }
+            });
+        }
+
+        function navigateTo(route) {
+            currentRoute = route;
+            renderNavigation();
+            renderCurrentView();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const colors = {
+                success: 'bg-[#006A4E] text-white border-emerald-400',
+                error: 'bg-[#F42A41] text-white border-rose-400',
+                info: 'bg-slate-800 text-white border-slate-600',
+            };
+            const icons = {
+                success: 'fa-circle-check',
+                error: 'fa-circle-exclamation',
+                info: 'fa-circle-info',
+            };
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl border text-xs font-bold transform transition-all duration-300 translate-x-4 opacity-0 ${colors[type] || colors.info}`;
+            toast.innerHTML = `<i class="fa-solid ${icons[type] || icons.info} text-sm"></i><span>${message}</span>`;
+            container.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-x-4', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-x-4');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // =========================================================================
+        // 5. FINANCIAL CALCULATIONS & ANALYTICS HELPERS
+        // =========================================================================
+        function getMetrics() {
+            const todayISO = toISODate(new Date());
+            const currentMonthPrefix = todayISO.slice(0, 7); // YYYY-MM
+
+            let totalIncome = 0;
+            let totalExpense = 0;
+            let todayExpense = 0;
+            let monthIncome = 0;
+            let monthExpense = 0;
+
+            appState.transactions.forEach((tx) => {
+                const amt = Number(tx.amount) || 0;
+                if (tx.type === 'income') {
+                    totalIncome += amt;
+                    if (tx.date.startsWith(currentMonthPrefix)) monthIncome += amt;
+                } else {
+                    totalExpense += amt;
+                    if (tx.date === todayISO) todayExpense += amt;
+                    if (tx.date.startsWith(currentMonthPrefix)) monthExpense += amt;
+                }
+            });
+
+            const totalSavings = (appState.savings || []).reduce((sum, s) => sum + (Number(s.saved) || 0), 0);
+            const balance = totalIncome - totalExpense;
+
+            return {
+                totalIncome,
+                totalExpense,
+                balance,
+                totalSavings,
+                todayExpense,
+                monthIncome,
+                monthExpense,
+                currentMonthPrefix,
+            };
+        }
+
+        function generateNotifications() {
+            const notes = [];
+            const lang = appState.settings.lang;
+            const metrics = getMetrics();
+            const overallLimit = Number(appState.budgets.overallMonthly) || 0;
+
+            // 1. Overall Budget Check
+            if (overallLimit > 0) {
+                const pct = (metrics.monthExpense / overallLimit) * 100;
+                if (pct >= 100) {
+                    notes.push({
+                        type: 'danger',
+                        icon: 'fa-fire',
+                        title: lang === 'bn' ? 'মাসিক বাজেট অতিক্রম করেছে!' : 'Monthly Budget Exceeded!',
+                        desc: lang === 'bn'
+                            ? `আপনি নির্ধারিত ${formatBDT(overallLimit)} বাজেটের বিপরীতে ${formatBDT(metrics.monthExpense)} খরচ করেছেন।`
+                            : `You have spent ${formatBDT(metrics.monthExpense)} against your ${formatBDT(overallLimit)} monthly limit.`,
+                    });
+                } else if (pct >= 80) {
+                    notes.push({
+                        type: 'warning',
+                        icon: 'fa-triangle-exclamation',
+                        title: lang === 'bn' ? 'বাজেট সতর্কতা (৮০%+ ব্যবহৃত)' : 'Budget Warning (80%+ Used)',
+                        desc: lang === 'bn'
+                            ? `মাসিক বাজেটের ${formatNum(Math.round(pct))}% ইতিমধ্যে খরচ হয়ে গেছে।`
+                            : `You've used ${formatNum(Math.round(pct))}% of your monthly budget.`,
+                    });
+                }
+            }
+
+            // 2. Category Budget Warnings
+            Object.entries(appState.budgets.categories || {}).forEach(([catId, limit]) => {
+                if (!limit || limit <= 0) return;
+                const spent = appState.transactions
+                    .filter((tx) => tx.type === 'expense' && tx.category === catId && tx.date.startsWith(metrics.currentMonthPrefix))
+                    .reduce((s, tx) => s + Number(tx.amount), 0);
+                const catObj = getCategoryObj(catId, 'expense');
+                if (spent >= limit) {
+                    notes.push({
+                        type: 'danger',
+                        icon: catObj.icon,
+                        title: lang === 'bn' ? `${catObj.bn} বাজেট সীমা অতিক্রম!` : `${catObj.en} Budget Exceeded!`,
+                        desc: `${formatBDT(spent)} / ${formatBDT(limit)}`,
+                    });
+                } else if (spent >= limit * 0.8) {
+                    notes.push({
+                        type: 'warning',
+                        icon: catObj.icon,
+                        title: lang === 'bn' ? `${catObj.bn} বাজেট ৮০% পূর্ণ` : `${catObj.en} Budget at 80%+`,
+                        desc: `${formatBDT(spent)} / ${formatBDT(limit)}`,
+                    });
+                }
+            });
+
+            // 3. Debt Due Reminders
+            (appState.debts || []).forEach((d) => {
+                const rem = Number(d.amount) - Number(d.paid);
+                if (rem > 0) {
+                    notes.push({
+                        type: 'info',
+                        icon: 'fa-handshake',
+                        title: d.kind === 'borrowed'
+                            ? (lang === 'bn' ? `${d.person}-কে ধার পরিশোধ বাকি` : `Repayment due to ${d.person}`)
+                            : (lang === 'bn' ? `${d.person}-এর কাছ থেকে পাওনা` : `Collect lent money from ${d.person}`),
+                        desc: `${lang === 'bn' ? 'বাকি:' : 'Remaining:'} ${formatBDT(rem)} • ${lang === 'bn' ? 'তারিখ:' : 'Due:'} ${formatDateDisplay(d.dueDate)}`,
+                    });
+                }
+            });
+
+            // 4. Recurring Reminders
+            (appState.recurring || []).filter((r) => r.active).forEach((r) => {
+                notes.push({
+                    type: 'success',
+                    icon: 'fa-rotate',
+                    title: lang === 'bn' ? `নিয়মিত লেনদেন: ${r.title}` : `Recurring Schedule: ${r.title}`,
+                    desc: `${formatBDT(r.amount)} (${r.frequency}) • ${formatDateDisplay(r.nextDate)}`,
+                });
+            });
+
+            return notes;
+        }
+
+        // =========================================================================
+        // 6. TRANSACTION CRUD & MODAL HANDLERS
+        // =========================================================================
+        function populateTxCategoryOptions(type) {
+            const select = document.getElementById('tx-category');
+            const list = type === 'income' ? DEFAULT_INCOME_CATEGORIES : getAllExpenseCategories();
+            select.innerHTML = list
+                .map((c) => `<option value="${c.id}">${c.en} (${c.bn})</option>`)
+                .join('');
+        }
+
+        function populatePaymentMethodOptions() {
+            const select = document.getElementById('tx-method');
+            select.innerHTML = PAYMENT_METHODS
+                .map((m) => `<option value="${m.id}">${m.en} (${m.bn})</option>`)
+                .join('');
+        }
+
+        function setTxModalType(type) {
+            document.getElementById('tx-type').value = type;
+            const expBtn = document.getElementById('tx-tab-expense');
+            const incBtn = document.getElementById('tx-tab-income');
+
+            if (type === 'expense') {
+                expBtn.className = 'py-2.5 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-2 bg-[#F42A41] text-white shadow-sm';
+                incBtn.className = 'py-2.5 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-2 text-slate-600 dark:text-slate-300';
+            } else {
+                incBtn.className = 'py-2.5 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-2 bg-[#006A4E] text-white shadow-sm';
+                expBtn.className = 'py-2.5 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-2 text-slate-600 dark:text-slate-300';
+            }
+            populateTxCategoryOptions(type);
+        }
+
+        function openTransactionModal(defaultType = 'expense', editTxId = null) {
+            const modal = document.getElementById('transaction-modal');
+            populatePaymentMethodOptions();
+            document.getElementById('tx-form').reset();
+            document.getElementById('tx-edit-id').value = '';
+
+            if (editTxId) {
+                const tx = appState.transactions.find((t) => t.id === editTxId);
+                if (!tx) return;
+                document.getElementById('tx-modal-title').textContent =
+                    appState.settings.lang === 'bn' ? 'লেনদেন সম্পাদনা করুন' : 'Edit Transaction';
+                document.getElementById('tx-edit-id').value = tx.id;
+                setTxModalType(tx.type);
+                document.getElementById('tx-amount').value = tx.amount;
+                document.getElementById('tx-title').value = tx.title;
+                document.getElementById('tx-category').value = tx.category;
+                document.getElementById('tx-method').value = tx.method;
+                document.getElementById('tx-date').value = tx.date;
+                document.getElementById('tx-notes').value = tx.notes || '';
+            } else {
+                document.getElementById('tx-modal-title').textContent =
+                    appState.settings.lang === 'bn' ? 'নতুন হিসাব যোগ করুন' : 'Add New Entry';
+                setTxModalType(defaultType);
+                document.getElementById('tx-date').value = toISODate(new Date());
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeTransactionModal() {
+            const modal = document.getElementById('transaction-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function handleTransactionSubmit(e) {
+            e.preventDefault();
+            const editId = document.getElementById('tx-edit-id').value;
+            const type = document.getElementById('tx-type').value;
+            const amount = parseFloat(document.getElementById('tx-amount').value);
+            const title = document.getElementById('tx-title').value.trim();
+            const category = document.getElementById('tx-category').value;
+            const method = document.getElementById('tx-method').value;
+            const date = document.getElementById('tx-date').value;
+            const notes = document.getElementById('tx-notes').value.trim();
+
+            if (!amount || amount <= 0 || !title || !date) {
+                showToast('Please enter valid amount, title, and date.', 'error');
+                return;
+            }
+
+            if (editId) {
+                const idx = appState.transactions.findIndex((t) => t.id === editId);
+                if (idx !== -1) {
+                    appState.transactions[idx] = { ...appState.transactions[idx], type, amount, title, category, method, date, notes };
+                    showToast(appState.settings.lang === 'bn' ? 'লেনদেন আপডেট হয়েছে!' : 'Transaction updated!', 'success');
+                }
+            } else {
+                const newId = 'TX-' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 100);
+                appState.transactions.unshift({ id: newId, type, amount, title, category, method, date, notes });
+                showToast(appState.settings.lang === 'bn' ? 'নতুন লেনদেন সংরক্ষিত হয়েছে!' : 'Transaction added successfully!', 'success');
+            }
+
+            saveState();
+            closeTransactionModal();
+            updateStaticTranslations();
+            renderCurrentView();
+        }
+
+        function deleteTransaction(id) {
+            appState.transactions = appState.transactions.filter((t) => t.id !== id);
+            saveState();
+            updateStaticTranslations();
+            renderCurrentView();
+            showToast(appState.settings.lang === 'bn' ? 'লেনদেন মুছে ফেলা হয়েছে' : 'Transaction deleted', 'info');
+        }
+
+        function openDetailModal(txId) {
+            const tx = appState.transactions.find((t) => t.id === txId);
+            if (!tx) return;
+            const cat = getCategoryObj(tx.category, tx.type);
+            const method = getMethodObj(tx.method);
+            const isIncome = tx.type === 'income';
+
+            document.getElementById('detail-modal-body').innerHTML = `
+        <div class="p-4 rounded-2xl ${isIncome ? 'bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800' : 'bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800'} text-center">
+          <span class="inline-block px-2.5 py-1 rounded-full text-[11px] font-extrabold uppercase ${isIncome ? 'bg-emerald-200/80 text-emerald-900' : 'bg-rose-200/80 text-rose-900'} mb-2">
+            ${isIncome ? (appState.settings.lang === 'bn' ? 'আয় (Income)' : 'Income') : (appState.settings.lang === 'bn' ? 'খরচ (Expense)' : 'Expense')}
+          </span>
+          <p class="text-3xl font-extrabold ${isIncome ? 'text-[#006A4E] dark:text-emerald-400' : 'text-[#F42A41] dark:text-rose-400'}">
+            ${isIncome ? '+' : '-'}${formatBDT(tx.amount)}
+          </p>
+          <p class="text-sm font-bold mt-1">${tx.title}</p>
+        </div>
+        <div class="space-y-2.5 text-xs">
+          <div class="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+            <span class="text-slate-500">ID</span>
+            <span class="font-mono font-bold">${tx.id}</span>
+          </div>
+          <div class="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+            <span class="text-slate-500">${t('categoryLabel')}</span>
+            <span class="px-2.5 py-0.5 rounded-full font-bold ${cat.bg}"><i class="fa-solid ${cat.icon} mr-1"></i>${getCatLabel(cat)}</span>
+          </div>
+          <div class="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+            <span class="text-slate-500">${t('paymentMethodLabel')}</span>
+            <span class="px-2.5 py-0.5 rounded-full font-bold border ${method.badge}"><i class="fa-solid ${method.icon} mr-1"></i>${getMethodLabel(method)}</span>
+          </div>
+          <div class="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+            <span class="text-slate-500">${t('dateLabel')}</span>
+            <span class="font-bold">${formatDateDisplay(tx.date)}</span>
+          </div>
+          <div class="py-2">
+            <span class="text-slate-500 block mb-1">Notes</span>
+            <p class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300">${tx.notes || '—'}</p>
+          </div>
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button onclick="closeDetailModal(); openTransactionModal('${tx.type}', '${tx.id}')" class="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold text-xs hover:bg-slate-200">
+            <i class="fa-solid fa-pen mr-1"></i> Edit
+          </button>
+          <button onclick="closeDetailModal(); openConfirmModal('deleteTx', '${tx.id}')" class="flex-1 py-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-[#F42A41] font-bold text-xs border border-rose-200 dark:border-rose-800">
+            <i class="fa-solid fa-trash mr-1"></i> Delete
+          </button>
+        </div>
+      `;
+            const modal = document.getElementById('detail-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeDetailModal() {
+            const modal = document.getElementById('detail-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // Confirmation Modal Logic
+        let pendingConfirmAction = null;
+        function openConfirmModal(actionType, payload = null) {
+            const lang = appState.settings.lang;
+            const titleEl = document.getElementById('confirm-title');
+            const msgEl = document.getElementById('confirm-message');
+
+            if (actionType === 'deleteTx') {
+                titleEl.textContent = lang === 'bn' ? 'লেনদেনটি মুছে ফেলবেন?' : 'Delete this transaction?';
+                msgEl.textContent = lang === 'bn' ? 'মুছে ফেললে এই হিসাবটি আর ফিরে পাওয়া যাবে না।' : 'This transaction will be permanently removed from your ledger.';
+                pendingConfirmAction = () => deleteTransaction(payload);
+            } else if (actionType === 'resetDemo') {
+                titleEl.textContent = lang === 'bn' ? 'সব ডেটা মুছে ফেলবেন?' : 'Clear All Financial Data?';
+                msgEl.textContent = lang === 'bn'
+                    ? 'এটি সকল ডেমো ও ব্যক্তিগত লেনদেন মুছে খালি করে দেবে।'
+                    : 'This will clear all sample/saved transactions, goals, and debts so you can start fresh.';
+                pendingConfirmAction = () => clearAllData();
+            } else if (actionType === 'deleteSavings') {
+                titleEl.textContent = lang === 'bn' ? 'সঞ্চয় লক্ষ্যটি মুছবেন?' : 'Delete Savings Goal?';
+                msgEl.textContent = lang === 'bn' ? 'এই সঞ্চয় কার্ডটি মুছে ফেলা হবে।' : 'This savings goal card will be removed.';
+                pendingConfirmAction = () => {
+                    appState.savings = appState.savings.filter((s) => s.id !== payload);
+                    saveState();
+                    updateStaticTranslations();
+                    renderCurrentView();
+                    showToast('Savings goal removed', 'info');
+                };
+            } else if (actionType === 'deleteDebt') {
+                titleEl.textContent = lang === 'bn' ? 'ধার/দেনার রেকর্ড মুছবেন?' : 'Delete Debt Record?';
+                msgEl.textContent = lang === 'bn' ? 'এই রেকর্ডটি তালিকা থেকে মুছে যাবে।' : 'This debt record will be removed.';
+                pendingConfirmAction = () => {
+                    appState.debts = appState.debts.filter((d) => d.id !== payload);
+                    saveState();
+                    updateStaticTranslations();
+                    renderCurrentView();
+                    showToast('Debt record removed', 'info');
+                };
+            }
+
+            const modal = document.getElementById('confirm-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeConfirmModal() {
+            const modal = document.getElementById('confirm-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            pendingConfirmAction = null;
+        }
+
+        document.getElementById('confirm-action-btn').addEventListener('click', () => {
+            const action = pendingConfirmAction;
+            closeConfirmModal();
+            if (action) action();
+        });
+
+        function clearAllData() {
+            const keptLang = appState.settings.lang;
+            const keptTheme = appState.settings.theme;
+            const keptDigits = appState.settings.banglaDigits;
+            appState = getDefaultFreshState();
+            appState.settings.lang = keptLang;
+            appState.settings.theme = keptTheme;
+            appState.settings.banglaDigits = keptDigits;
+            saveState();
+            updateStaticTranslations();
+            renderCurrentView();
+            showToast(appState.settings.lang === 'bn' ? 'সব ডেটা মুছে নতুন করে শুরু হয়েছে!' : 'All data reset to a clean ৳0 slate!', 'info');
+        }
+
+        // =========================================================================
+        // 7. VIEW RENDERERS FOR ALL 10 MODULES
+        // =========================================================================
+        function renderCurrentView() {
+            // Destroy old charts before re-rendering DOM
+            Object.keys(chartInstances).forEach((k) => {
+                if (chartInstances[k]) {
+                    chartInstances[k].destroy();
+                    chartInstances[k] = null;
+                }
+            });
+
+            const container = document.getElementById('view-container');
+            switch (currentRoute) {
+                case 'dashboard':
+                    renderDashboard(container);
+                    break;
+                case 'transactions':
+                    renderTransactions(container);
+                    break;
+                case 'budgets':
+                    renderBudgets(container);
+                    break;
+                case 'savings':
+                    renderSavings(container);
+                    break;
+                case 'debts':
+                    renderDebts(container);
+                    break;
+                case 'recurring':
+                    renderRecurring(container);
+                    break;
+                case 'calendar':
+                    renderCalendar(container);
+                    break;
+                case 'reports':
+                    renderReports(container);
+                    break;
+                case 'notifications':
+                    renderNotifications(container);
+                    break;
+                case 'settings':
+                    renderSettings(container);
+                    break;
+                default:
+                    renderDashboard(container);
+            }
+        }
+
+        // -------------------------------------------------------------------------
+        // VIEW 1: DASHBOARD (ড্যাশবোর্ড)
+        // -------------------------------------------------------------------------
+        function renderDashboard(container) {
+            const m = getMetrics();
+            const lang = appState.settings.lang;
+            const overallBudget = Number(appState.budgets.overallMonthly) || 0;
+            const budgetLimit = overallBudget > 0 ? overallBudget : 1;
+            const budgetPct = overallBudget > 0 ? Math.min(100, Math.round((m.monthExpense / budgetLimit) * 100)) : 0;
+            const rawBudgetPct = overallBudget > 0 ? Math.round((m.monthExpense / budgetLimit) * 100) : 0;
+            const budgetBarColor =
+                rawBudgetPct >= 100 ? 'bg-[#F42A41]' : rawBudgetPct >= 80 ? 'bg-amber-500' : 'bg-[#10B981]';
+
+            const recentTx = [...appState.transactions]
+                .sort((a, b) => b.date.localeCompare(a.date))
+                .slice(0, 6);
+
+            const alerts = generateNotifications().slice(0, 3);
+            const hasAnyTx = appState.transactions.length > 0;
+
+            container.innerHTML = `
+        <!-- Hero Student Greeting Banner -->
+        <div class="bd-gradient-banner rounded-3xl p-6 text-white shadow-soft">
+          <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-xs font-bold mb-2">
+                <span>HisabKhatā • হিসাবখাতা</span>
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                ${t('welcomeBack')} ${appState.settings.userName}! 👋
+              </h2>
+              <p class="text-xs sm:text-sm text-emerald-100 mt-1 max-w-xl">
+                ${t('studentBannerSub')}
+              </p>
+            </div>
+            <div class="flex flex-wrap gap-2.5 shrink-0">
+              <button onclick="openTransactionModal('income')" class="px-4 py-3 rounded-2xl bg-white text-[#006A4E] hover:bg-emerald-50 font-extrabold text-xs sm:text-sm shadow-md flex items-center gap-2 active:scale-95 transition">
+                <i class="fa-solid fa-circle-plus text-base"></i>
+                <span>${hasAnyTx ? (lang === 'bn' ? '+ আয় যোগ করুন' : '+ Add Income') : t('quickAddIncome')}</span>
+              </button>
+              <button onclick="openTransactionModal('expense')" class="px-4 py-3 rounded-2xl bg-[#F42A41] hover:bg-rose-600 text-white font-extrabold text-xs sm:text-sm shadow-md flex items-center gap-2 active:scale-95 transition">
+                <i class="fa-solid fa-circle-minus text-base"></i>
+                <span>${hasAnyTx ? (lang === 'bn' ? '+ খরচ যোগ করুন' : '+ Add Expense') : t('quickAddExpense')}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 Primary KPI Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <!-- Total Balance -->
+          <div class="hover-lift bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-soft">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-bold text-slate-500 dark:text-slate-400">${t('totalBalance')}</span>
+              <div class="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950 text-[#006A4E] dark:text-emerald-400 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-wallet"></i>
+              </div>
+            </div>
+            <p class="text-2xl font-extrabold ${m.balance >= 0 ? 'text-slate-900 dark:text-white' : 'text-[#F42A41]'}">${formatBDT(m.balance)}</p>
+            <p class="text-[11px] text-slate-400 mt-1">${lang === 'bn' ? 'হাতে ও মোবাইল ওয়ালেটে আছে' : 'Net available funds'}</p>
+          </div>
+
+          <!-- Total Income -->
+          <div class="hover-lift bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-soft">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-bold text-slate-500 dark:text-slate-400">${t('totalIncome')}</span>
+              <div class="w-10 h-10 rounded-2xl bg-teal-100 dark:bg-teal-950 text-teal-600 dark:text-teal-400 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-arrow-trend-up"></i>
+              </div>
+            </div>
+            <p class="text-2xl font-extrabold text-[#006A4E] dark:text-emerald-400">+${formatBDT(m.totalIncome)}</p>
+            <p class="text-[11px] text-emerald-600/80 dark:text-emerald-400/80 mt-1">${lang === 'bn' ? 'এই মাসে:' : 'This month:'} ${formatBDT(m.monthIncome)}</p>
+          </div>
+
+          <!-- Total Expenses -->
+          <div class="hover-lift bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-soft">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-bold text-slate-500 dark:text-slate-400">${t('totalExpenses')}</span>
+              <div class="w-10 h-10 rounded-2xl bg-rose-100 dark:bg-rose-950 text-[#F42A41] flex items-center justify-center text-lg">
+                <i class="fa-solid fa-arrow-trend-down"></i>
+              </div>
+            </div>
+            <p class="text-2xl font-extrabold text-[#F42A41]">-${formatBDT(m.totalExpense)}</p>
+            <p class="text-[11px] text-rose-500 mt-1">${t('todaysSpending')}: <strong>${formatBDT(m.todayExpense)}</strong></p>
+          </div>
+
+          <!-- Total Savings -->
+          <div class="hover-lift bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-soft cursor-pointer" onclick="navigateTo('savings')">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-bold text-slate-500 dark:text-slate-400">${t('totalSavings')}</span>
+              <div class="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-piggy-bank"></i>
+              </div>
+            </div>
+            <p class="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400">${formatBDT(m.totalSavings)}</p>
+            <p class="text-[11px] text-indigo-500 mt-1">${formatNum(appState.savings.length)} ${lang === 'bn' ? 'টি সঞ্চয় লক্ষ্য সক্রিয়' : 'active savings goals'}</p>
+          </div>
+        </div>
+
+        <!-- Monthly Budget Progress Card -->
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-soft">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+            <div>
+              <h3 class="text-sm font-extrabold flex items-center gap-2">
+                <i class="fa-solid fa-gauge-high text-[#006A4E] dark:text-emerald-400"></i>
+                <span>${t('monthlyBudget')}</span>
+              </h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                ${overallBudget > 0
+                    ? `${t('spent')}: <strong class="text-slate-800 dark:text-white">${formatBDT(m.monthExpense)}</strong> / ${formatBDT(overallBudget)}`
+                    : lang === 'bn'
+                        ? 'এখনো কোনো মাসিক বাজেট নির্ধারণ করা হয়নি।'
+                        : 'No monthly budget set yet. Set a limit to track your monthly spending.'
+                }
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              ${overallBudget > 0
+                    ? `<span class="px-3 py-1 rounded-full text-xs font-extrabold ${rawBudgetPct >= 100
+                        ? 'bg-rose-100 text-[#F42A41] dark:bg-rose-950'
+                        : rawBudgetPct >= 80
+                            ? 'bg-amber-100 text-amber-700 dark:bg-amber-950'
+                            : 'bg-emerald-100 text-[#006A4E] dark:bg-emerald-950 dark:text-emerald-300'
+                    }">
+                      ${formatNum(rawBudgetPct)}% ${rawBudgetPct >= 100 ? t('exceeded') : rawBudgetPct >= 80 ? t('warning80') : t('onTrack')}
+                    </span>`
+                    : ''
+                }
+              <button onclick="navigateTo('budgets')" class="px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-xs font-bold text-[#006A4E] dark:text-emerald-400 hover:bg-emerald-100">
+                ${lang === 'bn' ? '+ বাজেট সেট করুন' : '+ Set Budget'}
+              </button>
+            </div>
+          </div>
+          <div class="w-full h-3.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+            <div class="h-full rounded-full ${budgetBarColor} transition-all duration-500" style="width: ${budgetPct}%"></div>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <!-- Income vs Expense Chart -->
+          <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-soft">
+            <h3 class="text-sm font-extrabold mb-4 flex items-center gap-2">
+              <i class="fa-solid fa-chart-column text-emerald-500"></i>
+              <span>${t('incomeVsExpense')}</span>
+            </h3>
+            <div class="h-64 w-full">
+              <canvas id="dashboardBarChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Category Doughnut Chart -->
+          <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-soft">
+            <h3 class="text-sm font-extrabold mb-4 flex items-center gap-2">
+              <i class="fa-solid fa-chart-pie text-[#F42A41]"></i>
+              <span>${t('expenseBreakdown')}</span>
+            </h3>
+            <div class="h-64 w-full flex items-center justify-center">
+              <canvas id="dashboardDoughnutChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Grid: Recent Transactions & Smart Alerts -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <!-- Recent Transactions -->
+          <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-soft">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-extrabold">${t('recentTransactions')}</h3>
+              <button onclick="navigateTo('transactions')" class="text-xs font-bold text-[#006A4E] dark:text-emerald-400 hover:underline">
+                ${t('viewAll')} →
+              </button>
+            </div>
+            ${recentTx.length === 0
+                    ? `<div class="py-10 text-center space-y-3">
+                    <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center text-xl mx-auto">
+                      <i class="fa-solid fa-receipt"></i>
+                    </div>
+                    <p class="text-xs font-semibold text-slate-500">${t('noTransactionsFound')}</p>
+                    <div class="flex justify-center gap-2">
+                      <button onclick="openTransactionModal('income')" class="px-3.5 py-2 rounded-xl bg-[#006A4E] text-white text-xs font-bold">${t('quickAddIncome')}</button>
+                      <button onclick="openTransactionModal('expense')" class="px-3.5 py-2 rounded-xl bg-[#F42A41] text-white text-xs font-bold">${t('quickAddExpense')}</button>
+                    </div>
+                  </div>`
+                    : `<div class="space-y-2.5">
+                    ${recentTx.map((tx) => renderTransactionRowCompact(tx)).join('')}
+                  </div>`
+                }
+          </div>
+
+          <!-- Smart Student Tips & Budget Alerts -->
+          <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-soft flex flex-col justify-between">
+            <div>
+              <h3 class="text-sm font-extrabold mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-lightbulb text-amber-500"></i>
+                <span>${t('smartStudentTips')}</span>
+              </h3>
+              <div class="space-y-2.5">
+                ${alerts.length > 0
+                    ? alerts
+                        .map(
+                            (a) => `
+                        <div class="p-3 rounded-2xl border ${a.type === 'danger'
+                                    ? 'bg-rose-50/80 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800'
+                                    : a.type === 'warning'
+                                        ? 'bg-amber-50/80 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800'
+                                        : 'bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800'
+                                }">
+                          <p class="text-xs font-extrabold flex items-center gap-1.5">
+                            <i class="fa-solid ${a.icon}"></i>
+                            <span>${a.title}</span>
+                          </p>
+                          <p class="text-[11px] text-slate-600 dark:text-slate-300 mt-1">${a.desc}</p>
+                        </div>`
+                        )
+                        .join('')
+                    : `<div class="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs space-y-2">
+                        <p class="font-bold text-[#006A4E] dark:text-emerald-300">${lang === 'bn' ? 'স্বাগতম! আপনার হিসাব শুরু করুন:' : 'Get started in 3 easy steps:'}</p>
+                        <ul class="text-[11px] text-slate-600 dark:text-slate-300 space-y-1 list-disc pl-4">
+                          <li>${lang === 'bn' ? 'আপনার বর্তমান ব্যালেন্স বা আয় যোগ করুন' : 'Record your starting balance or monthly income'}</li>
+                          <li>${lang === 'bn' ? 'মাসিক খরচের বাজেট নির্ধারণ করুন' : 'Set a monthly budget limit'}</li>
+                          <li>${lang === 'bn' ? 'নতুন লক্ষ্য নিয়ে সঞ্চয় শুরু করুন' : 'Create a savings goal for your next target'}</li>
+                        </ul>
+                      </div>`
+                }
+              </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                <i class="fa-solid fa-graduation-cap text-[#006A4E] mr-1"></i>
+                ${lang === 'bn'
+                    ? 'টিপস: টিউশনি বা হাতখরচ পাওয়ার সাথে সাথে অন্তত ১৫% সঞ্চয় লক্ষ্যে জমা রাখুন!'
+                    : 'Student Tip: Move at least 15% of every tuition or allowance payout into a savings goal!'
+                }
+              </p>
+            </div>
+          </div>
+        </div>
+      `;
+
+            initDashboardCharts();
+        }
+
+        function renderTransactionRowCompact(tx) {
+            const cat = getCategoryObj(tx.category, tx.type);
+            const method = getMethodObj(tx.method);
+            const isIncome = tx.type === 'income';
+            return `
+        <div onclick="openDetailModal('${tx.id}')" class="cursor-pointer flex items-center justify-between gap-3 p-3 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-100 dark:border-slate-800 transition">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-2xl ${cat.bg} flex items-center justify-center shrink-0">
+              <i class="fa-solid ${cat.icon}"></i>
+            </div>
+            <div class="min-w-0">
+              <p class="text-xs sm:text-sm font-bold truncate">${tx.title}</p>
+              <div class="flex flex-wrap items-center gap-1.5 mt-0.5">
+                <span class="text-[10px] font-semibold text-slate-400">${formatDateDisplay(tx.date)}</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ${method.badge}">${getMethodLabel(method)}</span>
+              </div>
+            </div>
+          </div>
+          <div class="text-right shrink-0">
+            <p class="text-xs sm:text-sm font-extrabold ${isIncome ? 'text-[#006A4E] dark:text-emerald-400' : 'text-[#F42A41]'}">
+              ${isIncome ? '+' : '-'}${formatBDT(tx.amount)}
+            </p>
+            <p class="text-[10px] text-slate-400">${getCatLabel(cat)}</p>
+          </div>
+        </div>
+      `;
+        }
+
+        function initDashboardCharts() {
+            if (typeof Chart === 'undefined') return; // Chart.js failed to load (offline) — skip charts, keep app working
+
+            const isDark = appState.settings.theme === 'dark';
+            const textColor = isDark ? '#CBD5E1' : '#475569';
+            const gridColor = isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(148, 163, 184, 0.2)';
+            const lang = appState.settings.lang;
+
+            // 1. Income vs Expense Bar Chart (Last 6 Months)
+            const barCtx = document.getElementById('dashboardBarChart');
+            if (barCtx) {
+                const months = [];
+                const incomeSeries = [];
+                const expenseSeries = [];
+                const now = new Date();
+
+                for (let i = 5; i >= 0; i--) {
+                    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                    const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                    const label = d.toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US', { month: 'short' });
+                    months.push(label);
+
+                    const inc = appState.transactions
+                        .filter((t) => t.type === 'income' && t.date.startsWith(ym))
+                        .reduce((s, t) => s + Number(t.amount), 0);
+                    const exp = appState.transactions
+                        .filter((t) => t.type === 'expense' && t.date.startsWith(ym))
+                        .reduce((s, t) => s + Number(t.amount), 0);
+
+                    incomeSeries.push(inc);
+                    expenseSeries.push(exp);
+                }
+
+                chartInstances.barChart = new Chart(barCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: months,
+                        datasets: [
+                            {
+                                label: lang === 'bn' ? 'আয় (Income)' : 'Income (৳)',
+                                data: incomeSeries,
+                                backgroundColor: '#10B981',
+                                borderRadius: 8,
+                            },
+                            {
+                                label: lang === 'bn' ? 'খরচ (Expense)' : 'Expense (৳)',
+                                data: expenseSeries,
+                                backgroundColor: '#F42A41',
+                                borderRadius: 8,
+                            },
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { labels: { color: textColor, font: { family: 'Inter, Noto Sans Bengali', weight: 'bold' } } },
+                        },
+                        scales: {
+                            x: { ticks: { color: textColor }, grid: { display: false } },
+                            y: { ticks: { color: textColor }, grid: { color: gridColor } },
+                        },
+                    },
+                });
+            }
+
+            // 2. Expense Category Doughnut Chart
+            const doughnutCtx = document.getElementById('dashboardDoughnutChart');
+            if (doughnutCtx) {
+                const catTotals = {};
+                appState.transactions
+                    .filter((t) => t.type === 'expense')
+                    .forEach((t) => {
+                        catTotals[t.category] = (catTotals[t.category] || 0) + Number(t.amount);
+                    });
+
+                const entries = Object.entries(catTotals).sort((a, b) => b[1] - a[1]);
+                const labels = entries.map(([id]) => getCatLabel(getCategoryObj(id, 'expense')));
+                const values = entries.map(([, val]) => val);
+                const colors = entries.map(([id]) => getCategoryObj(id, 'expense').color);
+                const emptyLabel = lang === 'bn' ? 'কোনো খরচ নেই' : 'No Expenses Yet';
+
+                chartInstances.doughnutChart = new Chart(doughnutCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels.length ? labels : [emptyLabel],
+                        datasets: [
+                            {
+                                data: values.length ? values : [1],
+                                backgroundColor: colors.length ? colors : [isDark ? '#1E293B' : '#E2E8F0'],
+                                borderWidth: 2,
+                                borderColor: isDark ? '#0F172A' : '#FFFFFF',
+                            },
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '65%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { boxWidth: 10, color: textColor, font: { size: 11, family: 'Inter, Noto Sans Bengali' } },
+                            },
+                        },
+                    },
+                });
+            }
+        }
+
+        // -------------------------------------------------------------------------
+        // VIEW 2: TRANSACTIONS LEDGER (লেনদেন)
+        // -------------------------------------------------------------------------
+        function renderTransactions(container) {
+            const lang = appState.settings.lang;
+            const allCats = [...getAllExpenseCategories(), ...DEFAULT_INCOME_CATEGORIES];
+
+            // Filter & Sort logic
+            let filtered = appState.transactions.filter((tx) => {
+                if (txFilters.type !== 'all' && tx.type !== txFilters.type) return false;
+                if (txFilters.category !== 'all' && tx.category !== txFilters.category) return false;
+                if (txFilters.method !== 'all' && tx.method !== txFilters.method) return false;
+                if (txFilters.dateFrom && tx.date < txFilters.dateFrom) return false;
+                if (txFilters.dateTo && tx.date > txFilters.dateTo) return false;
+                if (txFilters.search) {
+                    const q = txFilters.search.toLowerCase();
+                    const matchTitle = tx.title.toLowerCase().includes(q);
+                    const matchNotes = (tx.notes || '').toLowerCase().includes(q);
+                    const matchAmount = String(tx.amount).includes(q);
+                    const matchId = tx.id.toLowerCase().includes(q);
+                    if (!matchTitle && !matchNotes && !matchAmount && !matchId) return false;
+                }
+                return true;
+            });
+
+            filtered.sort((a, b) => {
+                if (txFilters.sort === 'newest') return b.date.localeCompare(a.date);
+                if (txFilters.sort === 'oldest') return a.date.localeCompare(b.date);
+                if (txFilters.sort === 'highest') return Number(b.amount) - Number(a.amount);
+                if (txFilters.sort === 'lowest') return Number(a.amount) - Number(b.amount);
+                return 0;
+            });
+
+            const sumInc = filtered.filter((t) => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
+            const sumExp = filtered.filter((t) => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
+
+            container.innerHTML = `
+        <!-- Top Action & Summary Strip -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-soft">
+          <div class="flex flex-wrap items-center gap-4 text-xs">
+            <span class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 font-bold">
+              ${lang === 'bn' ? 'মোট রেকর্ড:' : 'Showing:'} <strong>${formatNum(filtered.length)}</strong>
+            </span>
+            <span class="text-[#006A4E] dark:text-emerald-400 font-extrabold">
+              ${lang === 'bn' ? 'আয়:' : 'Income:'} +${formatBDT(sumInc)}
+            </span>
+            <span class="text-[#F42A41] font-extrabold">
+              ${lang === 'bn' ? 'খরচ:' : 'Expense:'} -${formatBDT(sumExp)}
+            </span>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="openTransactionModal('income')" class="px-3.5 py-2 rounded-xl bg-[#006A4E] text-white text-xs font-bold hover:bg-emerald-700">
+              + ${lang === 'bn' ? 'আয়' : 'Income'}
+            </button>
+            <button onclick="openTransactionModal('expense')" class="px-3.5 py-2 rounded-xl bg-[#F42A41] text-white text-xs font-bold hover:bg-rose-600">
+              + ${lang === 'bn' ? 'খরচ' : 'Expense'}
+            </button>
+          </div>
+        </div>
+
+        <!-- Search & Filter Controls -->
+        <div class="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-soft space-y-3">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <div class="md:col-span-2 relative">
+              <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+              <input type="text" id="tx-search-input" value="${txFilters.search}" oninput="onTxSearchInput(this)" placeholder="${t('searchPlaceholder')}" class="w-full pl-9 pr-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
+            <select onchange="txFilters.type = this.value; renderCurrentView()" class="px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold">
+              <option value="all" ${txFilters.type === 'all' ? 'selected' : ''}>${t('allTypes')}</option>
+              <option value="income" ${txFilters.type === 'income' ? 'selected' : ''}>${t('incomeLabel')}</option>
+              <option value="expense" ${txFilters.type === 'expense' ? 'selected' : ''}>${t('expenseLabel')}</option>
+            </select>
+            <select onchange="txFilters.sort = this.value; renderCurrentView()" class="px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold">
+              <option value="newest" ${txFilters.sort === 'newest' ? 'selected' : ''}>${t('sortNewest')}</option>
+              <option value="oldest" ${txFilters.sort === 'oldest' ? 'selected' : ''}>${t('sortOldest')}</option>
+              <option value="highest" ${txFilters.sort === 'highest' ? 'selected' : ''}>${t('sortHighest')}</option>
+              <option value="lowest" ${txFilters.sort === 'lowest' ? 'selected' : ''}>${t('sortLowest')}</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <select onchange="txFilters.category = this.value; renderCurrentView()" class="px-3.5 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-semibold">
+              <option value="all">${t('allCategories')}</option>
+              ${allCats.map((c) => `<option value="${c.id}" ${txFilters.category === c.id ? 'selected' : ''}>${getCatLabel(c)}</option>`).join('')}
+            </select>
+            <select onchange="txFilters.method = this.value; renderCurrentView()" class="px-3.5 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-semibold">
+              <option value="all">${t('allMethods')}</option>
+              ${PAYMENT_METHODS.map((m) => `<option value="${m.id}" ${txFilters.method === m.id ? 'selected' : ''}>${getMethodLabel(m)}</option>`).join('')}
+            </select>
+            <input type="date" value="${txFilters.dateFrom}" onchange="txFilters.dateFrom = this.value; renderCurrentView()" class="px-3.5 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-semibold" title="From Date" />
+            <div class="flex gap-2">
+              <input type="date" value="${txFilters.dateTo}" onchange="txFilters.dateTo = this.value; renderCurrentView()" class="flex-1 px-3 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-semibold" title="To Date" />
+              <button onclick="txFilters = { search: '', type: 'all', category: 'all', method: 'all', dateFrom: '', dateTo: '', sort: 'newest' }; renderCurrentView()" class="px-3 py-2 rounded-2xl bg-slate-200 dark:bg-slate-700 text-xs font-bold hover:bg-slate-300" title="${t('resetFilters')}">
+                <i class="fa-solid fa-rotate-left"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transactions List -->
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-soft">
+          ${filtered.length === 0
+                    ? `<div class="text-center py-12">
+                  <i class="fa-solid fa-receipt text-4xl text-slate-300 dark:text-slate-700 mb-3"></i>
+                  <p class="text-sm font-bold text-slate-500">${t('noTransactionsFound')}</p>
+                </div>`
+                    : `<div class="space-y-2.5">
+                  ${filtered
+                        .map((tx) => {
+                            const cat = getCategoryObj(tx.category, tx.type);
+                            const method = getMethodObj(tx.method);
+                            const isInc = tx.type === 'income';
+                            return `
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-800 transition">
+                          <div onclick="openDetailModal('${tx.id}')" class="cursor-pointer flex items-center gap-3.5 min-w-0 flex-1">
+                            <div class="w-11 h-11 rounded-2xl ${cat.bg} flex items-center justify-center text-base shrink-0">
+                              <i class="fa-solid ${cat.icon}"></i>
+                            </div>
+                            <div class="min-w-0">
+                              <div class="flex items-center gap-2">
+                                <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-slate-700 text-slate-600 dark:text-slate-300">${tx.id}</span>
+                                <p class="text-sm font-extrabold truncate">${tx.title}</p>
+                              </div>
+                              <div class="flex flex-wrap items-center gap-2 mt-1">
+                                <span class="text-[11px] text-slate-500"><i class="fa-regular fa-calendar mr-1"></i>${formatDateDisplay(tx.date)}</span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${cat.bg}">${getCatLabel(cat)}</span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border ${method.badge}">${getMethodLabel(method)}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="flex items-center justify-between sm:justify-end gap-4 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200/60 dark:border-slate-700">
+                            <p class="text-base font-extrabold ${isInc ? 'text-[#006A4E] dark:text-emerald-400' : 'text-[#F42A41]'}">
+                              ${isInc ? '+' : '-'}${formatBDT(tx.amount)}
+                            </p>
+                            <div class="flex items-center gap-1.5">
+                              <button onclick="openDetailModal('${tx.id}')" class="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-emerald-600 text-xs" title="View">
+                                <i class="fa-solid fa-eye"></i>
+                              </button>
+                              <button onclick="openTransactionModal('${tx.type}', '${tx.id}')" class="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-blue-600 text-xs" title="Edit">
+                                <i class="fa-solid fa-pen"></i>
+                              </button>
+                              <button onclick="openConfirmModal('deleteTx', '${tx.id}')" class="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-rose-600 text-xs" title="Delete">
+                                <i class="fa-solid fa-trash"></i>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      `;
+                        })
+                        .join('')}
+                </div>`
+                }
+        </div>
+      `;
+        }
+
+        // Keeps keyboard focus in the search box while the list re-renders
+        function onTxSearchInput(inputEl) {
+            txFilters.search = inputEl.value;
+            const caret = inputEl.selectionStart;
+            renderCurrentView();
+            const fresh = document.getElementById('tx-search-input');
+            if (fresh) {
+                fresh.focus();
+                try { fresh.setSelectionRange(caret, caret); } catch (e) { }
+            }
+        }
+
+        // -------------------------------------------------------------------------
+        // VIEW 3: BUDGETS MANAGEMENT (বাজেট ব্যবস্থাপনা)
+        // -------------------------------------------------------------------------
+        function renderBudgets(container) {
+            const lang = appState.settings.lang;
+            const m = getMetrics();
+            const overall = Number(appState.budgets.overallMonthly) || 0;
+            const overallPct = overall > 0 ? Math.round((m.monthExpense / overall) * 100) : 0;
+            const allExpCats = getAllExpenseCategories();
+
+            container.innerHTML = `
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <!-- Set / Update Budget Form -->
+          <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-soft h-fit">
+            <h3 class="text-base font-extrabold mb-4 flex items-center gap-2">
+              <i class="fa-solid fa-sliders text-[#006A4E]"></i>
+              <span>${t('addBudgetGoal')}</span>
+            </h3>
+
+            <!-- Overall Monthly Budget Input -->
+            <form onsubmit="handleUpdateOverallBudget(event)" class="space-y-3 pb-5 mb-5 border-b border-slate-100 dark:border-slate-800">
+              <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">${t('overallMonthlyBudget')} (৳)</label>
+              <div class="flex gap-2">
+                <input type="number" id="overall-budget-input" min="100" required value="${overall > 0 ? overall : ''}" placeholder="e.g., 8000" class="flex-1 px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-extrabold" />
+                <button type="submit" class="px-4 py-2.5 rounded-2xl bg-[#006A4E] text-white text-xs font-extrabold hover:bg-emerald-700">Save</button>
+              </div>
+            </form>
+
+            <!-- Category Budget Form -->
+            <form onsubmit="handleSetCategoryBudget(event)" class="space-y-3">
+              <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">${t('categoryLabel')}</label>
+              <select id="budget-cat-select" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold">
+                ${allExpCats.map((c) => `<option value="${c.id}">${getCatLabel(c)}</option>`).join('')}
+              </select>
+              <label class="block text-xs font-bold text-slate-600 dark:text-slate-300">${lang === 'bn' ? 'মাসিক বাজেট সীমা (৳)' : 'Monthly Limit (৳)'}</label>
+              <input type="number" id="budget-cat-limit" min="50" required placeholder="e.g., 2500" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-extrabold" />
+              <button type="submit" class="w-full py-2.5 rounded-2xl bg-gradient-to-r from-[#006A4E] to-teal-600 text-white text-xs font-extrabold shadow-glow-green">
+                ${lang === 'bn' ? 'বিভাগীয় বাজেট সেট করুন' : 'Set Category Budget'}
+              </button>
+            </form>
+          </div>
+
+          <!-- Budget Progress Cards -->
+          <div class="lg:col-span-2 space-y-4">
+            <!-- Overall Monthly Card -->
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-soft">
+              <div class="flex items-center justify-between mb-2">
+                <h4 class="text-sm font-extrabold">${t('overallMonthlyBudget')} (${m.currentMonthPrefix})</h4>
+                <span class="px-2.5 py-1 rounded-full text-xs font-extrabold ${overallPct >= 100
+                    ? 'bg-rose-100 text-[#F42A41]'
+                    : overallPct >= 80
+                        ? 'bg-amber-100 text-amber-700'
+                        : 'bg-emerald-100 text-[#006A4E]'
+                }">${formatNum(overallPct)}%</span>
+              </div>
+              <div class="flex justify-between text-xs text-slate-500 mb-2">
+                <span>${t('spent')}: <strong class="text-slate-900 dark:text-white">${formatBDT(m.monthExpense)}</strong></span>
+                <span>${t('remaining')}: <strong class="${overall - m.monthExpense >= 0 ? 'text-[#006A4E]' : 'text-[#F42A41]'}">${formatBDT(overall - m.monthExpense)}</strong></span>
+              </div>
+              <div class="w-full h-3.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                <div class="h-full rounded-full ${overallPct >= 100 ? 'bg-[#F42A41]' : overallPct >= 80 ? 'bg-amber-500' : 'bg-[#10B981]'}" style="width: ${Math.min(100, overallPct)}%"></div>
+              </div>
+            </div>
+
+            <!-- Category-wise Progress List -->
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-soft">
+              <h4 class="text-sm font-extrabold mb-4">${t('categoryBudgets')}</h4>
+              ${Object.keys(appState.budgets.categories || {}).length === 0
+                    ? `<div class="py-10 text-center text-xs text-slate-400">
+                      <i class="fa-solid fa-chart-pie text-3xl mb-2 block text-slate-300 dark:text-slate-700"></i>
+                      ${lang === 'bn' ? 'বাম পাশের ফর্ম থেকে খাবার, যাতায়াত বা শিক্ষার জন্য বিভাগীয় বাজেট যোগ করুন।' : 'Use the form on the left to set limits for Food, Transport, Education, etc.'}
+                    </div>`
+                    : `<div class="space-y-4">
+                      ${Object.entries(appState.budgets.categories || {})
+                        .map(([catId, limit]) => {
+                            const cat = getCategoryObj(catId, 'expense');
+                            const spent = appState.transactions
+                                .filter((tx) => tx.type === 'expense' && tx.category === catId && tx.date.startsWith(m.currentMonthPrefix))
+                                .reduce((s, tx) => s + Number(tx.amount), 0);
+                            const pct = limit > 0 ? Math.round((spent / limit) * 100) : 0;
+                            const barColor = pct >= 100 ? 'bg-[#F42A41]' : pct >= 80 ? 'bg-amber-500' : 'bg-[#10B981]';
+                            return `
+                            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+                              <div class="flex items-center justify-between gap-2 mb-2">
+                                <div class="flex items-center gap-2.5">
+                                  <span class="w-8 h-8 rounded-xl ${cat.bg} flex items-center justify-center text-xs"><i class="fa-solid ${cat.icon}"></i></span>
+                                  <div>
+                                    <p class="text-xs font-extrabold">${getCatLabel(cat)}</p>
+                                    <p class="text-[11px] text-slate-500">${formatBDT(spent)} / ${formatBDT(limit)}</p>
+                                  </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                  <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${pct >= 100 ? 'bg-rose-100 text-[#F42A41]' : pct >= 80 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-[#006A4E]'
+                                }">
+                                    ${formatNum(pct)}%
+                                  </span>
+                                  <button onclick="deleteCategoryBudget('${catId}')" class="text-slate-400 hover:text-rose-500 text-xs p-1" title="Remove">
+                                    <i class="fa-solid fa-xmark"></i>
+                                  </button>
+                                </div>
+                              </div>
+                              <div class="w-full h-2.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                                <div class="h-full rounded-full ${barColor}" style="width: ${Math.min(100, pct)}%"></div>
+                              </div>
+                            </div>
+                          `;
+                        })
+                        .join('')}
+                    </div>`
+                }
+            </div>
+          </div>
+        </div>
+      `;
+        }
+
+        function handleUpdateOverallBudget(e) {
+            e.preventDefault();
+            const val = parseFloat(document.getElementById('overall-budget-input').value);
+            if (val > 0) {
+                appState.budgets.overallMonthly = val;
+                saveState();
+                updateStaticTranslations();
+                renderCurrentView();
+                showToast('Overall monthly budget updated!', 'success');
+            }
+        }
+
+        function handleSetCategoryBudget(e) {
+            e.preventDefault();
+            const catId = document.getElementById('budget-cat-select').value;
+            const limit = parseFloat(document.getElementById('budget-cat-limit').value);
+            if (catId && limit > 0) {
+                appState.budgets.categories[catId] = limit;
+                saveState();
+                updateStaticTranslations();
+                renderCurrentView();
+                showToast('Category budget saved!', 'success');
+            }
+        }
+
+        function deleteCategoryBudget(catId) {
+            delete appState.budgets.categories[catId];
+            saveState();
+            updateStaticTranslations();
+            renderCurrentView();
+        }
+
+        function handleAddSavingsGoal(e) {
+            e.preventDefault();
+            const name = document.getElementById('sav-name').value.trim();
+            const target = parseFloat(document.getElementById('sav-target').value);
+            const saved = parseFloat(document.getElementById('sav-initial').value) || 0;
+            const deadline = document.getElementById('sav-date').value;
+            if (!name || !target || target <= 0) return;
+
+            appState.savings.push({
+                id: 'SAV-' + Date.now(),
+                name,
+                target,
+                saved: Math.min(target, Math.max(0, saved)),
+                deadline,
+                icon: 'fa-piggy-bank',
+                color: 'from-emerald-500 to-teal-600',
+            });
+            saveState();
+            updateStaticTranslations();
+            renderCurrentView();
+            showToast('Savings goal added!', 'success');
+        }
+
+        function adjustSavings(id, direction) {
+            const input = document.getElementById(`sav-step-${id}`);
+            const amt = parseFloat(input ? input.value : 0);
+            if (!amt || amt <= 0) return;
+
+            const goal = appState.savings.find((s) => s.id === id);
+            if (!goal) return;
+
+            if (direction > 0) {
+                goal.saved = Math.min(goal.target, Number(goal.saved) + amt);
+                showToast(`Added ${formatBDT(amt)} to savings!`, 'success');
+            } else {
+                goal.saved = Math.max(0, Number(goal.saved) - amt);
+                showToast(`Withdrew ${formatBDT(amt)} from savings`, 'info');
+            }
+            saveState();
+            updateStaticTranslations();
+            renderCurrentView();
+        }
+
+        // -------------------------------------------------------------------------
+        // VIEW 4: SAVINGS GOALS (সঞ্চয়)
+        // -------------------------------------------------------------------------
+        function renderSavings(container) {
+            const lang = appState.settings.lang;
+            const m = getMetrics();
+
+            container.innerHTML = `
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <!-- Add New Savings Goal -->
+          <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-soft h-fit">
+            <div class="p-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white mb-5">
+              <p class="text-xs font-semibold opacity-80">${t('totalSavings')}</p>
+              <p class="text-2xl font-extrabold mt-0.5">${formatBDT(m.totalSavings)}</p>
+            </div>
+            <h3 class="text-sm font-extrabold mb-3">${t('createSavingsGoal')}</h3>
+            <form onsubmit="handleAddSavingsGoal(event)" class="space-y-3">
+              <input type="text" id="sav-name" required placeholder="${lang === 'bn' ? 'লক্ষ্যের নাম (যেমন: নতুন ল্যাপটপ)' : 'Goal Name (e.g., New Laptop)'}" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold" />
+              <input type="number" id="sav-target" min="100" required placeholder="${lang === 'bn' ? 'লক্ষ্যমাত্রা (৳)' : 'Target Amount (৳)'}" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold" />
+              <input type="number" id="sav-initial" min="0" value="0" placeholder="${lang === 'bn' ? 'প্রাথমিক জমা (৳)' : 'Initial Saved (৳)'}" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold" />
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">${lang === 'bn' ? 'টার্গেট তারিখ' : 'Target Date'}</label>
+                <input type="date" id="sav-date" required value="${getRelativeDate(60)}" class="w-full px-3.5 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold" />
+              </div>
+              <button type="submit" class="w-full py-3 rounded-2xl bg-[#006A4E] hover:bg-emerald-700 text-white text-xs font-extrabold shadow-glow-green">
+                + ${t('createSavingsGoal')}
+              </button>
+            </form>
+          </div>
+
+          <!-- Savings Goal Cards Grid -->
+          <div class="lg:col-span-2">
+            ${appState.savings.length === 0
+                    ? `<div class="bg-white dark:bg-slate-900 rounded-3xl p-10 border border-slate-200/80 dark:border-slate-800 shadow-soft text-center">
+                    <div class="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-500 flex items-center justify-center text-2xl mx-auto mb-3">
+                      <i class="fa-solid fa-piggy-bank"></i>
+                    </div>
+                    <h4 class="text-sm font-extrabold mb-1">${lang === 'bn' ? 'কোনো সঞ্চয় লক্ষ্য নেই' : 'No Savings Goals Yet'}</h4>
+                    <p class="text-xs text-slate-400 max-w-md mx-auto">${lang === 'bn' ? 'নতুন ল্যাপটপ, ভ্রমণ বা জরুরি তহবিলের জন্য বাম পাশ থেকে একটি সঞ্চয় লক্ষ্য তৈরি করুন!' : 'Create your first savings goal on the left for a laptop, semester tour, or emergency fund!'}</p>
+                  </div>`
+                    : `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    ${appState.savings
+                        .map((s) => {
+                            const pct = s.target > 0 ? Math.min(100, Math.round((s.saved / s.target) * 100)) : 0;
+                            const rem = Math.max(0, s.target - s.saved);
+                            const title = lang === 'bn' && s.nameBn ? s.nameBn : s.name;
+                            return `
+                          <div class="hover-lift bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-soft flex flex-col justify-between">
+                            <div>
+                              <div class="flex items-start justify-between gap-2 mb-3">
+                                <div class="flex items-center gap-3">
+                                  <div class="w-11 h-11 rounded-2xl bg-gradient-to-br ${s.color || 'from-emerald-500 to-teal-600'} text-white flex items-center justify-center text-lg shadow-sm">
+                                    <i class="fa-solid ${s.icon || 'fa-piggy-bank'}"></i>
+                                  </div>
+                                  <div>
+                                    <h4 class="text-sm font-extrabold">${title}</h4>
+                                    <p class="text-[11px] text-slate-400"><i class="fa-regular fa-calendar mr-1"></i>${formatDateDisplay(s.deadline)}</p>
+                                  </div>
+                                </div>
+                                <button onclick="openConfirmModal('deleteSavings', '${s.id}')" class="text-slate-400 hover:text-rose-500 text-xs p-1">
+                                  <i class="fa-solid fa-trash"></i>
+                                </button>
+                              </div>
+
+                              <div class="flex justify-between text-xs mb-1.5">
+                                <span class="text-slate-500">${t('saved')}: <strong class="text-[#006A4E] dark:text-emerald-400">${formatBDT(s.saved)}</strong></span>
+                                <span class="text-slate-500">${t('target')}: <strong>${formatBDT(s.target)}</strong></span>
+                              </div>
+
+                              <div class="w-full h-3 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden mb-2">
+                                <div class="h-full rounded-full bg-gradient-to-r ${s.color || 'from-emerald-500 to-teal-600'}" style="width: ${pct}%"></div>
+                              </div>
+                              <div class="flex justify-between text-[11px] font-bold">
+                                <span class="text-emerald-600 dark:text-emerald-400">${formatNum(pct)}% ${pct >= 100 ? '🎉 Completed!' : ''}</span>
+                                <span class="text-slate-400">${t('remaining')}: ${formatBDT(rem)}</span>
+                              </div>
+                            </div>
+
+                            <!-- Quick Deposit / Withdraw -->
+                            <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2">
+                              <input type="number" id="sav-step-${s.id}" value="500" min="10" class="w-24 px-2.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-extrabold text-center" />
+                              <button onclick="adjustSavings('${s.id}', 1)" class="flex-1 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-[#006A4E] dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-extrabold hover:bg-emerald-100">
+                                ${t('addSavingsBtn')}
+                              </button>
+                              <button onclick="adjustSavings('${s.id}', -1)" class="py-2 px-3 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-[#F42A41] border border-rose-200 dark:border-rose-800 text-xs font-extrabold hover:bg-rose-100">
+                                ${t('withdrawBtn')}
+                              </button>
+                            </div>
+                          </div>
+                        `;
+                        })
+                        .join('')}
+                  </div>`
+                }
+          </div>
+        </div>
+      `;
+        }
+
+        // -------------------------------------------------------------------------
+        // VIEW 5: DEBTS / DHAR-DENA (ধার ও দেনা)
+        // -------------------------------------------------------------------------
+        function renderDebts(container) {
+            const lang = appState.settings.lang;
+            const totalBorrowedDue = (appState.debts || [])
+                .filter((d) => d.kind === 'borrowed')
+                .reduce((s, d) => s + Math.max(0, Number(d.amount) - Number(d.paid)), 0);
+            const totalLentDue = (appState.debts || [])
+                .filter((d) => d.kind === 'lent')
+                .reduce((s, d) => s + Math.max(0, Number(d.amount) - Number(d.paid)), 0);
+
+            container.innerHTML = `
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <!-- Add Debt Form -->
+          <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-soft h-fit">
+            <div class="grid grid-cols-2 gap-2.5 mb-4">
+              <div class="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800">
+                <p class="text-[10px] font-bold text-[#F42A41]">${t('borrowed')}</p>
+                <p class="text-base font-extrabold text-[#F42A41] mt-0.5">${formatBDT(totalBorrowedDue)}</p>
+              </div>
+              <div class="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800">
+                <p class="text-[10px] font-bold text-[#006A4E] dark:text-emerald-400">${t('lent')}</p>
+                <p class="text-base font-extrabold text-[#006A4E] dark:text-emerald-400 mt-0.5">${formatBDT(totalLentDue)}</p>
+              </div>
+            </div>
+
+            <h3 class="text-sm font-extrabold mb-3">${t('addDebtRecord')}</h3>
+            <form onsubmit="handleAddDebt(event)" class="space-y-3">
+              <select id="debt-kind" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold">
+                <option value="borrowed">${t('borrowed')}</option>
+                <option value="lent">${t('lent')}</option>
+              </select>
+              <input type="text" id="debt-person" required placeholder="${lang === 'bn' ? 'ব্যক্তির নাম (যেমন: রাকিব)' : 'Person Name (e.g., Rakib)'}" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold" />
+              <input type="number" id="debt-amount" min="1" required placeholder="${lang === 'bn' ? 'পরিমাণ (৳)' : 'Amount (৳)'}" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold" />
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">${lang === 'bn' ? 'পরিশোধের শেষ তারিখ' : 'Due Date'}</label>
+                <input type="date" id="debt-due" required value="${getRelativeDate(14)}" class="w-full px-3.5 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold" />
+              </div>
+              <input type="text" id="debt-notes" placeholder="${lang === 'bn' ? 'নোট (ঐচ্ছিক)' : 'Notes (optional)'}" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs" />
+              <button type="submit" class="w-full py-2.5 rounded-2xl bg-[#006A4E] hover:bg-emerald-700 text-white text-xs font-extrabold shadow-glow-green">
+                + ${t('addDebtRecord')}
+              </button>
+            </form>
+          </div>
+
+          <!-- Debt Cards List -->
+          <div class="lg:col-span-2 space-y-3">
+            ${appState.debts.length === 0
+                    ? `<div class="bg-white dark:bg-slate-900 rounded-3xl p-10 border border-slate-200/80 dark:border-slate-800 shadow-soft text-center">
+                    <div class="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-[#006A4E] flex items-center justify-center text-2xl mx-auto mb-3">
+                      <i class="fa-solid fa-handshake"></i>
+                    </div>
+                    <h4 class="text-sm font-extrabold mb-1">${lang === 'bn' ? 'কোনো ধার বা দেনার হিসাব নেই' : 'No Debt or Loan Records'}</h4>
+                    <p class="text-xs text-slate-400">${lang === 'bn' ? 'কারো কাছ থেকে ধার নিলে বা কাউকে ধার দিলে বাম পাশের ফর্ম থেকে যোগ করুন।' : 'Track money borrowed from or lent to friends using the form on the left.'}</p>
+                  </div>`
+                    : appState.debts
+                        .map((d) => {
+                            const rem = Math.max(0, Number(d.amount) - Number(d.paid));
+                            const isPaid = rem === 0;
+                            const isBorrowed = d.kind === 'borrowed';
+                            return `
+                        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-soft">
+                          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div>
+                              <div class="flex items-center gap-2">
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${isBorrowed ? 'bg-rose-100 text-[#F42A41]' : 'bg-emerald-100 text-[#006A4E]'
+                                }">
+                                  ${isBorrowed ? (lang === 'bn' ? 'ধার নেওয়া' : 'Borrowed') : (lang === 'bn' ? 'ধার দেওয়া' : 'Lent')}
+                                </span>
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${isPaid ? 'bg-slate-200 text-slate-700' : 'bg-amber-100 text-amber-800'
+                                }">
+                                  ${isPaid ? t('settled') : t('unpaid')}
+                                </span>
+                              </div>
+                              <h4 class="text-base font-extrabold mt-1.5">${d.person}</h4>
+                              <p class="text-xs text-slate-500 mt-0.5">${d.notes || ''} • Due: <strong>${formatDateDisplay(d.dueDate)}</strong></p>
+                            </div>
+
+                            <div class="text-left sm:text-right">
+                              <p class="text-xs text-slate-400">${lang === 'bn' ? 'মোট:' : 'Total:'} ${formatBDT(d.amount)} | ${lang === 'bn' ? 'পরিশোধিত:' : 'Paid:'} ${formatBDT(d.paid)}</p>
+                              <p class="text-xl font-extrabold ${isBorrowed ? 'text-[#F42A41]' : 'text-[#006A4E] dark:text-emerald-400'}">
+                                ${t('remaining')}: ${formatBDT(rem)}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+                            ${!isPaid
+                                    ? `<div class="flex items-center gap-2 flex-1">
+                                    <input type="number" id="repay-amt-${d.id}" value="${rem}" max="${rem}" min="1" class="w-28 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-extrabold" />
+                                    <button onclick="recordDebtRepayment('${d.id}')" class="px-3.5 py-1.5 rounded-xl bg-[#006A4E] text-white text-xs font-extrabold hover:bg-emerald-700">
+                                      ${t('recordRepayment')}
+                                    </button>
+                                  </div>`
+                                    : `<span class="text-xs font-bold text-emerald-600"><i class="fa-solid fa-circle-check mr-1"></i> ${t('settled')}</span>`
+                                }
+                            <button onclick="openConfirmModal('deleteDebt', '${d.id}')" class="p-2 rounded-xl text-slate-400 hover:text-rose-500 text-xs">
+                              <i class="fa-solid fa-trash"></i>
+                            </button>
+                          </div>
+                        </div>
+                      `;
+                        })
+                        .join('')
+                }
+          </div>
+        </div>
+      `;
+        }
+
+        function handleAddDebt(e) {
+            e.preventDefault();
+            const kind = document.getElementById('debt-kind').value;
+            const person = document.getElementById('debt-person').value.trim();
+            const amount = parseFloat(document.getElementById('debt-amount').value);
+            const dueDate = document.getElementById('debt-due').value;
+            const notes = document.getElementById('debt-notes').value.trim();
+            if (!person || !amount || amount <= 0) return;
+
+            appState.debts.unshift({
+                id: 'DEBT-' + Date.now(),
+                kind,
+                person,
+                amount,
+                paid: 0,
+                dueDate,
+                notes,
+            });
+            saveState();
+            updateStaticTranslations();
+            renderCurrentView();
+            showToast('Debt record saved!', 'success');
+        }
+
+        function recordDebtRepayment(id) {
+            const input = document.getElementById(`repay-amt-${id}`);
+            const amt = parseFloat(input ? input.value : 0);
+            const d = appState.debts.find((item) => item.id === id);
+            if (!d || !amt || amt <= 0) return;
+            const rem = Math.max(0, Number(d.amount) - Number(d.paid));
+            d.paid = Number(d.paid) + Math.min(rem, amt);
+            saveState();
+            updateStaticTranslations();
+            renderCurrentView();
+            showToast('Repayment recorded!', 'success');
+        }
+
+        // -------------------------------------------------------------------------
+        // VIEW 6: RECURRING TRANSACTIONS (নিয়মিত লেনদেন)
+        // -------------------------------------------------------------------------
+        function renderRecurring(container) {
+            const lang = appState.settings.lang;
+            const allCats = [...getAllExpenseCategories(), ...DEFAULT_INCOME_CATEGORIES];
+
+            container.innerHTML = `
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <!-- Add Recurring Form -->
+          <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-soft h-fit">
+            <h3 class="text-sm font-extrabold mb-3">${t('addRecurring')}</h3>
+            <form onsubmit="handleAddRecurring(event)" class="space-y-3">
+              <select id="rec-type" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold">
+                <option value="expense">${t('expenseLabel')}</option>
+                <option value="income">${t('incomeLabel')}</option>
+              </select>
+              <input type="text" id="rec-title" required placeholder="${lang === 'bn' ? 'শিরোনাম (যেমন: মেস ভাড়া / টিউশনি)' : 'Title (e.g., Mess Rent / Tuition)'}" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold" />
+              <input type="number" id="rec-amount" min="1" required placeholder="${lang === 'bn' ? 'পরিমাণ (৳)' : 'Amount (৳)'}" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold" />
+              <select id="rec-cat" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold">
+                ${allCats.map((c) => `<option value="${c.id}">${getCatLabel(c)}</option>`).join('')}
+              </select>
+              <select id="rec-freq" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold">
+                <option value="Monthly">Monthly (মাসিক)</option>
+                <option value="Weekly">Weekly (সাপ্তাহিক)</option>
+                <option value="Daily">Daily (দৈনিক)</option>
+              </select>
+              <input type="date" id="rec-date" required value="${getRelativeDate(5)}" class="w-full px-3.5 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold" />
+              <button type="submit" class="w-full py-2.5 rounded-2xl bg-[#006A4E] text-white text-xs font-extrabold shadow-glow-green">
+                + ${t('addRecurring')}
+              </button>
+            </form>
+          </div>
+
+          <!-- Recurring Items List -->
+          <div class="lg:col-span-2 space-y-3">
+            ${appState.recurring.length === 0
+                    ? `<div class="bg-white dark:bg-slate-900 rounded-3xl p-10 border border-slate-200/80 dark:border-slate-800 shadow-soft text-center">
+                    <div class="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center text-2xl mx-auto mb-3">
+                      <i class="fa-solid fa-rotate"></i>
+                    </div>
+                    <h4 class="text-sm font-extrabold mb-1">${lang === 'bn' ? 'কোনো নিয়মিত লেনদেন সেট করা নেই' : 'No Recurring Schedules Yet'}</h4>
+                    <p class="text-xs text-slate-400">${lang === 'bn' ? 'মাসিক টিউশনি, মেস ভাড়া বা ইন্টারনেট বিলের রিমাইন্ডার বাম পাশ থেকে যোগ করুন।' : 'Add monthly tuition, mess rent, or Wi-Fi schedules on the left.'}</p>
+                  </div>`
+                    : appState.recurring
+                        .map((r) => {
+                            const cat = getCategoryObj(r.category, r.type);
+                            const isInc = r.type === 'income';
+                            return `
+                        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-soft flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div class="flex items-center gap-3.5">
+                            <div class="w-11 h-11 rounded-2xl ${cat.bg} flex items-center justify-center text-base">
+                              <i class="fa-solid ${cat.icon}"></i>
+                            </div>
+                            <div>
+                              <div class="flex items-center gap-2">
+                                <h4 class="text-sm font-extrabold">${r.title}</h4>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800">${r.frequency}</span>
+                              </div>
+                              <p class="text-xs text-slate-500 mt-0.5">Next: <strong>${formatDateDisplay(r.nextDate)}</strong></p>
+                            </div>
+                          </div>
+                          <div class="flex items-center justify-between sm:justify-end gap-3">
+                            <p class="text-base font-extrabold ${isInc ? 'text-[#006A4E] dark:text-emerald-400' : 'text-[#F42A41]'}">
+                              ${isInc ? '+' : '-'}${formatBDT(r.amount)}
+                            </p>
+                            <button onclick="postRecurringNow('${r.id}')" class="px-3.5 py-2 rounded-xl bg-[#006A4E] hover:bg-emerald-700 text-white text-xs font-extrabold">
+                              <i class="fa-solid fa-check mr-1"></i> ${t('postNow')}
+                            </button>
+                            <button onclick="deleteRecurring('${r.id}')" class="p-2 rounded-xl text-slate-400 hover:text-rose-500 text-xs">
+                              <i class="fa-solid fa-trash"></i>
+                            </button>
+                          </div>
+                        </div>
+                      `;
+                        })
+                        .join('')
+                }
+          </div>
+        </div>
+      `;
+        }
+
+        function handleAddRecurring(e) {
+            e.preventDefault();
+            const type = document.getElementById('rec-type').value;
+            const title = document.getElementById('rec-title').value.trim();
+            const amount = parseFloat(document.getElementById('rec-amount').value);
+            const category = document.getElementById('rec-cat').value;
+            const frequency = document.getElementById('rec-freq').value;
+            const nextDate = document.getElementById('rec-date').value;
+            if (!title || !amount || amount <= 0) return;
+
+            appState.recurring.push({
+                id: 'REC-' + Date.now(),
+                type,
+                title,
+                amount,
+                category,
+                method: 'bkash',
+                frequency,
+                nextDate,
+                active: true,
+            });
+            saveState();
+            updateStaticTranslations();
+            renderCurrentView();
+            showToast('Recurring schedule added!', 'success');
+        }
+
+        function postRecurringNow(recId) {
+            const r = appState.recurring.find((item) => item.id === recId);
+            if (!r) return;
+            appState.transactions.unshift({
+                id: 'TX-' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 100),
+                type: r.type,
+                amount: r.amount,
+                title: `${r.title} (${r.frequency})`,
+                category: r.category,
+                method: r.method || 'bkash',
+                date: toISODate(new Date()),
+                notes: 'Posted from recurring schedule',
+            });
+
+            const next = new Date(r.nextDate + 'T00:00:00');
+            if (r.frequency === 'Daily') next.setDate(next.getDate() + 1);
+            else if (r.frequency === 'Weekly') next.setDate(next.getDate() + 7);
+            else next.setMonth(next.getMonth() + 1);
+            r.nextDate = toISODate(next);
+
+            saveState();
+            updateStaticTranslations();
+            renderCurrentView();
+            showToast('Recurring entry posted to ledger!', 'success');
+        }
+
+        function deleteRecurring(recId) {
+            appState.recurring = appState.recurring.filter((r) => r.id !== recId);
+            saveState();
+            updateStaticTranslations();
+            renderCurrentView();
+        }
+
+        // -------------------------------------------------------------------------
+        // VIEW 7: CALENDAR VIEW (ক্যালেন্ডার)
+        // -------------------------------------------------------------------------
+        function renderCalendar(container) {
+            const lang = appState.settings.lang;
+            const year = calendarViewDate.getFullYear();
+            const month = calendarViewDate.getMonth();
+            const monthLabel = toBanglaDigits(
+                calendarViewDate.toLocaleDateString(lang === 'bn' ? 'bn-BD' : 'en-US', { month: 'long', year: 'numeric' })
+            );
+
+            const firstDayIndex = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const dayNames =
+                lang === 'bn'
+                    ? ['রবি', 'সোম', 'মঙ্গল', 'বুধ', 'বৃহঃ', 'শুক্র', 'শনি']
+                    : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+            let cellsHtml = '';
+            for (let i = 0; i < firstDayIndex; i++) {
+                cellsHtml += `<div class="h-20 rounded-2xl bg-slate-50/40 dark:bg-slate-800/20"></div>`;
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const iso = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayTx = appState.transactions.filter((t) => t.date === iso);
+                const dInc = dayTx.filter((t) => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
+                const dExp = dayTx.filter((t) => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
+                const isSelected = selectedCalendarDate === iso;
+                const isToday = toISODate(new Date()) === iso;
+
+                cellsHtml += `
+          <button onclick="selectedCalendarDate = '${iso}'; renderCurrentView()" class="h-20 p-2 rounded-2xl border text-left flex flex-col justify-between transition ${isSelected
+                        ? 'bg-emerald-50 dark:bg-emerald-950/70 border-[#006A4E] ring-2 ring-emerald-500/30'
+                        : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 hover:border-emerald-300'
+                    }">
+            <div class="flex items-center justify-between w-full">
+              <span class="text-xs font-extrabold ${isToday ? 'px-1.5 py-0.5 rounded-full bg-[#F42A41] text-white' : ''}">${formatNum(day)}</span>
+              ${dayTx.length > 0 ? `<span class="w-2 h-2 rounded-full bg-[#006A4E]"></span>` : ''}
+            </div>
+            <div class="space-y-0.5 text-[10px] font-bold leading-tight">
+              ${dInc > 0 ? `<div class="text-[#006A4E] dark:text-emerald-400 truncate">+${formatBDT(dInc)}</div>` : ''}
+              ${dExp > 0 ? `<div class="text-[#F42A41] truncate">-${formatBDT(dExp)}</div>` : ''}
+            </div>
+          </button>
+        `;
+            }
+
+            const selectedDayTx = appState.transactions.filter((t) => t.date === selectedCalendarDate);
+
+            container.innerHTML = `
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <!-- Calendar Grid -->
+          <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-soft">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-base font-extrabold">${monthLabel}</h3>
+              <div class="flex gap-2">
+                <button onclick="calendarViewDate = new Date(${year}, ${month - 1}, 1); renderCurrentView()" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-xs font-bold">
+                  <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button onclick="calendarViewDate = new Date(); selectedCalendarDate = toISODate(new Date()); renderCurrentView()" class="px-3 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950 text-[#006A4E] dark:text-emerald-300 text-xs font-extrabold">
+                  ${lang === 'bn' ? 'আজ' : 'Today'}
+                </button>
+                <button onclick="calendarViewDate = new Date(${year}, ${month + 1}, 1); renderCurrentView()" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-xs font-bold">
+                  <i class="fa-solid fa-chevron-right"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-7 gap-2 mb-2 text-center">
+              ${dayNames.map((dn) => `<div class="text-[11px] font-extrabold text-slate-400">${dn}</div>`).join('')}
+            </div>
+            <div class="grid grid-cols-7 gap-2">
+              ${cellsHtml}
+            </div>
+          </div>
+
+          <!-- Selected Date Details -->
+          <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-soft h-fit">
+            <h4 class="text-sm font-extrabold mb-1">${formatDateDisplay(selectedCalendarDate)}</h4>
+            <p class="text-xs text-slate-400 mb-4">${formatNum(selectedDayTx.length)} ${lang === 'bn' ? 'টি লেনদেন' : 'transactions on this date'}</p>
+            ${selectedDayTx.length === 0
+                    ? `<p class="text-xs text-slate-400 py-8 text-center">${lang === 'bn' ? 'এই তারিখে কোনো লেনদেন নেই।' : 'No transactions recorded on this day.'}</p>`
+                    : `<div class="space-y-2.5">${selectedDayTx.map((tx) => renderTransactionRowCompact(tx)).join('')}</div>`
+                }
+          </div>
+        </div>
+      `;
+        }
+
+        // -------------------------------------------------------------------------
+        // VIEW 8: REPORTS & EXPORT (রিপোর্ট ও এক্সপোর্ট)
+        // -------------------------------------------------------------------------
+        function renderReports(container) {
+            const lang = appState.settings.lang;
+            const m = getMetrics();
+
+            // Highest spending category
+            const catMap = {};
+            appState.transactions
+                .filter((t) => t.type === 'expense')
+                .forEach((t) => {
+                    catMap[t.category] = (catMap[t.category] || 0) + Number(t.amount);
+                });
+            const topCatEntry = Object.entries(catMap).sort((a, b) => b[1] - a[1])[0];
+            const topCatName = topCatEntry ? getCatLabel(getCategoryObj(topCatEntry[0], 'expense')) : '—';
+            const topCatAmt = topCatEntry ? topCatEntry[1] : 0;
+
+            // Payment method totals
+            const methodTotals = PAYMENT_METHODS.map((pm) => {
+                const total = appState.transactions
+                    .filter((t) => t.method === pm.id)
+                    .reduce((s, t) => s + Number(t.amount), 0);
+                return { ...pm, total };
+            }).filter((x) => x.total > 0);
+
+            container.innerHTML = `
+        <!-- Export Buttons Bar -->
+        <div class="no-print flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-soft">
+          <div>
+            <h3 class="text-base font-extrabold">${lang === 'bn' ? 'আর্থিক সারসংক্ষেপ ও রিপোর্ট' : 'Financial Analytics & Export'}</h3>
+            <p class="text-xs text-slate-500">${lang === 'bn' ? 'CSV ফাইল ডাউনলোড করুন অথবা প্রিন্ট/PDF হিসেবে সংরক্ষণ করুন।' : 'Export your ledger as CSV or print/save as PDF.'}</p>
+          </div>
+          <div class="flex gap-2.5">
+            <button onclick="exportTransactionsCSV()" class="px-4 py-2.5 rounded-2xl bg-[#006A4E] hover:bg-emerald-700 text-white text-xs font-extrabold flex items-center gap-2">
+              <i class="fa-solid fa-file-csv"></i>
+              <span>${t('exportCSV')}</span>
+            </button>
+            <button onclick="window.print()" class="px-4 py-2.5 rounded-2xl bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 text-white text-xs font-extrabold flex items-center gap-2">
+              <i class="fa-solid fa-print"></i>
+              <span>${t('printPDF')}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-soft">
+            <p class="text-xs font-bold text-slate-400">${lang === 'bn' ? 'সর্বোচ্চ খরচের বিভাগ' : 'Highest Spending Category'}</p>
+            <p class="text-xl font-extrabold text-[#F42A41] mt-1">${topCatName}</p>
+            <p class="text-xs text-slate-500 mt-0.5">${formatBDT(topCatAmt)}</p>
+          </div>
+          <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-soft">
+            <p class="text-xs font-bold text-slate-400">${lang === 'bn' ? 'মোট সঞ্চয় হার' : 'Savings vs Income'}</p>
+            <p class="text-xl font-extrabold text-[#006A4E] dark:text-emerald-400 mt-1">
+              ${m.totalIncome > 0 ? formatNum(Math.round((m.totalSavings / m.totalIncome) * 100)) : formatNum(0)}%
+            </p>
+            <p class="text-xs text-slate-500 mt-0.5">${formatBDT(m.totalSavings)} ${lang === 'bn' ? 'সঞ্চিত' : 'saved'}</p>
+          </div>
+          <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-soft">
+            <p class="text-xs font-bold text-slate-400">${lang === 'bn' ? 'মোট লেনদেনের সংখ্যা' : 'Total Recorded Entries'}</p>
+            <p class="text-xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-1">${formatNum(appState.transactions.length)}</p>
+            <p class="text-xs text-slate-500 mt-0.5">${lang === 'bn' ? 'লোকাল ব্রাউজার স্টোরেজে' : 'Stored in browser'}</p>
+          </div>
+        </div>
+
+        <!-- Payment Method Breakdown -->
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-soft">
+          <h4 class="text-sm font-extrabold mb-4">${lang === 'bn' ? 'পেমেন্ট মাধ্যম অনুযায়ী লেনদেন (bKash, Nagad, Cash...)' : 'Payment Method Volume Breakdown'}</h4>
+          ${methodTotals.length === 0
+                    ? `<p class="text-xs text-slate-400 py-8 text-center">${lang === 'bn' ? 'এখনো কোনো লেনদেন রেকর্ড করা হয়নি।' : 'No payment method data yet. Start recording transactions to see wallet breakdowns.'}</p>`
+                    : `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  ${methodTotals
+                        .map(
+                            (pm) => `
+                    <div class="p-4 rounded-2xl border ${pm.badge} flex items-center justify-between">
+                      <div class="flex items-center gap-2.5">
+                        <i class="fa-solid ${pm.icon} text-base"></i>
+                        <span class="text-xs font-extrabold">${getMethodLabel(pm)}</span>
+                      </div>
+                      <span class="text-sm font-extrabold">${formatBDT(pm.total)}</span>
+                    </div>
+                  `
+                        )
+                        .join('')}
+                </div>`
+                }
+        </div>
+      `;
+        }
+
+        function exportTransactionsCSV() {
+            const headers = ['ID', 'Type', 'Title', 'Amount_BDT', 'Category', 'Payment_Method', 'Date', 'Notes'];
+            const rows = appState.transactions.map((tx) => [
+                tx.id,
+                tx.type,
+                `"${(tx.title || '').replace(/"/g, '""')}"`,
+                tx.amount,
+                tx.category,
+                tx.method,
+                tx.date,
+                `"${(tx.notes || '').replace(/"/g, '""')}"`,
+            ]);
+            // BOM so Excel reads Bangla text correctly
+            const csvText = '\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+            const blob = new Blob([csvText], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', `HisabKhata_Report_${toISODate(new Date())}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            showToast('CSV Report downloaded!', 'success');
+        }
+
+        // -------------------------------------------------------------------------
+        // VIEW 9: NOTIFICATIONS & REMINDERS (নোটিফিকেশন)
+        // -------------------------------------------------------------------------
+        function renderNotifications(container) {
+            const lang = appState.settings.lang;
+            const notes = generateNotifications();
+
+            container.innerHTML = `
+        <div class="max-w-3xl mx-auto bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-soft">
+          <div class="flex items-center justify-between mb-5">
+            <h3 class="text-base font-extrabold flex items-center gap-2">
+              <i class="fa-solid fa-bell text-[#F42A41]"></i>
+              <span>${lang === 'bn' ? 'সক্রিয় সতর্কতা ও রিমাইন্ডার' : 'Active Alerts & Student Reminders'}</span>
+            </h3>
+            <span class="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-extrabold">${formatNum(notes.length)}</span>
+          </div>
+
+          ${notes.length === 0
+                    ? `<p class="text-xs text-slate-400 py-10 text-center">${lang === 'bn' ? 'কোনো নতুন নোটিফিকেশন নেই।' : 'All caught up! No pending alerts.'}</p>`
+                    : `<div class="space-y-3">
+                  ${notes
+                        .map(
+                            (n) => `
+                    <div class="p-4 rounded-2xl border flex items-start gap-3.5 ${n.type === 'danger'
+                                    ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800'
+                                    : n.type === 'warning'
+                                        ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800'
+                                        : 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800'
+                                }">
+                      <div class="w-10 h-10 rounded-2xl bg-white dark:bg-slate-900 flex items-center justify-center text-base shrink-0 shadow-xs">
+                        <i class="fa-solid ${n.icon}"></i>
+                      </div>
+                      <div>
+                        <h4 class="text-sm font-extrabold">${n.title}</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 mt-1">${n.desc}</p>
+                      </div>
+                    </div>
+                  `
+                        )
+                        .join('')}
+                </div>`
+                }
+        </div>
+      `;
+        }
+
+        // -------------------------------------------------------------------------
+        // VIEW 10: SETTINGS (সেটিংস)
+        // -------------------------------------------------------------------------
+        function renderSettings(container) {
+            const lang = appState.settings.lang;
+
+            container.innerHTML = `
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <!-- Profile & Display Preferences -->
+          <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-soft space-y-4">
+            <h3 class="text-base font-extrabold">${t('profileSettings')}</h3>
+            <form onsubmit="handleSaveProfile(event)" class="space-y-3">
+              <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1">${lang === 'bn' ? 'শিক্ষার্থীর নাম' : 'Student Name'}</label>
+                <input type="text" id="set-username" value="${appState.settings.userName}" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1">${lang === 'bn' ? 'প্রতিষ্ঠান / বিভাগ' : 'Institution / Department'}</label>
+                <input type="text" id="set-tagline" value="${appState.settings.userTagline}" class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold" />
+              </div>
+              <button type="submit" class="px-5 py-2.5 rounded-2xl bg-[#006A4E] text-white text-xs font-extrabold hover:bg-emerald-700">
+                ${lang === 'bn' ? 'প্রোফাইল সংরক্ষণ' : 'Save Profile'}
+              </button>
+            </form>
+
+            <div class="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold">${lang === 'bn' ? 'ইন্টারফেস ভাষা (English / বাংলা)' : 'Interface Language'}</span>
+                <button onclick="toggleLanguage()" class="px-3.5 py-1.5 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-[#006A4E] dark:text-emerald-300 text-xs font-extrabold">
+                  ${lang === 'en' ? 'Switch to বাংলা' : 'Switch to English'}
+                </button>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold">${lang === 'bn' ? 'বাংলা সংখ্যা ব্যবহার (১২৩)' : 'Bangla Numerals (১২৩)'}</span>
+                <button onclick="toggleBanglaDigits()" class="px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-extrabold">
+                  ${appState.settings.banglaDigits ? 'ON (১২৩)' : 'OFF (123)'}
+                </button>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold">${lang === 'bn' ? 'ডার্ক / লাইট থিম' : 'Dark / Light Mode'}</span>
+                <button onclick="toggleTheme()" class="px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-extrabold">
+                  ${appState.settings.theme === 'dark' ? 'Dark Mode 🌙' : 'Light Mode ☀️'}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Custom Categories & Backup/Reset -->
+          <div class="space-y-5">
+            <!-- Custom Expense Category -->
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-soft">
+              <h3 class="text-base font-extrabold mb-3">${t('customCategories')}</h3>
+              <form onsubmit="handleAddCustomCategory(event)" class="flex flex-col sm:flex-row gap-2 mb-3">
+                <input type="text" id="cust-cat-en" required placeholder="English Name (e.g., Coaching)" class="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold" />
+                <input type="text" id="cust-cat-bn" required placeholder="বাংলা নাম (যেমন: কোচিং)" class="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold" />
+                <button type="submit" class="px-4 py-2 rounded-xl bg-[#006A4E] text-white text-xs font-extrabold">+ Add</button>
+              </form>
+              <div class="flex flex-wrap gap-2">
+                ${(appState.customExpenseCategories || []).length === 0
+                    ? `<p class="text-xs text-slate-400">${lang === 'bn' ? 'কোনো কাস্টম বিভাগ যোগ করা হয়নি।' : 'No custom categories added yet.'}</p>`
+                    : appState.customExpenseCategories
+                        .map(
+                            (c) => `
+                      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${c.bg}">
+                        <span>${getCatLabel(c)}</span>
+                        <button onclick="removeCustomCategory('${c.id}')" class="hover:text-rose-600"><i class="fa-solid fa-xmark"></i></button>
+                      </span>
+                    `
+                        )
+                        .join('')
+                }
+              </div>
+            </div>
+
+            <!-- Backup, Restore & Reset -->
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-soft space-y-3">
+              <h3 class="text-base font-extrabold">${t('dangerZone')}</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">
+                ${lang === 'bn'
+                    ? 'আপনার সব হিসাব ব্রাউজারের localStorage-এ সংরক্ষিত থাকে। নিরাপদ রাখতে JSON ব্যাকআপ ডাউনলোড করে রাখুন।'
+                    : 'All records are saved in your browser localStorage. Download a JSON backup anytime to keep a copy.'
+                }
+              </p>
+              <div class="flex flex-wrap gap-2.5 pt-1">
+                <button onclick="downloadJSONBackup()" class="px-4 py-2.5 rounded-2xl bg-[#006A4E] hover:bg-emerald-700 text-white text-xs font-extrabold">
+                  <i class="fa-solid fa-download mr-1"></i> ${t('backupJSON')}
+                </button>
+                <label class="cursor-pointer px-4 py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-xs font-extrabold">
+                  <i class="fa-solid fa-upload mr-1"></i> ${t('restoreJSON')}
+                  <input type="file" accept=".json" onchange="restoreJSONBackup(event)" class="hidden" />
+                </label>
+              </div>
+              <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap gap-2.5">
+                <button onclick="openConfirmModal('resetDemo')" class="px-4 py-2.5 rounded-2xl bg-rose-50 dark:bg-rose-950/60 text-[#F42A41] border border-rose-200 dark:border-rose-800 text-xs font-extrabold">
+                  <i class="fa-solid fa-trash-can mr-1"></i> ${t('clearDemoBtn')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+        }
+
+        function handleSaveProfile(e) {
+            e.preventDefault();
+            appState.settings.userName = document.getElementById('set-username').value.trim() || 'Student';
+            appState.settings.userTagline = document.getElementById('set-tagline').value.trim() || 'Personal Finance • ৳ BDT';
+            saveState();
+            updateStaticTranslations();
+            showToast('Profile settings saved!', 'success');
+        }
+
+        function handleAddCustomCategory(e) {
+            e.preventDefault();
+            const en = document.getElementById('cust-cat-en').value.trim();
+            const bn = document.getElementById('cust-cat-bn').value.trim();
+            const id = 'custom_' + Date.now();
+            appState.customExpenseCategories.push({
+                id,
+                en,
+                bn,
+                icon: 'fa-star',
+                color: '#8B5CF6',
+                bg: 'bg-purple-100 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300',
+            });
+            saveState();
+            renderCurrentView();
+            showToast('Custom category added!', 'success');
+        }
+
+        function removeCustomCategory(id) {
+            appState.customExpenseCategories = appState.customExpenseCategories.filter((c) => c.id !== id);
+            saveState();
+            renderCurrentView();
+        }
+
+        function downloadJSONBackup() {
+            const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(appState, null, 2));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute('href', dataStr);
+            dlAnchor.setAttribute('download', `HisabKhata_Backup_${toISODate(new Date())}.json`);
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+            showToast('JSON backup downloaded!', 'success');
+        }
+
+        function restoreJSONBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (imported && Array.isArray(imported.transactions)) {
+                        const fresh = getDefaultFreshState();
+                        appState = {
+                            ...fresh,
+                            ...imported,
+                            settings: { ...fresh.settings, ...(imported.settings || {}) },
+                            budgets: { ...fresh.budgets, ...(imported.budgets || {}) },
+                        };
+                        saveState();
+                        applyTheme();
+                        updateStaticTranslations();
+                        renderNavigation();
+                        renderCurrentView();
+                        showToast('Backup restored successfully!', 'success');
+                    } else {
+                        showToast('Invalid HisabKhatā backup file.', 'error');
+                    }
+                } catch (err) {
+                    showToast('Failed to parse backup JSON.', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // =========================================================================
+        // 8. INITIALIZATION ON WINDOW LOAD
+        // =========================================================================
+        window.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            applyTheme();
+            updateStaticTranslations();
+            renderNavigation();
+            renderCurrentView();
+        });
+    </script>
+</body>
+
+</html>
